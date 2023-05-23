@@ -2,27 +2,27 @@
 
 /*Parte 1*/
 
-CREATE TABLE Persona(id_persona INT, nombre NVARCHAR(255), apellido NVARCHAR(255), DNI DECIMAL(18,0), telefono DECIMAL(18,2), mail VARCHAR(255), fecha_nac DATE)
+CREATE TABLE Persona(id_persona INT, nombre VARCHAR(255), apellido VARCHAR(255), DNI DECIMAL(18,0), telefono DECIMAL(18,0), mail VARCHAR(255), fecha_nac DATE)
 
-CREATE TABLE Producto(codigo VARCHAR(255), nombre VARCHAR(255), descripcion VARCHAR(255), precio DECIMAL(18,2), cantidad DECIMAL(18,2))
+CREATE TABLE Producto(codigo VARCHAR(50), nombre VARCHAR(50), descripcion VARCHAR(255))
 
-CREATE TABLE Tipo_Reclamo(id_tipo INT, descripcion VARCHAR(255))
+CREATE TABLE Tipo_Reclamo(id_tipo INT, descripcion VARCHAR(50))
 
-CREATE TABLE Tipo_Medio_Pago(id_tipo_medioPago INT, descripcion VARCHAR(255))
+CREATE TABLE Tipo_Medio_Pago(id_tipo_medioPago INT, descripcion VARCHAR(50))
 
-CREATE TABLE Tipo_Paquete(id_tipo INT, tipo VARCHAR(255), alto_max DECIMAL, ancho_max DECIMAL, largo_max DECIMAL, peso_max DECIMAL, tipo_precio DECIMAL)
+CREATE TABLE Tipo_Paquete(id_tipo INT, tipo VARCHAR(50), alto_max DECIMAL(18,2), ancho_max DECIMAL(18,2), largo_max DECIMAL(18,2), peso_max DECIMAL(18,2), tipo_precio DECIMAL(18,2))
 
-CREATE TABLE Estado (id_estado INT, descripcion VARCHAR(255))
+CREATE TABLE Estado (id_estado INT, descripcion VARCHAR(50))
 
-CREATE TABLE Tipo_Local(id_tipo INT, descripcion VARCHAR(255))
+CREATE TABLE Tipo_Local(id_tipo INT, descripcion VARCHAR(50))
 
-CREATE TABLE provincia (id_provincia INT, nombre_provincia VARCHAR(50));
+CREATE TABLE provincia (id_provincia INT, nombre_provincia VARCHAR(255));
 
 CREATE TABLE tipo_movilidad (id_tipo_movilidad INT, descripcion_movilidad INT);
 
 CREATE TABLE localidad (id_localidad INT, id_provincia INT, nombre_localidad VARCHAR(50));
 
-CREATE TABLE Dia (id_dia INT, descripcion VARCHAR)
+CREATE TABLE Dia (id_dia INT, descripcion VARCHAR(50))
 
 ALTER TABLE Persona
 	ADD CONSTRAINT pk_persona PRIMARY KEY (id_persona)
