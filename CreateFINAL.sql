@@ -145,31 +145,34 @@ ALTER TABLE local_
 ALTER TABLE local_ 
 	ADD CONSTRAINT fk_local_cat FOREIGN KEY (categoria) REFERENCES categoria(id_categoria);
 
-create table envio_de_mensajeria (
-id_envio int references envio,
-id_envio_mensajeria int primary key,
-km decimal(18,2),
-tipo_paquete int references tipo_paquete,
-valor_asegurado decimal(18,2),
-precio_seguro decimal(18,2),
-total_envio_mensajeria decimal(18,2)
-);
+--Parte 4
 
-create table pedido_productos (
-id_pedido int primary key,
-id_envio int references envio,
-id_local int references local,
-tarifa_servicio int,
-total_pedido decimal(18,2),
-pedido_total_cupones decimal(18,2)
-);
+CREATE TABLE envio_de_mensajeria(id_envio INT, id_envio_mensajeria INT, km DECIMAL(18,2), tipo_paquete INT, valor_asegurado decimal(18,2), precio_seguro decimal(18,2),
+				total_envio_mensajeria decimal(18,2));
+CREATE TABLE pedido_productos(id_pedido INT, id_envio INT, id_local INT, tarifa_servicio INT, total_pedido DECIMAL(18,2), pedido_total_cupones DECIMAL(18,2))
+CREATE TABLE producto_por_local(codigo_producto INT, id_local INT, precio DECIMAL(18,2))
+				
+ALTER TABLE envio_de_mensajeria
+	ADD CONSTRAINT pk_envio_de_mensajeria PRIMARY KEY (id_envio_de_mensajeria);
+ALTER TABLE envio_de_mensajeria
+	ADD CONSTRAINT fK_envio_de_mensajeria_envio FOREIGN KEY (id_envio) REFERENCES envio(id_envio);
+ALTER TABLE envio_de_mensajeria
+	ADD CONSTRAINT fk_envio_de_mensajria_tipo FOREIGN KEY (tipo_paquete) REFERENCES tipo_paquete(id_tipo)
+ALTER TABLE pedido_productos
+	ADD CONSTRAINT pk_pedido_productos PRIMARY KEY (id_pedido)
+ALTER TABLE pedido_productos
+	ADD CONSTRAINT fk_pedido_productos_envio FOREIGN KEY (id_envio) REFERENCES envio(id_envio) 
+ALTER TABLE pedido_local
+	ADD CONSTRAINT fk_pedido_productos_local FOREIGN KEY (id_local) REFERENCES local(id_local) 
+ALTER TABLE producto_por_local
+	ADD CONSTRAINT pk_producto_por_local PRIMARY KEY (codigo_producto)
+ALTER TABLE producto_por_local
+	ADD CONSTRAINT pk_producto_por_local PRIMARY KEY (id_local)
+ALTER TABLE producto_por_local
+	ADD CONSTRAINT fk_producto_por_local FOREIGN KEY (codigo_producto) REFERENCES producto(codigo_producto)
+ALTER TABLE producto_por_local
+	ADD CONSTRAINT fk_producto_por_local FOREIGN KEY (id_local) REFERENCES local(id_local)	
 
-create table producto_por_local (
-codigo_producto int references producto,
-id_local int references local,
-precio decimal(18,2),
-primary key (codigo_producto, id_local)
-);
 
 create table horario (
 id_horario int primary key,
