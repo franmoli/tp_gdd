@@ -1,10 +1,10 @@
 use GD2015C1
 
-CREATE TABLE provincia (id_provincia INT, nombre_provincia VARCHAR(50));
-CREATE TABLE tipo_movilidad (id_tipo_movilidad INT, descripcion_movilidad INT);
-CREATE TABLE localidad (id_localidad INT, id_provincia INT, nombre_localidad VARCHAR(50));
+CREATE TABLE provincia (id_provincia INT, nombre_provincia NVARCHAR(255));
+CREATE TABLE tipo_movilidad (id_tipo_movilidad INT, descripcion_movilidad NVARCHAR(50));
+CREATE TABLE localidad (id_localidad INT, id_provincia INT, nombre_localidad NVARCHAR(255));
 CREATE TABLE operador (id_operador INT, id_persona INT);
-CREATE TABLE usuario (id_usuario INT, id_persona INT, fecha_registro DATE);
+CREATE TABLE usuario (id_usuario INT, id_persona INT, fecha_registro DATETIME2(3));
 CREATE TABLE repartidor (id_repartidor INT, id_persona INT, tipo_movilidad INT, localidad_activa INT);
 
 ALTER TABLE provincia 
