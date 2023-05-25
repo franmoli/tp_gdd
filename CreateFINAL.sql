@@ -62,10 +62,10 @@ ALTER TABLE tipo_movilidad
 CREATE TABLE operador (id_operador INT, id_persona INT);
 CREATE TABLE usuario (id_usuario INT, id_persona INT, fecha_registro DATE);
 CREATE TABLE repartidor (id_repartidor INT, id_persona INT, tipo_movilidad INT, localidad_activa INT);
-CREATE TABLE direccion (id_direccion INT, id_persona INT, direccion VARCHAR(255), localidad INT);
-CREATE TABLE medio_de_pago (id_medioPago INT, id_usuario INT, tipo_medioPago INT, nro_tarjeta VARCHAR(50), tipo VARCHAR(50), marca_tarjeta VARCHAR(100));
-CREATE TABLE cupon_descuento (nro DECIMAL, id_usuario INT, monto DECIMAL(18,2), fecha_alta DATE, fecha_vencimiento DATE, tipo VARCHAR(50), usado TINYINT);
-CREATE TABLE categoria (id_categoria INT, id_tipo INT, descripcion VARCHAR(255));
+CREATE TABLE direccion (id_direccion INT, id_persona INT, direccion NVARCHAR(255), localidad INT);
+CREATE TABLE medio_de_pago (id_medioPago INT, id_usuario INT, tipo_medioPago INT, nro_tarjeta NVARCHAR(50), tipo NVARCHAR(50), marca_tarjeta NVARCHAR(100));
+CREATE TABLE cupon_descuento (nro DECIMAL(18,0), id_usuario INT, monto DECIMAL(18,2), fecha_alta DATE, fecha_vencimiento DATE, tipo NVARCHAR(50), usado TINYINT);
+CREATE TABLE categoria (id_categoria INT, id_tipo INT, descripcion NVARCHAR(255));
 
 ALTER TABLE usuario 
 	ADD CONSTRAINT pk PRIMARY KEY (id_usuario)
@@ -99,16 +99,18 @@ ALTER TABLE cupon_descuento
 ALTER TABLE cupon_descuento 
 	ADD CONSTRAINT fk_cupon_descuento_usuario FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario);
 
---Categoria
+--Categoria/tiene q tener diferente nombre la primary?
 ALTER TABLE categoria 
 	ADD CONSTRAINT pk_categoria PRIMARY KEY (id_categoria);
+ALTER TABLE categoria 
+	ADD CONSTRAINT pk_categoria PRIMARY KEY (id_tipo);
 
 /*Parte 3*/
 
-CREATE TABLE envio (id_envio INT, id_usuario INT, id_repartidor INT, id_estado INT, id_medioPago INT, precio_envio DECIMAL(18,2), propina DECIMAL(18,2), observaciones VARCHAR(255),
+CREATE TABLE envio (id_envio INT, id_usuario INT, id_repartidor INT, id_estado INT, id_medioPago INT, precio_envio DECIMAL(18,2), propina DECIMAL(18,2), observaciones NVARCHAR(255),
 					fecha_pedido DATE, fecha_entrega DATE, tiempo_estimado_entrega DECIMAL(18,2), calificacion DECIMAL(18,0), dir_origen INT, dir_destino INT);
 
-CREATE TABLE local_ (id_local INT, id_direccion INT, nombre VARCHAR(255), descripcion VARCHAR(255), tipo INT, categoria INT);--CREO Q SIN EL _ NO FUNCARIA
+CREATE TABLE local_ (id_local INT, id_direccion INT, nombre NVARCHAR(100), descripcion NVARCHAR(255), tipo NVARCHAR(55), categoria INT);--CREO Q SIN EL _ NO FUNCARIA
 
 
 --Envio
@@ -132,6 +134,8 @@ ALTER TABLE local_
 	ADD CONSTRAINT local_ PRIMARY KEY (id_local)
 ALTER TABLE local_ 
 	ADD CONSTRAINT fk_local_dir FOREIGN KEY (id_direccion) REFERENCES direccion(id_direccion);
+ALTER TABLE local_ 
+	ADD CONSTRAINT fk_local_cat FOREIGN KEY (categoria) REFERENCES categoria(id_categoria);
 
 create table envio_de_mensajeria (
 id_envio int references envio,
