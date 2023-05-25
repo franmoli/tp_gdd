@@ -2,115 +2,109 @@
 
 /*Parte 1*/
 
-CREATE TABLE Persona(id_persona INT, nombre VARCHAR(255), apellido VARCHAR(255), DNI DECIMAL(18,0), telefono DECIMAL(18,0), mail VARCHAR(255), fecha_nac DATE)
+CREATE TABLE persona(id_persona INT NOT NULL IDENTITY(1,1), nombre NVARCHAR(255), apellido NVARCHAR(255), DNI DECIMAL(18,0), telefono DECIMAL(18,0), mail NVARCHAR(255), fecha_nac DATE)
+CREATE TABLE producto(codigo NVARCHAR(50), nombre NVARCHAR(50), descripcion NVARCHAR(255))
+CREATE TABLE tipo_reclamo(id_tipo INT NOT NULL IDENTITY(1,1), descripcion NVARCHAR(50))
+CREATE TABLE tipo_medio_pago(id_tipo_medio_pago INT NOT NULL IDENTITY(1,1), descripcion NVARCHAR(50))
+CREATE TABLE tipo_paquete(id_tipo INT NOT NULL IDENTITY(1,1), tipo NVARCHAR(50), alto_max DECIMAL(18,2), ancho_max DECIMAL(18,2), largo_max DECIMAL(18,2), peso_max DECIMAL(18,2), tipo_precio DECIMAL(18,2))
+CREATE TABLE estado (id_estado INT NOT NULL IDENTITY(1,1), descripcion NVARCHAR(50))
+CREATE TABLE tipo_local(id_tipo INT NOT NULL IDENTITY(1,1), descripcion NVARCHAR(50))
+CREATE TABLE provincia (id_provincia INT NOT NULL IDENTITY(1,1), nombre_provincia NVARCHAR(255));
+CREATE TABLE tipo_movilidad (id_tipo_movilidad INT NOT NULL IDENTITY(1,1), descripcion_movilidad INT);
+CREATE TABLE dia (id_dia INT NOT NULL IDENTITY(1,1), descripcion NVARCHAR(50))
 
-CREATE TABLE Producto(codigo VARCHAR(50), nombre VARCHAR(50), descripcion VARCHAR(255))
-
-CREATE TABLE Tipo_Reclamo(id_tipo INT, descripcion VARCHAR(50))
-
-CREATE TABLE Tipo_Medio_Pago(id_tipo_medioPago INT, descripcion VARCHAR(50))
-
-CREATE TABLE Tipo_Paquete(id_tipo INT, tipo VARCHAR(50), alto_max DECIMAL(18,2), ancho_max DECIMAL(18,2), largo_max DECIMAL(18,2), peso_max DECIMAL(18,2), tipo_precio DECIMAL(18,2))
-
-CREATE TABLE Estado (id_estado INT, descripcion VARCHAR(50))
-
-CREATE TABLE Tipo_Local(id_tipo INT, descripcion VARCHAR(50))
-
-CREATE TABLE provincia (id_provincia INT, nombre_provincia VARCHAR(255));
-
-CREATE TABLE tipo_movilidad (id_tipo_movilidad INT, descripcion_movilidad INT);
-
-CREATE TABLE Dia (id_dia INT, descripcion VARCHAR(50))
-
-ALTER TABLE Persona
+ALTER TABLE persona
 	ADD CONSTRAINT pk_persona PRIMARY KEY (id_persona)
+GO
 
-ALTER TABLE Producto
+ALTER TABLE producto
 	ADD CONSTRAINT pk_codigo_producto PRIMARY KEY (codigo_producto)
+GO
 
-ALTER TABLE Tipo_Reclamo
+ALTER TABLE tipo_reclamo
 	ADD CONSTRAINT pk_tipo_reclamo PRIMARY KEY (id_tipo)
+GO
 	
-ALTER TABLE Tipo_Medio_Pago
-	ADD CONSTRAINT pk_tipo_medioPago PRIMARY KEY (id_tipo_medioPago)
+ALTER TABLE tipo_medio_Pago
+	ADD CONSTRAINT pk_tipo_medioPago PRIMARY KEY (id_tipo_medio_pago)
+GO
 	
-ALTER TABLE Tipo_Paquete
+ALTER TABLE tipo_paquete
 	ADD CONSTRAINT pk_tipo_paquete PRIMARY KEY (id_tipo)
-	
-ALTER TABLE Estado
-	ADD CONSTRAINT pk_estado PRIMARY KEY (id_estado)
+GO
 
-ALTER TABLE Tipo_Local
+ALTER TABLE estado
+	ADD CONSTRAINT pk_estado PRIMARY KEY (id_estado)
+GO
+
+ALTER TABLE tipo_local
 	ADD CONSTRAINT pk_tipo_local PRIMARY KEY (id_tipo)
+GO
 
 ALTER TABLE provincia 
 	ADD CONSTRAINT pk_provincia PRIMARY KEY (id_provincia);
+GO
 
 ALTER TABLE tipo_movilidad 
 	ADD CONSTRAINT pk_tipo_movilidad PRIMARY KEY (id_movilidad);
 	
 ALTER TABLE dia
-	ADD CONSTRAIT pk_dia PRIMARY KEY (id_dia);
+	ADD CONSTRAINT pk_dia PRIMARY KEY (id_dia);
 
 /*Parte 2*/
 
-CREATE TABLE tipo_movilidad (id_tipo_movilidad INT, descripcion_movilidad NVARCHAR(50));
-CREATE TABLE localidad (id_localidad INT, id_provincia INT, nombre_localidad NVARCHAR(255));
-CREATE TABLE operador (id_operador INT, id_persona INT);
-CREATE TABLE usuario (id_usuario INT, id_persona INT, fecha_registro DATETIME2(3));
-CREATE TABLE repartidor (id_repartidor INT, id_persona INT, tipo_movilidad INT, localidad_activa INT);
+CREATE TABLE tipo_movilidad (id_tipo_movilidad INT NOT NULL IDENTITY(1,1), descripcion_movilidad NVARCHAR(50));
+CREATE TABLE localidad (id_localidad INT NOT NULL IDENTITY(1,1), id_provincia INT, nombre_localidad NVARCHAR(255));
+CREATE TABLE operador (id_operador INT NOT NULL IDENTITY(1,1), id_persona INT);
+CREATE TABLE usuario (id_usuario INT NOT NULL IDENTITY(1,1), id_persona INT, fecha_registro DATETIME2(3));
+CREATE TABLE repartidor (id_repartidor INT NOT NULL IDENTITY(1,1), id_persona INT, tipo_movilidad INT, localidad_activa INT);
 
 --usuario
 ALTER TABLE usuario 
-	ADD CONSTRAINT pk PRIMARY KEY (id_usuario)
-ALTER TABLE usuario 
-	ADD CONSTRAINT fk_usuario_persona FOREIGN KEY (id_persona) REFERENCES persona(id_persona);
+	ADD CONSTRAINT pk PRIMARY KEY (id_usuario),
+	CONSTRAINT fk_usuario_persona FOREIGN KEY (id_persona) REFERENCES persona(id_persona)
+GO
 	
 --repartidor
 ALTER TABLE repartidor 
-	ADD CONSTRAINT pk PRIMARY KEY (id_repartidor)
-ALTER TABLE repartidor 
-	ADD CONSTRAINT fk_repartidor_persona FOREIGN KEY (id_persona) REFERENCES persona(id_persona);
-
+	ADD CONSTRAINT pk PRIMARY KEY (id_repartidor),
+	CONSTRAINT fk_repartidor_persona FOREIGN KEY (id_persona) REFERENCES persona(id_persona)
+GO
 
 --Medio de Pago
 ALTER TABLE medio_de_pago 
-	ADD CONSTRAINT pk_medio_de_pago PRIMARY KEY (id_medioPago);
-ALTER TABLE medio_de_pago 
-	ADD CONSTRAINT fk_medio_de_pago_usuario FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario);
-ALTER TABLE medio_de_pago 
-	ADD CONSTRAINT fk_medio_de_pago_tipo FOREIGN KEY (tipo_medioPago) REFERENCES tipo_medio_pago(id_medioPago);
+	ADD CONSTRAINT pk_medio_de_pago PRIMARY KEY (id_medioPago),
+	CONSTRAINT fk_medio_de_pago_usuario FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario),
+	CONSTRAINT fk_medio_de_pago_tipo FOREIGN KEY (tipo_medioPago) REFERENCES tipo_medio_pago(id_medioPago)
+GO
 
 --Cupon desc
 ALTER TABLE cupon_descuento
-	ADD CONSTRAINT pk_cupon_descuento PRIMARY KEY (nro);
-ALTER TABLE cupon_descuento 
-	ADD CONSTRAINT fk_cupon_descuento_usuario FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario);
+	ADD CONSTRAINT pk_cupon_descuento PRIMARY KEY (nro),
+	CONSTRAINT fk_cupon_descuento_usuario FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario)
+GO
 
 --Categoria
 ALTER TABLE categoria 
-	ADD CONSTRAINT pk_categoria PRIMARY KEY (id_categoria);
-ALTER TABLE categoria 
-	ADD CONSTRAINT pk_categoria PRIMARY KEY (id_tipo);
+	ADD CONSTRAINT pk_categoria PRIMARY KEY (id_categoria),
+	CONSTRAINT pk_categoria PRIMARY KEY (id_tipo)
+GO
 	
 --Localidad
 ALTER TABLE localidad
-ADD CONSTRAINT pk_localidad PRIMARY KEY (id_localidad)
-
-ALTER TABLE localidad
-	ADD CONSTRAINT fk_localidad FOREIGN KEY (id_provincia) REFERENCES provincia(id_provincia)
+	ADD CONSTRAINT pk_localidad PRIMARY KEY (id_localidad),
+	CONSTRAINT fk_localidad FOREIGN KEY (id_provincia) REFERENCES provincia(id_provincia)
+GO
 
 /*Parte 3*/
 
-CREATE TABLE direccion (id_direccion INT, id_persona INT, direccion NVARCHAR(255), localidad INT);--, provincia INT);correccion tp
+CREATE TABLE direccion (id_direccion INT, id_persona INT, direccion NVARCHAR(255), localidad INT);
 CREATE TABLE medio_de_pago (id_medioPago INT, id_usuario INT, tipo_medioPago INT, nro_tarjeta NVARCHAR(50), tipo NVARCHAR(50), marca_tarjeta NVARCHAR(100));
 CREATE TABLE cupon_descuento (nro DECIMAL(18,2), id_usuario INT, monto DECIMAL(18,2), fecha_alta DATETIME, fecha_vencimiento DATETIME, tipo NVARCHAR(50), usado TINYINT);
 CREATE TABLE categoria (id_categoria INT, id_tipo INT, descripcion VARCHAR(255));
-
 CREATE TABLE envio (id_envio INT, id_usuario INT, id_repartidor INT, id_estado INT, id_medioPago INT, precio_envio DECIMAL(18,2), propina DECIMAL(18,2), observaciones NVARCHAR(255),
 					fecha_pedido DATE, fecha_entrega DATE, tiempo_estimado_entrega DECIMAL(18,2), calificacion DECIMAL(18,0), dir_origen INT, dir_destino INT);
-
-CREATE TABLE local_ (id_local INT, id_direccion INT, nombre NVARCHAR(100), descripcion NVARCHAR(255), tipo NVARCHAR(55), categoria INT);--CREO Q SIN EL _ NO FUNCARIA
+CREATE TABLE local_ (id_local INT, id_direccion INT, nombre NVARCHAR(100), descripcion NVARCHAR(255), tipo NVARCHAR(55), categoria INT);
 
 
 --Direccion
@@ -151,7 +145,8 @@ CREATE TABLE envio_de_mensajeria(id_envio INT, id_envio_mensajeria INT, km DECIM
 				total_envio_mensajeria decimal(18,2));
 CREATE TABLE pedido_productos(id_pedido INT, id_envio INT, id_local INT, tarifa_servicio INT, total_pedido DECIMAL(18,2), pedido_total_cupones DECIMAL(18,2))
 CREATE TABLE producto_por_local(codigo_producto INT, id_local INT, precio DECIMAL(18,2))
-				
+CREATE TABLE horario (id_horario INT, id_local INT, hora_apertuta DECIMAL(18,0), hora_cierre DECIMAL(18,0), id_dia INT);
+	
 ALTER TABLE envio_de_mensajeria
 	ADD CONSTRAINT pk_envio_de_mensajeria PRIMARY KEY (id_envio_de_mensajeria);
 ALTER TABLE envio_de_mensajeria
@@ -172,46 +167,45 @@ ALTER TABLE producto_por_local
 	ADD CONSTRAINT fk_producto_por_local FOREIGN KEY (codigo_producto) REFERENCES producto(codigo_producto)
 ALTER TABLE producto_por_local
 	ADD CONSTRAINT fk_producto_por_local FOREIGN KEY (id_local) REFERENCES local(id_local)	
-
-
-create table horario (
-id_horario int primary key,
-id_local int references local,
-hora_apertuta decimal(18,0),
-hora_cierre decimal(18,0),
-id_dia int references dia,
-);
+ALTER TABLE horario
+	ADD CONSTRAINT pk_horario PRIMARY KEY (id_horario),
+	CONSTRAINT fk_local FOREIGN KEY REFERENCES local_(id_local),
+	CONSTRAINT fk_dia FOREIGN KEY REFERENCES Dia(id_dia)
+GO
 
 /*Parte 5*/
 
-create table reclamo (
-nro_reclamo decimal(18,0) primary key,
-id_pedido int references pedido_productos,
-tipo_reclamo int references tipo_reclamo,
-fecha datetime,
-descripcion nvarchar(255),
-fecha_solucion datetime,
-estado nvarchar(50),
-solucion nvarchar(255),
-calificacion decimal(18,0),
-id_usuario int references usuario,
-);
+CREATE TABLE reclamo (nro_reclamo decimal(18,0) IDENTITY(1,1), id_pedido int, tipo_reclamo int, fecha datetime, descripcion nvarchar(255), fecha_solucion datetime, estado nvarchar(50), solucion nvarchar(255), calificacion decimal(18,0), id_usuario int);
+CREATE TABLE producto_por_pedido (id_pedido int, codigo_producto nvarchar(50), cantidad decimal(18,0), total_producto decimal(18,2));
+CREATE TABLE cupon_por_pedido(nro_cupon decimal(18,0), id_pedido INT)
 
-create table producto_por_pedido (
-id_pedido int references pedido_productos,
-codigo_producto nvarchar(50) references producto_por_local,
-cantidad decimal(18,0),
-total_producto decimal(18,2),
-primary key(id_pedido, codigo_producto)
-);
+ALTER TABLE reclamo
+	ADD CONSTRAINT pk_reclamo PRIMARY KEY (nro_reclamo),
+	CONSTRAINT fk_pedido FOREIGN KEY (id_pedido) REFERENCES pedido_productos(id_pedido),
+	CONSTRAINT pk_tipo_reclamo FOREIGN KEY (tipo_reclamo) REFERENCES tipo_reclamo(id_tipo),
+	CONSTRAINT pk_usuario FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario)
+GO
 
-create table cupon_por_pedido (
-nro_cupon int primary key references cupon_descuento,
-id_pedido int references pedido_productos
-);
+ALTER TABLE producto_por_pedido
+	ADD CONSTRAINT pk_pedido PRIMARY KEY (id_pedido),
+	CONSTRAINT pk_producto PRIMARY KEY (codigo_producto),
+	CONSTRAINT fk_pedido FOREIGN KEY REFERENCES pedido_productos(id_pedido),
+	CONSTRAINT fk_producto FOREIGN KEY REFERENCES producto_por_local(codigo_producto)
+GO
+
+ALTER TABLE cupon_por_pedido
+	ADD CONSTRAINT pk_cuponXpedido_nro_cupon PRIMARY KEY (nro_cupon),
+	CONSTRAINT fk_cuponXpedidon_cupon_nro_cupon FOREIGN KEY (nro_cupon) REFERENCES cupon_descuento(nro),
+	CONSTRAINT fk_cuponXpedidon_cupon_id_pedido FOREIGN KEY (id_pedido) REFERENCES pedido_productos(id_pedido);
+GO
 
 /*Parte 6*/
-create table cupon_por_reclamo (
-nro_cupon decimal primary key references cupon_descuento,
-nro_reclamo decimal(18,0) references reclamo
-);
+
+CREATE TABLE cupon_por_reclamo(nro_cupon decimal(18,0), nro_reclamo decimal(18,0))
+
+ALTER TABLE cupon_por_reclamo
+	ADD CONSTRAINT pk_cuponXreclamo_nro_cupon PRIMARY KEY (nro_cupon),
+	CONSTRAINT fk_cuponXreclamo_nro_cupon FOREIGN KEY (nro_cupon) REFERENCES cupon_descuento(nro),
+	CONSTRAINT fk_cuponXreclamo_nro_reclamo FOREIGN KEY (nro_reclamo) REFERENCES reclamo(nro_reclamo);
+GO
+
