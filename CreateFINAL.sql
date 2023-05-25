@@ -59,13 +59,12 @@ ALTER TABLE tipo_movilidad
 
 /*Parte 2*/
 
+CREATE TABLE provincia (id_provincia INT, nombre_provincia NVARCHAR(255));
+CREATE TABLE tipo_movilidad (id_tipo_movilidad INT, descripcion_movilidad NVARCHAR(50));
+CREATE TABLE localidad (id_localidad INT, id_provincia INT, nombre_localidad NVARCHAR(255));
 CREATE TABLE operador (id_operador INT, id_persona INT);
-CREATE TABLE usuario (id_usuario INT, id_persona INT, fecha_registro DATE);
+CREATE TABLE usuario (id_usuario INT, id_persona INT, fecha_registro DATETIME2(3));
 CREATE TABLE repartidor (id_repartidor INT, id_persona INT, tipo_movilidad INT, localidad_activa INT);
-CREATE TABLE direccion (id_direccion INT, id_persona INT, direccion NVARCHAR(255), localidad INT);
-CREATE TABLE medio_de_pago (id_medioPago INT, id_usuario INT, tipo_medioPago INT, nro_tarjeta NVARCHAR(50), tipo NVARCHAR(50), marca_tarjeta NVARCHAR(100));
-CREATE TABLE cupon_descuento (nro DECIMAL(18,0), id_usuario INT, monto DECIMAL(18,2), fecha_alta DATE, fecha_vencimiento DATE, tipo NVARCHAR(50), usado TINYINT);
-CREATE TABLE categoria (id_categoria INT, id_tipo INT, descripcion NVARCHAR(255));
 
 ALTER TABLE usuario 
 	ADD CONSTRAINT pk PRIMARY KEY (id_usuario)
