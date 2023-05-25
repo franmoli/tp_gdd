@@ -20,8 +20,6 @@ CREATE TABLE provincia (id_provincia INT, nombre_provincia VARCHAR(255));
 
 CREATE TABLE tipo_movilidad (id_tipo_movilidad INT, descripcion_movilidad INT);
 
-CREATE TABLE localidad (id_localidad INT, id_provincia INT, nombre_localidad VARCHAR(50));
-
 CREATE TABLE Dia (id_dia INT, descripcion VARCHAR(50))
 
 ALTER TABLE Persona
@@ -48,41 +46,32 @@ ALTER TABLE Tipo_Local
 ALTER TABLE provincia 
 	ADD CONSTRAINT pk_provincia PRIMARY KEY (id_provincia);
 
-ALTER TABLE localidad
-	ADD CONSTRAINT pk_localidad PRIMARY KEY (id_localidad)
-
-ALTER TABLE localidad
-	ADD CONSTRAINT fk_localidad FOREIGN KEY (id_provincia) REFERENCES provincia(id_provincia)
-
 ALTER TABLE tipo_movilidad 
 	ADD CONSTRAINT pk_tipo_movilidad PRIMARY KEY (id_movilidad);
+	
+ALTER TABLE dia
+	ADD CONSTRAIT pk_dia PRIMARY KEY (id_dia);
 
 /*Parte 2*/
 
-CREATE TABLE provincia (id_provincia INT, nombre_provincia NVARCHAR(255));
 CREATE TABLE tipo_movilidad (id_tipo_movilidad INT, descripcion_movilidad NVARCHAR(50));
 CREATE TABLE localidad (id_localidad INT, id_provincia INT, nombre_localidad NVARCHAR(255));
 CREATE TABLE operador (id_operador INT, id_persona INT);
 CREATE TABLE usuario (id_usuario INT, id_persona INT, fecha_registro DATETIME2(3));
 CREATE TABLE repartidor (id_repartidor INT, id_persona INT, tipo_movilidad INT, localidad_activa INT);
 
+--usuario
 ALTER TABLE usuario 
 	ADD CONSTRAINT pk PRIMARY KEY (id_usuario)
 ALTER TABLE usuario 
 	ADD CONSTRAINT fk_usuario_persona FOREIGN KEY (id_persona) REFERENCES persona(id_persona);
+	
+--repartidor
 ALTER TABLE repartidor 
 	ADD CONSTRAINT pk PRIMARY KEY (id_repartidor)
 ALTER TABLE repartidor 
 	ADD CONSTRAINT fk_repartidor_persona FOREIGN KEY (id_persona) REFERENCES persona(id_persona);
 
-
---Direccion
-ALTER TABLE direccion 
-	ADD CONSTRAINT pk_direccion PRIMARY KEY (id_direccion);
-ALTER TABLE direccion 
-	ADD CONSTRAINT fk_direccion_persona FOREIGN KEY (id_persona) REFERENCES persona(id_persona);
-ALTER TABLE direccion 
-	ADD CONSTRAINT fk_direccion_localidad FOREIGN KEY (localidad) REFERENCES localidad(id_localidad);
 
 --Medio de Pago
 ALTER TABLE medio_de_pago 
@@ -98,11 +87,18 @@ ALTER TABLE cupon_descuento
 ALTER TABLE cupon_descuento 
 	ADD CONSTRAINT fk_cupon_descuento_usuario FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario);
 
---Categoria/tiene q tener diferente nombre la primary?
+--Categoria
 ALTER TABLE categoria 
 	ADD CONSTRAINT pk_categoria PRIMARY KEY (id_categoria);
 ALTER TABLE categoria 
 	ADD CONSTRAINT pk_categoria PRIMARY KEY (id_tipo);
+	
+--Localidad
+ALTER TABLE localidad
+ADD CONSTRAINT pk_localidad PRIMARY KEY (id_localidad)
+
+ALTER TABLE localidad
+	ADD CONSTRAINT fk_localidad FOREIGN KEY (id_provincia) REFERENCES provincia(id_provincia)
 
 /*Parte 3*/
 
@@ -112,7 +108,15 @@ CREATE TABLE envio (id_envio INT, id_usuario INT, id_repartidor INT, id_estado I
 CREATE TABLE local_ (id_local INT, id_direccion INT, nombre NVARCHAR(100), descripcion NVARCHAR(255), tipo NVARCHAR(55), categoria INT);--CREO Q SIN EL _ NO FUNCARIA
 
 
+--Direccion
+ALTER TABLE direccion 
+	ADD CONSTRAINT pk_direccion PRIMARY KEY (id_direccion);
+ALTER TABLE direccion 
+	ADD CONSTRAINT fk_direccion_persona FOREIGN KEY (id_persona) REFERENCES persona(id_persona);
+ALTER TABLE direccion 
+	ADD CONSTRAINT fk_direccion_localidad FOREIGN KEY (localidad) REFERENCES localidad(id_localidad);
 --Envio
+
 ALTER TABLE envio 
 	ADD CONSTRAINT pk_envio PRIMARY KEY (id_envio), 
 	CONSTRAINT fk_envio_usuario FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario);
