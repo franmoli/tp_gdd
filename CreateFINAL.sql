@@ -102,6 +102,11 @@ ALTER TABLE localidad
 
 /*Parte 3*/
 
+CREATE TABLE direccion (id_direccion INT, id_persona INT, direccion NVARCHAR(255), localidad INT);--, provincia INT);correccion tp
+CREATE TABLE medio_de_pago (id_medioPago INT, id_usuario INT, tipo_medioPago INT, nro_tarjeta NVARCHAR(50), tipo NVARCHAR(50), marca_tarjeta NVARCHAR(100));
+CREATE TABLE cupon_descuento (nro DECIMAL(18,2), id_usuario INT, monto DECIMAL(18,2), fecha_alta DATETIME, fecha_vencimiento DATETIME, tipo NVARCHAR(50), usado TINYINT);
+CREATE TABLE categoria (id_categoria INT, id_tipo INT, descripcion VARCHAR(255));
+
 CREATE TABLE envio (id_envio INT, id_usuario INT, id_repartidor INT, id_estado INT, id_medioPago INT, precio_envio DECIMAL(18,2), propina DECIMAL(18,2), observaciones NVARCHAR(255),
 					fecha_pedido DATE, fecha_entrega DATE, tiempo_estimado_entrega DECIMAL(18,2), calificacion DECIMAL(18,0), dir_origen INT, dir_destino INT);
 
