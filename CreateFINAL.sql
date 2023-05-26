@@ -13,6 +13,10 @@ GO
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[producto_por_pedido]') AND type in (N'U'))
 	DROP TABLE producto_por_pedido
 GO
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[cupon_por_reclamo]') AND type in (N'U'))
+	DROP TABLE cupon_por_reclamo
+GO
+
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[reclamo]') AND type in (N'U'))
 	DROP TABLE reclamo
 GO
@@ -25,10 +29,6 @@ GO
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[envio]') AND type in (N'U'))
 	DROP TABLE envio
 GO
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[cupon_por_reclamo]') AND type in (N'U'))
-	DROP TABLE cupon_por_reclamo
-GO
-
 
 
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[producto_por_local]') AND type in (N'U'))
