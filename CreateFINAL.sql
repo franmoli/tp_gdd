@@ -171,8 +171,8 @@ GO
 
 --Tipo movilidad
 ALTER TABLE tipo_movilidad 
-	ADD CONSTRAINT pk_tipo_movilidad PRIMARY KEY (id_tipo_movilidad);
-
+	ADD CONSTRAINT pk_tipo_movilidad PRIMARY KEY (id_tipo_movilidad)
+GO
 
 
 /*Parte 3*/
@@ -184,15 +184,13 @@ CREATE TABLE categoria (id_categoria INT IDENTITY(1,1) NOT NULL, id_tipo INT NOT
 CREATE TABLE envio (id_envio INT IDENTITY(1,1), id_usuario INT, id_repartidor INT, id_estado INT, id_medioPago INT, precio_envio DECIMAL(18,2), propina DECIMAL(18,2), observaciones NVARCHAR(255),
 					fecha_pedido DATE, fecha_entrega DATE, tiempo_estimado_entrega DECIMAL(18,2), calificacion DECIMAL(18,0), dir_origen INT, dir_destino INT);
 CREATE TABLE local_ (id_local INT IDENTITY(1,1), id_direccion INT, nombre NVARCHAR(100), descripcion NVARCHAR(255), tipo INT, categoria INT);
-
-
+	
 --Direccion
 ALTER TABLE direccion 
-	ADD CONSTRAINT pk_direccion PRIMARY KEY (id_direccion);
-ALTER TABLE direccion 
-	ADD CONSTRAINT fk_direccion_persona FOREIGN KEY (id_persona) REFERENCES persona(id_persona);
-ALTER TABLE direccion 
-	ADD CONSTRAINT fk_direccion_localidad FOREIGN KEY (localidad) REFERENCES localidad(id_localidad);
+	ADD CONSTRAINT pk_direccion PRIMARY KEY (id_direccion),
+	CONSTRAINT fk_direccion_persona FOREIGN KEY (id_persona) REFERENCES persona(id_persona),
+	CONSTRAINT fk_direccion_localidad FOREIGN KEY (localidad) REFERENCES localidad(id_localidad)
+GO
 
 --Medio de Pago
 ALTER TABLE medio_de_pago 
@@ -215,21 +213,21 @@ GO
 --Envio
 ALTER TABLE envio 
 	ADD CONSTRAINT pk_envio PRIMARY KEY (id_envio), 
-	CONSTRAINT fk_envio_usuario FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario);
-
-ALTER TABLE envio 
-	ADD CONSTRAINT fk_envio_repartidor FOREIGN KEY (id_repartidor) REFERENCES repartidor(id_repartidor),
+	CONSTRAINT fk_envio_usuario FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario),
+	CONSTRAINT fk_envio_repartidor FOREIGN KEY (id_repartidor) REFERENCES repartidor(id_repartidor),
 	CONSTRAINT fk_envio_estado FOREIGN KEY (id_estado) REFERENCES estado(id_estado),
 	CONSTRAINT fk_envio_medio_pago FOREIGN KEY (id_medioPago) REFERENCES medio_de_pago(id_medioPago),
 	CONSTRAINT fk_envio_dir_origen FOREIGN KEY (dir_origen) REFERENCES direccion(id_direccion),
 	CONSTRAINT fk_envio_dir_destino FOREIGN KEY (dir_destino) REFERENCES direccion(id_direccion)
+GO
 
 --Local
 ALTER TABLE local_ 
 	ADD CONSTRAINT pk_local_ PRIMARY KEY (id_local),
 	CONSTRAINT fk_local_dir FOREIGN KEY (id_direccion) REFERENCES direccion(id_direccion),
 	CONSTRAINT fk_local_cat FOREIGN KEY (categoria, tipo) REFERENCES categoria(id_categoria, id_tipo),
-	CONSTRAINT fk_local_tipo FOREIGN KEY (tipo) REFERENCES tipo_local(id_tipo);
+	CONSTRAINT fk_local_tipo FOREIGN KEY (tipo) REFERENCES tipo_local(id_tipo)
+GO
 
 
 --Parte 4
@@ -239,25 +237,37 @@ CREATE TABLE envio_de_mensajeria(id_envio INT, id_envio_mensajeria INT NOT NULL,
 CREATE TABLE pedido_productos(id_pedido INT NOT NULL, id_envio INT, id_local INT, tarifa_servicio INT, total_pedido DECIMAL(18,2), pedido_total_cupones DECIMAL(18,2))
 CREATE TABLE producto_por_local(codigo_producto NVARCHAR(50) NOT NULL, id_local INT NOT NULL, precio DECIMAL(18,2))
 CREATE TABLE horario (id_horario INT NOT NULL, id_local INT, hora_apertuta DECIMAL(18,0), hora_cierre DECIMAL(18,0), id_dia INT);
-	
+CREATE TABLE direccionesXpersona (id_persona INT, id_direccion INT)
+
 ALTER TABLE envio_de_mensajeria
 	ADD CONSTRAINT pk_envio_de_mensajeria PRIMARY KEY (id_envio_mensajeria);
+GO
 ALTER TABLE envio_de_mensajeria
 	ADD CONSTRAINT fK_envio_de_mensajeria_envio FOREIGN KEY (id_envio) REFERENCES envio(id_envio);
+GO
 ALTER TABLE envio_de_mensajeria
 	ADD CONSTRAINT fk_envio_de_mensajria_tipo FOREIGN KEY (tipo_paquete) REFERENCES tipo_paquete(id_tipo)
+GO
 ALTER TABLE pedido_productos
 	ADD CONSTRAINT pk_pedido_productos PRIMARY KEY (id_pedido),
 	CONSTRAINT fk_pedido_productos_envio FOREIGN KEY (id_envio) REFERENCES envio(id_envio),
-	CONSTRAINT fk_pedido_productos_local FOREIGN KEY (id_local) REFERENCES local_(id_local) 
+	CONSTRAINT fk_pedido_productos_local FOREIGN KEY (id_local) REFERENCES local_(id_local)
+GO
 ALTER TABLE producto_por_local
 	ADD CONSTRAINT pk_producto_por_local PRIMARY KEY (codigo_producto, id_local),
 	CONSTRAINT fk_producto_por_local_producto FOREIGN KEY (codigo_producto) REFERENCES producto(codigo),
-	CONSTRAINT fk_producto_por_local_local FOREIGN KEY (id_local) REFERENCES local_(id_local)	
+	CONSTRAINT fk_producto_por_local_local FOREIGN KEY (id_local) REFERENCES local_(id_local)
+GO
 ALTER TABLE horario
 	ADD CONSTRAINT pk_horario PRIMARY KEY (id_horario),
 	CONSTRAINT fk_local FOREIGN KEY (id_local) REFERENCES local_(id_local),
 	CONSTRAINT fk_dia FOREIGN KEY (id_dia) REFERENCES Dia(id_dia)
+GO
+ALTER TABLE direccionesXpersona
+	ADD CONSTRAINT pk_persona PRIMARY KEY (id_persona),
+	CONSTRAINT pk_direccion PRIMARY KEY (id_direccion),
+	CONSTRAINT fk_persona FOREIGN KEY (id_persona) REFERENCES persona.id_persona,
+	CONSTRAINT fk_direccion FOREIGN KEY (id_direccion) REFERENCES direccion.id_direccion,
 GO
 
 /*Parte 5*/
