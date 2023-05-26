@@ -23,9 +23,10 @@ JOIN pedido_productos as pp ON pp.id_pedido = PEDIDO_NRO
 
 
 INSERT INTO producto_por_pedido (id_pedido, codigo_producto, id_local, cantidad, total_producto)
-SELECT  pp.id_pedido, PRODUCTO_LOCAL_CODIGO, l.id_local, PRODUCTO_CANTIDAD, PRODUCTO_LOCAL_PRECIO --no se si esta bien todo esto en gral, mas puntualmente el ultimo
+SELECT  pp.id_pedido, p.codigo, l.id_local, PRODUCTO_CANTIDAD, PRODUCTO_LOCAL_PRECIO --no se si esta bien todo esto en gral, mas puntualmente el ultimo
 FROM gd_esquema.Maestra
 JOIN pedido_productos as pp ON pp.id_pedido = PEDIDO_NRO
+JOIN producto p ON p.codigo =  PRODUCTO_LOCAL_CODIGO
 JOIN local_ l ON l.nombre =  LOCAL_NOMBRE
 
 
