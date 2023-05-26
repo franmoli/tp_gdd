@@ -1,7 +1,7 @@
 
 
 
-INSERT INTO horario (id_horario, id_local, hora_apertuta, hora_cierre, id_dia)
+INSERT INTO horario ( id_local, hora_apertuta, hora_cierre, id_dia)
 SELECT  l.id_local, HORARIO_LOCAL_HORA_APERTURA, HORARIO_LOCAL_HORA_CIERRE, d.id_dia
 FROM gd_esquema.Maestra
 JOIN local_ l ON l.nombre =  LOCAL_NOMBRE
