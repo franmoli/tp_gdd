@@ -95,6 +95,11 @@ GO
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dia]') AND type in (N'U'))
 	DROP TABLE dia
 GO
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[direccionesXpersona]') AND type in (N'U'))
+	DROP TABLE direccionesXpersona
+GO
+
+
 /*Parte 1*/
 
 CREATE TABLE persona(id_persona INT NOT NULL IDENTITY(1,1), nombre NVARCHAR(255), apellido NVARCHAR(255), DNI DECIMAL(18,0), telefono DECIMAL(18,0), mail NVARCHAR(255), fecha_nac DATE)
@@ -237,7 +242,7 @@ CREATE TABLE envio_de_mensajeria(id_envio INT, id_envio_mensajeria INT NOT NULL,
 CREATE TABLE pedido_productos(id_pedido INT NOT NULL, id_envio INT, id_local INT, tarifa_servicio INT, total_pedido DECIMAL(18,2), pedido_total_cupones DECIMAL(18,2))
 CREATE TABLE producto_por_local(codigo_producto NVARCHAR(50) NOT NULL, id_local INT NOT NULL, precio DECIMAL(18,2))
 CREATE TABLE horario (id_horario INT NOT NULL, id_local INT, hora_apertuta DECIMAL(18,0), hora_cierre DECIMAL(18,0), id_dia INT);
-CREATE TABLE direccionesXpersona (id_persona INT, id_direccion INT)
+CREATE TABLE direccionesXpersona (id_persona INT NOT NULL, id_direccion INT NOT NULL)
 
 ALTER TABLE envio_de_mensajeria
 	ADD CONSTRAINT pk_envio_de_mensajeria PRIMARY KEY (id_envio_mensajeria);
@@ -261,13 +266,12 @@ GO
 ALTER TABLE horario
 	ADD CONSTRAINT pk_horario PRIMARY KEY (id_horario),
 	CONSTRAINT fk_local FOREIGN KEY (id_local) REFERENCES local_(id_local),
-	CONSTRAINT fk_dia FOREIGN KEY (id_dia) REFERENCES Dia(id_dia)
+	CONSTRAINT fk_dia FOREIGN KEY (id_dia) REFERENCES dia(id_dia)
 GO
 ALTER TABLE direccionesXpersona
-	ADD CONSTRAINT pk_persona PRIMARY KEY (id_persona),
-	CONSTRAINT pk_direccion PRIMARY KEY (id_direccion),
-	CONSTRAINT fk_persona FOREIGN KEY (id_persona) REFERENCES persona.id_persona,
-	CONSTRAINT fk_direccion FOREIGN KEY (id_direccion) REFERENCES direccion.id_direccion,
+	ADD CONSTRAINT pk_direcxpersona PRIMARY KEY (id_persona, id_direccion),
+	CONSTRAINT fk_persona FOREIGN KEY (id_persona) REFERENCES persona(id_persona),
+	CONSTRAINT fk_direccion FOREIGN KEY (id_direccion) REFERENCES direccion(id_direccion)
 GO
 
 /*Parte 5*/
