@@ -1,10 +1,7 @@
 USE GD1C2023
 GO
 
---CREATE SCHEMA delivery
---drop schema delivery
---GO
- 
+
  
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[cupon_por_pedido]') AND type in (N'U'))
 	DROP TABLE cupon_por_pedido
@@ -39,7 +36,10 @@ IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[horario]') 
 GO
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[local_]') AND type in (N'U'))
 	DROP TABLE local_
-GO	
+GO
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[direccionesXpersona]') AND type in (N'U'))
+	DROP TABLE direccionesXpersona
+GO
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[direccion]') AND type in (N'U'))
 	DROP TABLE direccion
 GO
@@ -148,7 +148,6 @@ GO
 ALTER TABLE dia
 	ADD CONSTRAINT pk_dia PRIMARY KEY (id_dia)
 GO
-
 /*Parte 2*/
 
 CREATE TABLE tipo_movilidad (id_tipo_movilidad INT NOT NULL IDENTITY(1,1), descripcion_movilidad NVARCHAR(255));
@@ -184,8 +183,8 @@ GO
 
 /*Parte 3*/
 
-CREATE TABLE direccion (id_direccion INT IDENTITY(1,1) NOT NULL, id_persona INT, direccion NVARCHAR(255), localidad INT);
-CREATE TABLE medio_de_pago (id_medioPago INT IDENTITY(1,1), id_usuario INT, id_tipo_medio_pago INT, nro_tarjeta NVARCHAR(50), tipo NVARCHAR(50), marca_tarjeta NVARCHAR(100));
+CREATE TABLE direccion (id_direccion INT IDENTITY(1,1) NOT NULL, direccion NVARCHAR(255), localidad INT);
+CREATE TABLE medio_de_pago (id_medioPago INT IDENTITY(1,1), id_usuario INT, id_tipo_medio_pago INT, nro_tarjeta NVARCHAR(50), marca_tarjeta NVARCHAR(100));
 CREATE TABLE cupon_descuento (nro DECIMAL(18,2) NOT NULL, id_usuario INT, monto DECIMAL(18,2), fecha_alta DATETIME, fecha_vencimiento DATETIME, tipo NVARCHAR(50), usado TINYINT);
 CREATE TABLE categoria (id_categoria INT IDENTITY(1,1) NOT NULL, id_tipo INT NOT NULL, descripcion VARCHAR(255));
 CREATE TABLE envio (id_envio INT IDENTITY(1,1), id_usuario INT, id_repartidor INT, id_estado INT, id_medioPago INT, precio_envio DECIMAL(18,2), propina DECIMAL(18,2), observaciones NVARCHAR(255),
@@ -195,7 +194,6 @@ CREATE TABLE local_ (id_local INT IDENTITY(1,1), id_direccion INT, nombre NVARCH
 --Direccion
 ALTER TABLE direccion 
 	ADD CONSTRAINT pk_direccion PRIMARY KEY (id_direccion),
-	CONSTRAINT fk_direccion_persona FOREIGN KEY (id_persona) REFERENCES persona(id_persona),
 	CONSTRAINT fk_direccion_localidad FOREIGN KEY (localidad) REFERENCES localidad(id_localidad)
 GO
 
@@ -315,86 +313,220 @@ GO
 
 /*Parte 1*/
 
+--PERSONA
+INSERT INTO persona (nombre, apellido, DNI, telefono, mail, fecha_nac)
+SELECT DISTINCT USUARIO_NOMBRE, USUARIO_APELLIDO, USUARIO_DNI, USUARIO_TELEFONO, USUARIO_MAIL, USUARIO_FECHA_NAC 
+FROM gd_esquema.Maestra WHERE USUARIO_DNI IS NOT NULL
+UNION
+SELECT DISTINCT OPERADOR_RECLAMO_NOMBRE, OPERADOR_RECLAMO_APELLIDO, OPERADOR_RECLAMO_DNI, OPERADOR_RECLAMO_TELEFONO, OPERADOR_RECLAMO_MAIL, OPERADOR_RECLAMO_FECHA_NAC 
+FROM gd_esquema.Maestra WHERE OPERADOR_RECLAMO_DNI IS NOT NULL
+UNION
+SELECT DISTINCT REPARTIDOR_NOMBRE, REPARTIDOR_APELLIDO, REPARTIDOR_DNI, REPARTIDOR_TELEFONO, REPARTIDOR_EMAIL, REPARTIDOR_FECHA_NAC
+FROM gd_esquema.Maestra WHERE REPARTIDOR_DNI IS NOT NULL
+
+--PRODUCTO
 INSERT INTO producto (codigo, nombre, descripcion) 
 SELECT DISTINCT PRODUCTO_LOCAL_CODIGO, PRODUCTO_LOCAL_NOMBRE, PRODUCTO_LOCAL_DESCRIPCION
 FROM gd_esquema.Maestra
 WHERE PRODUCTO_LOCAL_CODIGO IS NOT NULL
 
+--TIPO DE RECLAMO
+INSERT INTO tipo_reclamo (descripcion) SELECT DISTINCT RECLAMO_TIPO FROM gd_esquema.Maestra WHERE RECLAMO_TIPO IS NOT NULL
+
+--TIPO MEDIO DE PAGO
+INSERT INTO tipo_medio_pago (descripcion) SELECT DISTINCT MEDIO_PAGO_TIPO FROM gd_esquema.Maestra
+
+--TIPO DE PAQUETE
+INSERT INTO tipo_paquete(tipo, alto_max, ancho_max, largo_max, peso_max, tipo_precio) 
+SELECT PAQUETE_TIPO, PAQUETE_ALTO_MAX, PAQUETE_ANCHO_MAX, PAQUETE_LARGO_MAX, PAQUETE_PESO_MAX, PAQUETE_TIPO_PRECIO FROM gd_esquema.Maestra 
+WHERE PAQUETE_TIPO IS NOT NULL
+GROUP BY PAQUETE_TIPO, PAQUETE_ALTO_MAX, PAQUETE_ANCHO_MAX, PAQUETE_LARGO_MAX, PAQUETE_PESO_MAX, PAQUETE_TIPO_PRECIO
+
+-- ESTADO (ENVIO)
 INSERT INTO estado (descripcion)
 SELECT DISTINCT ENVIO_MENSAJERIA_ESTADO
-FROM gd_esquema.Maestra
+FROM gd_esquema.Maestra WHERE ENVIO_MENSAJERIA_ESTADO IS NOT NULL
+UNION 
+SELECT DISTINCT PEDIDO_ESTADO FROM gd_esquema.Maestra WHERE PEDIDO_ESTADO IS NOT NULL
 
+--TIPO DE LOCAL
 INSERT INTO tipo_local (descripcion)
 SELECT DISTINCT LOCAL_TIPO
-FROM gd_esquema.Maestra
+FROM gd_esquema.Maestra WHERE LOCAL_TIPO IS NOT NULL
+
+
+--PROVINCIA
+INSERT INTO provincia (nombre_provincia) values ( NULL)
 
 INSERT INTO provincia (nombre_provincia)
-SELECT DISTINCT DIRECCION_USUARIO_PROVINCIA 
-UNION SELECT DISTINCT LOCAL_PROVINCIA 
-UNION SELECT DISTINCT ENVIO_MENSAJERIA_PROVINCIA
-FROM gd_esquema.Maestra
+SELECT DISTINCT DIRECCION_USUARIO_PROVINCIA  FROM gd_esquema.Maestra WHERE DIRECCION_USUARIO_PROVINCIA IS NOT NULL
+UNION SELECT DISTINCT LOCAL_PROVINCIA  FROM gd_esquema.Maestra WHERE LOCAL_PROVINCIA IS NOT NULL
+UNION SELECT DISTINCT ENVIO_MENSAJERIA_PROVINCIA FROM gd_esquema.Maestra WHERE ENVIO_MENSAJERIA_PROVINCIA IS NOT NULL
 
+-- TIPO DE MOVILIDAD
 INSERT INTO tipo_movilidad (descripcion_movilidad)
 SELECT DISTINCT REPARTIDOR_TIPO_MOVILIDAD
 FROM gd_esquema.Maestra
 
+-- DIA (LOCAL)
 INSERT INTO dia (descripcion)
 SELECT DISTINCT HORARIO_LOCAL_DIA
 FROM gd_esquema.Maestra
 WHERE HORARIO_LOCAL_DIA IS NOT NULL
 
+
 /*Parte 2*/
 
+--OPERADOR
 INSERT INTO operador (id_persona)
-SELECT  p.id_persona
-FROM gd_esquema.Maestra
-JOIN persona p ON p.DNI =  USUARIO_DNI
+SELECT p.id_persona 
+FROM persona p
+WHERE p.DNI IN (SELECT DISTINCT OPERADOR_RECLAMO_DNI FROM gd_esquema.Maestra)
 
+--USUARIO
 INSERT INTO usuario ( id_persona, fecha_registro)
-SELECT  p.id_persona, USUARIO_FECHA_REGISTRO
-FROM gd_esquema.Maestra
-JOIN persona p ON p.DNI =  USUARIO_DNI
+SELECT DISTINCT  p.id_persona, m.USUARIO_FECHA_REGISTRO
+FROM persona p JOIN gd_esquema.Maestra m ON p.DNI = m.USUARIO_DNI
 
+--RAPERTIDOR
 INSERT INTO repartidor (id_persona)
-SELECT  p.id_persona
-FROM gd_esquema.Maestra
-JOIN persona p ON p.DNI =  USUARIO_DNI
+SELECT DISTINCT p.id_persona
+FROM persona p
+WHERE p.DNI IN (SELECT DISTINCT REPARTIDOR_DNI FROM gd_esquema.Maestra)
 
-INSERT INTO medio_de_pago (id_usuario, tipo_medioPago, nro_tarjeta, tipo, marca_tarjeta)
-SELECT u.id_usuario, tp.id_tipo_medioPago, MEDIO_PAGO_NRO_TARJETA, MARCA_TARJETA
-FROM gd_esquema.Maestra
-JOIN persona AS p ON p.nombre = USUARIO_NOMBRE
-JOIN usuario AS u ON u.id_persona = p.id_persona
-JOIN Tipo_Medio_pago as tp ON t.descripcion = MEDIO_PAGO_TIPO
-GROUP BY USUARIO_NOMBRE, MEDIO_PAGO_NRO_TARJETA, MEDIO_PAGO_TIPO, MARCA_TARJETA
+--MEDIOS DE PAGO
+INSERT INTO medio_de_pago (id_usuario, id_tipo_medio_pago, nro_tarjeta, marca_tarjeta)
+SELECT  u.id_usuario, tmp.id_tipo_medio_pago, m.MEDIO_PAGO_NRO_TARJETA, m.MARCA_TARJETA
+FROM gd_esquema.Maestra m
+JOIN persona p ON p.DNI = m.USUARIO_DNI
+JOIN usuario u ON u.id_persona = p.id_persona
+JOIN tipo_medio_pago tmp ON tmp.descripcion = m.MEDIO_PAGO_TIPO
+group by u.id_usuario, tmp.id_tipo_medio_pago, m.MEDIO_PAGO_NRO_TARJETA, m.MARCA_TARJETA
 
+
+--CUPONES DE DESCUENTO
 INSERT INTO cupon_descuento (nro, id_usuario, monto, fecha_alta, fecha_vencimiento, tipo, usado)
-SELECT CUPON_NRO, u.id_usuario, CUPON_MONTO, CUPON_FECHA_ALTA, CUPON_FECHA_VENCIMIENTO, CUPON_TIPO, 0
-FROM gd_esquema.Maestra
-JOIN persona as p ON USUARIO_NOMBRE = p.nombre
-JOIN usuario as u ON p.id_persona = u.id_persona
+SELECT m.CUPON_NRO, u.id_usuario, CUPON_MONTO, CUPON_FECHA_ALTA, CUPON_FECHA_VENCIMIENTO, CUPON_TIPO, 0
+FROM gd_esquema.Maestra m
+JOIN persona p ON p.DNI = m.USUARIO_DNI
+JOIN usuario u ON u.id_persona = p.id_persona
 WHERE CUPON_NRO IS NOT NULL
+order BY CUPON_NRO
+GO
 
-/*Parte 3*/
+
+
+--LOCALIDADES
+
+INSERT INTO localidad( nombre_localidad) values ( NULL)
+
+INSERT INTO localidad(id_provincia, nombre_localidad)
+SELECT DISTINCT p.id_provincia, ENVIO_MENSAJERIA_LOCALIDAD FROM gd_esquema.Maestra m
+JOIN provincia p ON m.ENVIO_MENSAJERIA_PROVINCIA = p.nombre_provincia
+UNION
+SELECT DISTINCT p.id_provincia, DIRECCION_USUARIO_LOCALIDAD FROM gd_esquema.Maestra m
+JOIN provincia p ON m.DIRECCION_USUARIO_PROVINCIA = p.nombre_provincia
+UNION
+SELECT DISTINCT p.id_provincia, LOCAL_LOCALIDAD FROM gd_esquema.Maestra m
+JOIN provincia p ON m.LOCAL_PROVINCIA = p.nombre_provincia
+
+
+	
+INSERT INTO direccion (direccion, localidad)
+SELECT  m.ENVIO_MENSAJERIA_DIR_DEST, L.id_localidad FROM gd_esquema.Maestra m
+JOIN localidad l ON l.nombre_localidad = m.ENVIO_MENSAJERIA_LOCALIDAD
+WHERE ENVIO_MENSAJERIA_DIR_DEST IS NOT NULL
+UNION
+SELECT  m.LOCAL_DIRECCION, L.id_localidad FROM gd_esquema.Maestra m
+JOIN localidad l ON l.nombre_localidad = m.LOCAL_LOCALIDAD
+WHERE LOCAL_DIRECCION IS NOT NULL
+UNION 
+SELECT  m.DIRECCION_USUARIO_DIRECCION, L.id_localidad FROM gd_esquema.Maestra m
+JOIN localidad l ON l.nombre_localidad = m.DIRECCION_USUARIO_LOCALIDAD
+WHERE DIRECCION_USUARIO_DIRECCION IS NOT NULL
+UNION 
+SELECT  m.REPARTIDOR_DIRECION, 1 FROM gd_esquema.Maestra m
+WHERE REPARTIDOR_DIRECION IS NOT NULL
+
+INSERT INTO direccionesXpersona (id_persona, id_direccion)
+SELECT DISTINCT P.id_persona, D.id_direccion FROM gd_esquema.Maestra m
+JOIN persona p ON p.DNI = m.USUARIO_DNI
+JOIN direccion d ON d.direccion = m.DIRECCION_USUARIO_DIRECCION
+WHERE m.USUARIO_DNI IS NOT NULL
+GO
+
+/*Parte 3 */
 
 --insert de envio de mensajes
-INSERT INTO envio (id_usuario, id_repartidor, id_estado, id_medioPago, precio_envio, propina, observaciones,
-fecha_pedido, fecha_entrega, tiempo_estimado_entrega, calificacion, dir_origen, dir_destino)
-SELECT u.id_usuario, r.id_repartidor, e.id_estado, mp.id_medioPago, ENVIO_MENSAJERIA_PRECIO_ENVIO,
-ENVIO_MENSAJERIA_PROPINA, ENVIO_MENSAJERIA_OBSERV, ENVIO_MENSAJERIA_FECHA, ENVIO_MENSAJERIA_FECHA_ENTREGA,
-ENVIO_MENSAJERIA_TIEMPO_ESTIMADO, ENVIO_MENSAJERIA_CALIFICACION, dest.id_direccion, orig.id_direccion
-FROM gd_esquema.Maestra
-JOIN persona as p1 ON p1.nombre = USUARIO_NOMBRE
-JOIN persona as p2 ON p2.nombre = REPARTIDOR_NOMBRE
-JOIN usuario as u ON p1.id_persona = u.id_persona
-JOIN repartidor as r ON p2.id_persona = r.id_persona
-JOIN estado as e ON e.descirpcion = ENVIO_MENSAJERIA_ESTADO
-JOIN medio_de_pago as mp ON mp.nro_tarjeta = MEDIO_PAGO_NRO_TARJETA
-JOIN direccion as dest ON dest.direccion = ENVIO_MENSAJERIA_DIR_DEST
-JOIN direccion as orig ON orig.direccion = ENVIO_MENSAJERIA_DIR_ORIG
-WHERE ENVIO_MENSAJERIA_NRO IS NOT NULL
+CREATE TRIGGER insert_envio_mensajeria_tr ON envio_de_mensajeria INSTEAD OF INSERT AS
+BEGIN
+		
+		select * from inserted
+		select * from direccion
+		
+		declare cursor_envios_msj cursor 
+		for select id_envio_mensajeria, id_envio, km, tipo_paquete, valor_asegurado, precio_seguro, total_envio_mensajeria from inserted
+	
+		open cursor_envios_msj
+		declare @idEnvioMSJ int
+		declare @IdEnvio int
+		declare @km decimal(18,2)
+		declare @tipoPaquete int
+		declare @valorAseg decimal(18,2)
+		declare @precioSeguro decimal(18,2)
+		declare @totalEnvio decimal(18,2)
+
+		fetch cursor_envios_msj into @idEnvioMSJ ,@IdEnvio, @km , @tipoPaquete, @valorAseg, @precioSeguro, @totalEnvio
+
+		while (@@FETCH_STATUS = 0)
+			begin
+			
+			INSERT INTO envio(id_usuario, id_repartidor, id_estado, id_medioPago, precio_envio, propina, observaciones,
+			fecha_pedido, fecha_entrega, tiempo_estimado_entrega, calificacion, dir_origen, dir_destino)
+			SELECT u.id_usuario, r.id_repartidor, e.id_estado, mp.id_medioPago, ENVIO_MENSAJERIA_PRECIO_ENVIO, ENVIO_MENSAJERIA_PROPINA, ENVIO_MENSAJERIA_OBSERV,
+				ENVIO_MENSAJERIA_FECHA, ENVIO_MENSAJERIA_FECHA_ENTREGA, ENVIO_MENSAJERIA_TIEMPO_ESTIMADO, ENVIO_MENSAJERIA_CALIFICACION, ENVIO_MENSAJERIA_DIR_ORIG, dir.id_direccion
+			FROM gd_esquema.Maestra m
+			JOIN persona pu ON pu.DNI = m.USUARIO_DNI
+			JOIN usuario u ON u.id_persona = pu.id_persona
+			JOIN persona pr ON pr.DNI = m.REPARTIDOR_DNI
+			JOIN repartidor r ON r.id_persona = pr.id_persona
+			JOIN estado e ON e.descripcion = m.ENVIO_MENSAJERIA_ESTADO
+			JOIN medio_de_pago mp ON mp.id_usuario = u.id_usuario
+			JOIN direccion dir ON m.ENVIO_MENSAJERIA_DIR_DEST = dir.direccion 
+			WHERE ENVIO_MENSAJERIA_NRO = @idEnvioMSJ
+		
+			--select * from envio
+		
+			--INSERT INTO envio_de_mensajeria (id_envio_mensajeria, id_envio, km, tipo_paquete, valor_asegurado, precio_seguro, total_envio_mensajeria)
+			--VALUES (@idEnvioMSJ, IDENT_CURRENT('dbo.envio'), @km, @tipoPaquete, @valorAseg, @precioSeguro, @totalEnvio )
+			
+			--SELECT IDENT_CURRENT('dbo.envio')
+
+		
+		end
+		close cursor_envios_msj
+
+		
+end;
+
+DROP TRIGGER insert_envio_mensajeria_tr
+
+select * from envio
+select * from envio e join envio_de_mensajeria em on e.id_envio = em.id_envio
+
+INSERT INTO envio_de_mensajeria (id_envio_mensajeria, id_envio, km, tipo_paquete, valor_asegurado, precio_seguro, total_envio_mensajeria) 
+SELECT top 1 ENVIO_MENSAJERIA_NRO, 0, ENVIO_MENSAJERIA_KM, tp.id_tipo, ENVIO_MENSAJERIA_VALOR_ASEGURADO, ENVIO_MENSAJERIA_PRECIO_SEGURO, ENVIO_MENSAJERIA_TOTAL
+FROM gd_esquema.Maestra m
+JOIN tipo_paquete tp ON m.PAQUETE_TIPO = tp.tipo
+ORDER BY m.ENVIO_MENSAJERIA_NRO
+
+insert into envio_de_mensajeria (id_envio_mensajeria, id_envio, km, tipo_paquete, valor_asegurado, precio_seguro, total_envio_mensajeria) values (0,0,0,0,0,0,0)
+
+
+/*
 
 --insert de pedidos
+/*
 INSERT INTO envio (id_usuario, id_repartidor, id_estado, id_medioPago, precio_envio, propina, observaciones,
 fecha_pedido, fecha_entrega, tiempo_estimado_entrega, calificacion, dir_origen, dir_destino)
 SELECT u.id_usuario, r.id_repartidor, e.id_estado, mp.id_medioPago, PEDIDO_PRECIO_ENVIO,
@@ -405,12 +537,12 @@ JOIN persona as p1 ON p1.nombre = USUARIO_NOMBRE
 JOIN persona as p2 ON p2.nombre = REPARTIDOR_NOMBRE
 JOIN usuario as u ON p1.id_persona = u.id_persona
 JOIN repartidor as r ON p2.id_persona = r.id_persona
-JOIN estado as e ON e.descirpcion = PEDIDO_ESTADO
+JOIN estado as e ON e.descripcion = PEDIDO_ESTADO
 JOIN medio_de_pago as mp ON mp.nro_tarjeta = MEDIO_PAGO_NRO_TARJETA
 JOIN direccion as dest ON dest.direccion = DIRECCION_USUARIO_DIRECCION
 JOIN direccion as orig ON orig.direccion = LOCAL_DIRECCION
 WHERE PEDIDO_NRO IS NOT NULL
-
+*/
 INSERT INTO local_(id_direccion, nombre, descripcion, tipo)
 SELECT DISTINCT d.id_direccion, LOCAL_NOMBRE, LOCAL_DESCRIPCION, t.id_tipo
 FROM gd_esquema.Maestra
@@ -418,8 +550,8 @@ JOIN tipo_local as t ON t.descripcion = LOCAL_TIPO
 JOIN direccion as d ON d.direccion = LOCAL_DIRECCION
 WHERE LOCAL_NOMBRE IS NOT NULL
 
-INSERT INTO direccion (id_direccion, id_persona, direccion, localidad, provincia)
-SELECT p.id_persona, DIRECCION_USUARIO_DIRECCION, l.localidad,pro.provincia
+INSERT INTO direccion (id_direccion, direccion, localidad)
+SELECT DIRECCION_USUARIO_DIRECCION, l.localidad,pro.provincia
 FROM gd_esquema.Maestra
 JOIN persona as p ON p.DIRECCION_USUARIO_NOMBRE = p.nombre
 JOIN localidad as l ON l.nombre_localidad = DIRECCION_USUARIO_LOCALIDAD
@@ -469,3 +601,5 @@ SELECT cd.nro, r.nro_reclamo
 FROM gd_esquema.Maestra
 JOIN cupon_descuento cd ON cd.nro =  CUPON_NRO 
 JOIN reclamo r ON r.nro_reclamo = RECLAMO_NRO -- o seria CUPON_NRO o CUPON_RECLAMO_NRO?
+
+*/

@@ -1,0 +1,1 @@
+INSERT INTO tipo_reclamo (descripcion) SELECT DISTINCT RECLAMO_TIPO FROM gd_esquema.Maestra WHERE RECLAMO_TIPO IS NOT NULL

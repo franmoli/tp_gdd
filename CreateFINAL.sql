@@ -1,9 +1,7 @@
 USE GD1C2023
 GO
 
---CREATE SCHEMA delivery
---drop schema delivery
---GO
+
  
  
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[cupon_por_pedido]') AND type in (N'U'))
@@ -40,6 +38,9 @@ GO
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[local_]') AND type in (N'U'))
 	DROP TABLE local_
 GO	
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[direccionesXpersona]') AND type in (N'U'))
+	DROP TABLE direccionesXpersona
+GO
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[direccion]') AND type in (N'U'))
 	DROP TABLE direccion
 GO
