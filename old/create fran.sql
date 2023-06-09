@@ -7,7 +7,7 @@ valor_asegurado decimal(18,2),
 precio_seguro decimal(18,2),
 total_envio_mensajeria decimal(18,2)
 );
-
+ 
 create table pedido_productos (
 id_pedido int primary key,
 id_envio int references envio,
