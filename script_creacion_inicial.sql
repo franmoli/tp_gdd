@@ -1,6 +1,103 @@
-CREATE SCHEMA DATAZO
+
+/* DELETE FROM TABLES */
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.cupon_por_pedido') AND type in (N'U'))
+	DELETE FROM DATAZO.cupon_por_pedido
 GO
 
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.producto_por_pedido') AND type in (N'U'))
+	DELETE FROM DATAZO.producto_por_pedido
+GO
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.cupon_por_reclamo') AND type in (N'U'))
+	DELETE FROM DATAZO.cupon_por_reclamo
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.reclamo') AND type in (N'U'))
+	DELETE FROM DATAZO.reclamo
+GO
+ IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.pedido_productos') AND type in (N'U'))
+	DELETE FROM DATAZO.pedido_productos
+GO
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.envio_de_mensajeria') AND type in (N'U'))
+	DELETE FROM DATAZO.envio_de_mensajeria
+GO
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.envio') AND type in (N'U'))
+	DELETE FROM DATAZO.envio
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.producto_por_local') AND type in (N'U'))
+	DELETE FROM DATAZO.producto_por_local
+GO
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.horario') AND type in (N'U'))
+	DELETE FROM DATAZO.horario
+GO
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.local_') AND type in (N'U'))
+	DELETE FROM DATAZO.local_
+GO
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.direccionesXpersona') AND type in (N'U'))
+	DELETE FROM DATAZO.direccionesXpersona
+GO
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.direccion') AND type in (N'U'))
+	DELETE FROM DATAZO.direccion
+GO
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.medio_de_pago') AND type in (N'U'))
+	DELETE FROM DATAZO.medio_de_pago
+GO
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.cupon_descuento') AND type in (N'U'))
+	DELETE FROM DATAZO.cupon_descuento
+GO
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.categoria') AND type in (N'U'))
+	DELETE FROM DATAZO.categoria
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.tipo_movilidad') AND type in (N'U'))
+	DELETE FROM DATAZO.tipo_movilidad
+GO
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.localidad') AND type in (N'U'))
+	DELETE FROM DATAZO.localidad
+GO
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.operador') AND type in (N'U'))
+	DELETE FROM DATAZO.operador
+GO
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.usuario') AND type in (N'U'))
+	DELETE FROM DATAZO.usuario
+GO
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.repartidor') AND type in (N'U'))
+	DELETE FROM DATAZO.repartidor
+GO
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.persona') AND type in (N'U'))
+	DELETE FROM DATAZO.persona
+GO
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.producto') AND type in (N'U'))
+	DELETE FROM DATAZO.producto
+GO
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.tipo_reclamo') AND type in (N'U'))
+	DELETE FROM DATAZO.tipo_reclamo
+GO
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.tipo_medio_pago') AND type in (N'U'))
+	DELETE FROM DATAZO.tipo_medio_pago
+GO
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.tipo_paquete') AND type in (N'U'))
+	DELETE FROM DATAZO.tipo_paquete
+GO
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.estado') AND type in (N'U'))
+	DELETE FROM DATAZO.estado
+GO
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.tipo_local') AND type in (N'U'))
+	DELETE FROM DATAZO.tipo_local
+GO
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.provincia') AND type in (N'U'))
+	DELETE FROM DATAZO.provincia
+GO
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.dia') AND type in (N'U'))
+	DELETE FROM DATAZO.dia
+GO
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.direccionesXpersona') AND type in (N'U'))
+	DELETE FROM DATAZO.direccionesXpersona
+GO
+
+
+/* DROP TABLES */
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.cupon_por_pedido') AND type in (N'U'))
 	DROP TABLE DATAZO.cupon_por_pedido
 GO
@@ -24,7 +121,6 @@ GO
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.envio') AND type in (N'U'))
 	DROP TABLE DATAZO.envio
 GO
-
 
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.producto_por_local') AND type in (N'U'))
 	DROP TABLE DATAZO.producto_por_local
@@ -97,6 +193,14 @@ IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.direc
 	DROP TABLE DATAZO.direccionesXpersona
 GO
 
+--SCHEMA
+IF  EXISTS (SELECT * FROM sys.schemas WHERE [name] = 'DATAZO')
+	DROP SCHEMA  DATAZO
+GO
+CREATE SCHEMA DATAZO
+GO
+
+
 --Inicio de Creacion de Tablas
 
 /*Parte 1*/
@@ -157,20 +261,20 @@ CREATE TABLE DATAZO.repartidor (id_repartidor INT NOT NULL IDENTITY(1,1), id_per
 --usuario
 ALTER TABLE DATAZO.usuario 
 	ADD CONSTRAINT pk_usuario PRIMARY KEY (id_usuario),
-	CONSTRAINT fk_usuario_persona FOREIGN KEY (id_persona) REFERENCES persona(id_persona)
+	CONSTRAINT fk_usuario_persona FOREIGN KEY (id_persona) REFERENCES DATAZO.persona(id_persona)
 GO
 	
 --repartidor
 ALTER TABLE DATAZO.repartidor 
 	ADD CONSTRAINT pk_repartidor PRIMARY KEY (id_repartidor),
-	CONSTRAINT fk_repartidor_persona FOREIGN KEY (id_persona) REFERENCES persona(id_persona)
+	CONSTRAINT fk_repartidor_persona FOREIGN KEY (id_persona) REFERENCES DATAZO.persona(id_persona)
 GO
 
 	
 --Localidad
 ALTER TABLE DATAZO.localidad
 	ADD CONSTRAINT pk_localidad PRIMARY KEY (id_localidad),
-	CONSTRAINT fk_localidad FOREIGN KEY (id_provincia) REFERENCES provincia(id_provincia)
+	CONSTRAINT fk_localidad FOREIGN KEY (id_provincia) REFERENCES DATAZO.provincia(id_provincia)
 GO
 
 --Tipo movilidad
@@ -192,20 +296,20 @@ CREATE TABLE DATAZO.local_ (id_local INT IDENTITY(1,1), id_direccion INT, nombre
 --Direccion
 ALTER TABLE DATAZO.direccion 
 	ADD CONSTRAINT pk_direccion PRIMARY KEY (id_direccion),
-	CONSTRAINT fk_direccion_localidad FOREIGN KEY (localidad) REFERENCES localidad(id_localidad)
+	CONSTRAINT fk_direccion_localidad FOREIGN KEY (localidad) REFERENCES DATAZO.localidad(id_localidad)
 GO
 
 --Medio de Pago
 ALTER TABLE DATAZO.medio_de_pago 
 	ADD CONSTRAINT pk_medio_de_pago PRIMARY KEY (id_medioPago),
-	CONSTRAINT fk_medio_de_pago_usuario FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario),
-	CONSTRAINT fk_medio_de_pago_tipo FOREIGN KEY (id_tipo_medio_pago) REFERENCES tipo_medio_pago(id_tipo_medio_pago)
+	CONSTRAINT fk_medio_de_pago_usuario FOREIGN KEY (id_usuario) REFERENCES DATAZO.usuario(id_usuario),
+	CONSTRAINT fk_medio_de_pago_tipo FOREIGN KEY (id_tipo_medio_pago) REFERENCES DATAZO.tipo_medio_pago(id_tipo_medio_pago)
 GO
 
 --Cupon desc
 ALTER TABLE DATAZO.cupon_descuento
 	ADD CONSTRAINT pk_cupon_descuento PRIMARY KEY (nro, id_usuario),
-	CONSTRAINT fk_cupon_descuento_usuario FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario)
+	CONSTRAINT fk_cupon_descuento_usuario FOREIGN KEY (id_usuario) REFERENCES DATAZO.usuario(id_usuario)
 GO
 
 --Categoria
@@ -216,20 +320,20 @@ GO
 --Envio
 ALTER TABLE DATAZO.envio 
 	ADD CONSTRAINT pk_envio PRIMARY KEY (id_envio), 
-	CONSTRAINT fk_envio_usuario FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario),
-	CONSTRAINT fk_envio_repartidor FOREIGN KEY (id_repartidor) REFERENCES repartidor(id_repartidor),
-	CONSTRAINT fk_envio_estado FOREIGN KEY (id_estado) REFERENCES estado(id_estado),
-	CONSTRAINT fk_envio_medio_pago FOREIGN KEY (id_medioPago) REFERENCES medio_de_pago(id_medioPago),
-	CONSTRAINT fk_envio_dir_origen FOREIGN KEY (dir_origen) REFERENCES direccion(id_direccion),
-	CONSTRAINT fk_envio_dir_destino FOREIGN KEY (dir_destino) REFERENCES direccion(id_direccion)
+	CONSTRAINT fk_envio_usuario FOREIGN KEY (id_usuario) REFERENCES DATAZO.usuario(id_usuario),
+	CONSTRAINT fk_envio_repartidor FOREIGN KEY (id_repartidor) REFERENCES DATAZO.repartidor(id_repartidor),
+	CONSTRAINT fk_envio_estado FOREIGN KEY (id_estado) REFERENCES DATAZO.estado(id_estado),
+	CONSTRAINT fk_envio_medio_pago FOREIGN KEY (id_medioPago) REFERENCES DATAZO.medio_de_pago(id_medioPago),
+	-- CONSTRAINT fk_envio_dir_origen FOREIGN KEY (dir_origen) REFERENCES direccion(id_direccion),
+	CONSTRAINT fk_envio_dir_destino FOREIGN KEY (dir_destino) REFERENCES DATAZO.direccion(id_direccion)
 GO
 
 --Local
 ALTER TABLE DATAZO.local_ 
 	ADD CONSTRAINT pk_local_ PRIMARY KEY (id_local),
-	CONSTRAINT fk_local_dir FOREIGN KEY (id_direccion) REFERENCES direccion(id_direccion),
-	CONSTRAINT fk_local_cat FOREIGN KEY (categoria, tipo) REFERENCES categoria(id_categoria, id_tipo),
-	CONSTRAINT fk_local_tipo FOREIGN KEY (tipo) REFERENCES tipo_local(id_tipo)
+	CONSTRAINT fk_local_dir FOREIGN KEY (id_direccion) REFERENCES DATAZO.direccion(id_direccion),
+	CONSTRAINT fk_local_cat FOREIGN KEY (categoria, tipo) REFERENCES DATAZO.categoria(id_categoria, id_tipo),
+	CONSTRAINT fk_local_tipo FOREIGN KEY (tipo) REFERENCES DATAZO.tipo_local(id_tipo)
 GO
 
 
@@ -246,30 +350,30 @@ ALTER TABLE DATAZO.envio_de_mensajeria
 	ADD CONSTRAINT pk_envio_de_mensajeria PRIMARY KEY (id_envio_mensajeria);
 GO
 ALTER TABLE DATAZO.envio_de_mensajeria
-	ADD CONSTRAINT fK_envio_de_mensajeria_envio FOREIGN KEY (id_envio) REFERENCES envio(id_envio);
+	ADD CONSTRAINT fK_envio_de_mensajeria_envio FOREIGN KEY (id_envio) REFERENCES DATAZO.envio(id_envio);
 GO
 ALTER TABLE DATAZO.envio_de_mensajeria
-	ADD CONSTRAINT fk_envio_de_mensajria_tipo FOREIGN KEY (tipo_paquete) REFERENCES tipo_paquete(id_tipo)
+	ADD CONSTRAINT fk_envio_de_mensajria_tipo FOREIGN KEY (tipo_paquete) REFERENCES DATAZO.tipo_paquete(id_tipo)
 GO
 ALTER TABLE DATAZO.pedido_productos
 	ADD CONSTRAINT pk_pedido_productos PRIMARY KEY (id_pedido),
-	CONSTRAINT fk_pedido_productos_envio FOREIGN KEY (id_envio) REFERENCES envio(id_envio),
-	CONSTRAINT fk_pedido_productos_local FOREIGN KEY (id_local) REFERENCES local_(id_local)
+	CONSTRAINT fk_pedido_productos_envio FOREIGN KEY (id_envio) REFERENCES DATAZO.envio(id_envio),
+	CONSTRAINT fk_pedido_productos_local FOREIGN KEY (id_local) REFERENCES DATAZO.local_(id_local)
 GO
 ALTER TABLE DATAZO.producto_por_local
 	ADD CONSTRAINT pk_producto_por_local PRIMARY KEY (codigo_producto, id_local),
-	CONSTRAINT fk_producto_por_local_producto FOREIGN KEY (codigo_producto) REFERENCES producto(codigo),
-	CONSTRAINT fk_producto_por_local_local FOREIGN KEY (id_local) REFERENCES local_(id_local)
+	CONSTRAINT fk_producto_por_local_producto FOREIGN KEY (codigo_producto) REFERENCES DATAZO.producto(codigo),
+	CONSTRAINT fk_producto_por_local_local FOREIGN KEY (id_local) REFERENCES DATAZO.local_(id_local)
 GO
 ALTER TABLE DATAZO.horario
 	ADD CONSTRAINT pk_horario PRIMARY KEY (id_horario),
-	CONSTRAINT fk_local FOREIGN KEY (id_local) REFERENCES local_(id_local),
-	CONSTRAINT fk_dia FOREIGN KEY (id_dia) REFERENCES dia(id_dia)
+	CONSTRAINT fk_local FOREIGN KEY (id_local) REFERENCES DATAZO.local_(id_local),
+	CONSTRAINT fk_dia FOREIGN KEY (id_dia) REFERENCES DATAZO.dia(id_dia)
 GO
 ALTER TABLE DATAZO.direccionesXpersona
 	ADD CONSTRAINT pk_direcxpersona PRIMARY KEY (id_persona, id_direccion),
-	CONSTRAINT fk_persona FOREIGN KEY (id_persona) REFERENCES persona(id_persona),
-	CONSTRAINT fk_direccion FOREIGN KEY (id_direccion) REFERENCES direccion(id_direccion)
+	CONSTRAINT fk_persona FOREIGN KEY (id_persona) REFERENCES DATAZO.persona(id_persona),
+	CONSTRAINT fk_direccion FOREIGN KEY (id_direccion) REFERENCES DATAZO.direccion(id_direccion)
 GO
 
 /*Parte 5*/
@@ -280,21 +384,21 @@ CREATE TABLE DATAZO.cupon_por_pedido(nro_cupon decimal(18,2) NOT NULL, id_usuari
 
 ALTER TABLE DATAZO.reclamo
 	ADD CONSTRAINT pk_reclamo PRIMARY KEY (nro_reclamo),
-	CONSTRAINT fk_pedido FOREIGN KEY (id_pedido) REFERENCES pedido_productos(id_pedido),
-	CONSTRAINT fk_tipo_reclamo FOREIGN KEY (tipo_reclamo) REFERENCES tipo_reclamo(id_tipo),
-	CONSTRAINT fk_usuario FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario)
+	CONSTRAINT fk_pedido FOREIGN KEY (id_pedido) REFERENCES DATAZO.pedido_productos(id_pedido),
+	CONSTRAINT fk_tipo_reclamo FOREIGN KEY (tipo_reclamo) REFERENCES DATAZO.tipo_reclamo(id_tipo),
+	CONSTRAINT fk_usuario FOREIGN KEY (id_usuario) REFERENCES DATAZO.usuario(id_usuario)
 GO
 
 ALTER TABLE DATAZO.producto_por_pedido
 	ADD CONSTRAINT pk_pedido PRIMARY KEY (id_pedido, codigo_producto),
-	CONSTRAINT fk_pedido_ppp FOREIGN KEY (id_pedido) REFERENCES pedido_productos(id_pedido),
-	CONSTRAINT fk_producto_ppp FOREIGN KEY (codigo_producto, id_local) REFERENCES producto_por_local(codigo_producto, id_local)
+	CONSTRAINT fk_pedido_ppp FOREIGN KEY (id_pedido) REFERENCES DATAZO.pedido_productos(id_pedido),
+	CONSTRAINT fk_producto_ppp FOREIGN KEY (codigo_producto, id_local) REFERENCES DATAZO.producto_por_local(codigo_producto, id_local)
 GO
 
 ALTER TABLE DATAZO.cupon_por_pedido
 	ADD CONSTRAINT pk_cuponXpedido_nro_cupon PRIMARY KEY (nro_cupon),
-	CONSTRAINT fk_cuponXpedidon_cupon_nro_cupon FOREIGN KEY (nro_cupon, id_usuario) REFERENCES cupon_descuento(nro, id_usuario),
-	CONSTRAINT fk_cuponXpedidon_cupon_id_pedido FOREIGN KEY (id_pedido) REFERENCES pedido_productos(id_pedido);
+	CONSTRAINT fk_cuponXpedidon_cupon_nro_cupon FOREIGN KEY (nro_cupon, id_usuario) REFERENCES DATAZO.cupon_descuento(nro, id_usuario),
+	CONSTRAINT fk_cuponXpedidon_cupon_id_pedido FOREIGN KEY (id_pedido) REFERENCES DATAZO.pedido_productos(id_pedido);
 GO
 
 /*Parte 6*/
@@ -303,11 +407,11 @@ CREATE TABLE DATAZO.cupon_por_reclamo(nro_cupon decimal(18,2) NOT NULL, id_usuar
 
 ALTER TABLE DATAZO.cupon_por_reclamo
 	ADD CONSTRAINT pk_cuponXreclamo_nro_cupon PRIMARY KEY (nro_cupon),
-	CONSTRAINT fk_cuponXreclamo_nro_cupon FOREIGN KEY (nro_cupon, id_usuario) REFERENCES cupon_descuento(nro, id_usuario),
-	CONSTRAINT fk_cuponXreclamo_nro_reclamo FOREIGN KEY (nro_reclamo) REFERENCES reclamo(nro_reclamo);
+	CONSTRAINT fk_cuponXreclamo_nro_cupon FOREIGN KEY (nro_cupon, id_usuario) REFERENCES DATAZO.cupon_descuento(nro, id_usuario),
+	CONSTRAINT fk_cuponXreclamo_nro_reclamo FOREIGN KEY (nro_reclamo) REFERENCES DATAZO.reclamo(nro_reclamo);
 GO
 
---Migración
+--Migracion
 
 /*Parte 1*/
 
@@ -425,17 +529,22 @@ SELECT DISTINCT p.id_provincia, LOCAL_LOCALIDAD FROM gd_esquema.Maestra m
 JOIN DATAZO.provincia p ON m.LOCAL_PROVINCIA = p.nombre_provincia
 
 
-	
+
+--TODO: comprobar que se metan correctamente las localidades
 INSERT INTO DATAZO.direccion (direccion, localidad)
 SELECT  m.ENVIO_MENSAJERIA_DIR_DEST, L.id_localidad FROM gd_esquema.Maestra m
 JOIN DATAZO.localidad l ON l.nombre_localidad = m.ENVIO_MENSAJERIA_LOCALIDAD
 WHERE ENVIO_MENSAJERIA_DIR_DEST IS NOT NULL
 UNION
+SELECT  m.ENVIO_MENSAJERIA_DIR_ORIG, L.id_localidad FROM gd_esquema.Maestra m
+JOIN DATAZO.localidad l ON l.nombre_localidad = m.ENVIO_MENSAJERIA_LOCALIDAD
+WHERE ENVIO_MENSAJERIA_DIR_ORIG IS NOT NULL
+UNION
 SELECT  m.LOCAL_DIRECCION, L.id_localidad FROM gd_esquema.Maestra m
 JOIN DATAZO.localidad l ON l.nombre_localidad = m.LOCAL_LOCALIDAD
 WHERE LOCAL_DIRECCION IS NOT NULL
 UNION 
-SELECT  m.DIRECCION_USUARIO_DIRECCION, L.id_localidad FROM gd_esquema.Maestra m
+SELECT  m.DIRECCION_USUARIO_DIRECCION, L.id_localidad FROM gd_esquema.Maestra m 
 JOIN DATAZO.localidad l ON l.nombre_localidad = m.DIRECCION_USUARIO_LOCALIDAD
 WHERE DIRECCION_USUARIO_DIRECCION IS NOT NULL
 UNION 
@@ -452,11 +561,13 @@ GO
 /*Parte 3 */
 
 --insert de envio de mensajes
-CREATE TRIGGER insert_envio_mensajeria_tr ON envio_de_mensajeria INSTEAD OF INSERT AS
+
+IF  EXISTS (SELECT * FROM sys.triggers WHERE [name] = 'DATAZO.insert_envio_mensajeria_tr')
+	DROP TRIGGER  DATAZO.insert_envio_mensajeria_tr
+GO
+
+CREATE TRIGGER insert_envio_mensajeria_tr ON DATAZO.envio_de_mensajeria INSTEAD OF INSERT AS
 BEGIN
-		
-		select * from inserted
-		select * from DATAZO.direccion
 		
 		declare cursor_envios_msj cursor 
 		for select id_envio_mensajeria, id_envio, km, tipo_paquete, valor_asegurado, precio_seguro, total_envio_mensajeria from inserted
@@ -472,51 +583,59 @@ BEGIN
 
 		fetch cursor_envios_msj into @idEnvioMSJ ,@IdEnvio, @km , @tipoPaquete, @valorAseg, @precioSeguro, @totalEnvio
 
+
+
+
 		while (@@FETCH_STATUS = 0)
 			begin
-			
+
 			INSERT INTO DATAZO.envio(id_usuario, id_repartidor, id_estado, id_medioPago, precio_envio, propina, observaciones,
-			fecha_pedido, fecha_entrega, tiempo_estimado_entrega, calificacion, dir_origen, dir_destino)
-			SELECT u.id_usuario, r.id_repartidor, e.id_estado, mp.id_medioPago, ENVIO_MENSAJERIA_PRECIO_ENVIO, ENVIO_MENSAJERIA_PROPINA, ENVIO_MENSAJERIA_OBSERV,
-				ENVIO_MENSAJERIA_FECHA, ENVIO_MENSAJERIA_FECHA_ENTREGA, ENVIO_MENSAJERIA_TIEMPO_ESTIMADO, ENVIO_MENSAJERIA_CALIFICACION, ENVIO_MENSAJERIA_DIR_ORIG, dir.id_direccion
-			FROM gd_esquema.Maestra m
-			JOIN DATAZO.persona pu ON pu.DNI = m.USUARIO_DNI
-			JOIN DATAZO.usuario u ON u.id_persona = pu.id_persona
-			JOIN DATAZO.persona pr ON pr.DNI = m.REPARTIDOR_DNI
-			JOIN DATAZO.repartidor r ON r.id_persona = pr.id_persona
-			JOIN DATAZO.estado e ON e.descripcion = m.ENVIO_MENSAJERIA_ESTADO
-			JOIN DATAZO.medio_de_pago mp ON mp.id_usuario = u.id_usuario
-			JOIN DATAZO.direccion dir ON m.ENVIO_MENSAJERIA_DIR_DEST = dir.direccion 
-			WHERE ENVIO_MENSAJERIA_NRO = @idEnvioMSJ
-		
-			--select * from envio
-		
-			--INSERT INTO envio_de_mensajeria (id_envio_mensajeria, id_envio, km, tipo_paquete, valor_asegurado, precio_seguro, total_envio_mensajeria)
-			--VALUES (@idEnvioMSJ, IDENT_CURRENT('dbo.envio'), @km, @tipoPaquete, @valorAseg, @precioSeguro, @totalEnvio )
-			
-			--SELECT IDENT_CURRENT('dbo.envio')
+									fecha_pedido, fecha_entrega, tiempo_estimado_entrega, calificacion, dir_origen, dir_destino)
+			SELECT USR.id_usuario [user] , REP.id_repartidor rep, EST.id_estado EST, MP.id_medioPago medioPago, MASTR.ENVIO_MENSAJERIA_PRECIO_ENVIO precioEnvio,
+					MASTR.ENVIO_MENSAJERIA_PROPINA propina, MASTR.ENVIO_MENSAJERIA_OBSERV OBS, MASTR.ENVIO_MENSAJERIA_FECHA FECHA_E, MASTR.ENVIO_MENSAJERIA_FECHA_ENTREGA ENTREGA,
+					MASTR.ENVIO_MENSAJERIA_TIEMPO_ESTIMADO ESTIMADO, MASTR.ENVIO_MENSAJERIA_CALIFICACION CALIF, DIR_O.id_direccion dir_o, DIR_D.id_direccion
+			FROM gd_esquema.Maestra MASTR 
+			JOIN DATAZO.persona P_USR ON P_USR.DNI = MASTR.USUARIO_DNI
+			JOIN DATAZO.usuario USR ON USR.id_persona = P_USR.id_persona
+			JOIN DATAZO.persona P_REP ON P_REP.DNI = MASTR.REPARTIDOR_DNI 
+			JOIN DATAZO.repartidor REP ON REP.id_persona = P_REP.id_persona
+			JOIN DATAZO.estado EST ON EST.descripcion = MASTR.ENVIO_MENSAJERIA_ESTADO 
+			JOIN DATAZO.medio_de_pago MP ON MP.nro_tarjeta = MASTR.MEDIO_PAGO_NRO_TARJETA 
+			JOIN DATAZO.localidad LOC ON LOC.nombre_localidad = MASTR.ENVIO_MENSAJERIA_LOCALIDAD
+			JOIN DATAZO.direccion DIR_O ON DIR_O.direccion = MASTR.ENVIO_MENSAJERIA_DIR_ORIG AND DIR_O.localidad = LOC.id_localidad
+			JOIN DATAZO.direccion DIR_D ON DIR_D.direccion = MASTR.ENVIO_MENSAJERIA_DIR_DEST AND DIR_D.localidad = LOC.id_localidad
+			WHERE MASTR.ENVIO_MENSAJERIA_NRO = @idEnvioMSJ
+
 
 		
+			INSERT INTO envio_de_mensajeria (id_envio_mensajeria, id_envio, km, tipo_paquete, valor_asegurado, precio_seguro, total_envio_mensajeria)
+			VALUES (@idEnvioMSJ, IDENT_CURRENT('DATAZO.ENVIO'), @km, @tipoPaquete, @valorAseg, @precioSeguro, @totalEnvio )
+			
+
+			fetch cursor_envios_msj into @idEnvioMSJ ,@IdEnvio, @km , @tipoPaquete, @valorAseg, @precioSeguro, @totalEnvio
 		end
 		close cursor_envios_msj
 
 		
-end;
+end
+go
 
-DROP TRIGGER insert_envio_mensajeria_tr
-
-select * from DATAZO.envio
-select * from DATAZO.envio e join DATAZO.envio_de_mensajeria em on e.id_envio = em.id_envio
+			-- TODO: COMPROBAR QUE REALMENTE COINCIDAN LOS IDS INSERTADOS no funciona el cursor, muy lento, poner identity en ambos
 
 INSERT INTO DATAZO.envio_de_mensajeria (id_envio_mensajeria, id_envio, km, tipo_paquete, valor_asegurado, precio_seguro, total_envio_mensajeria) 
-SELECT top 1 ENVIO_MENSAJERIA_NRO, 0, ENVIO_MENSAJERIA_KM, tp.id_tipo, ENVIO_MENSAJERIA_VALOR_ASEGURADO, ENVIO_MENSAJERIA_PRECIO_SEGURO, ENVIO_MENSAJERIA_TOTAL
+SELECT m.ENVIO_MENSAJERIA_NRO, 0, m.ENVIO_MENSAJERIA_KM, tp.id_tipo, m.ENVIO_MENSAJERIA_VALOR_ASEGURADO, m.ENVIO_MENSAJERIA_PRECIO_SEGURO, m.ENVIO_MENSAJERIA_TOTAL
 FROM gd_esquema.Maestra m
 JOIN DATAZO.tipo_paquete tp ON m.PAQUETE_TIPO = tp.tipo
 ORDER BY m.ENVIO_MENSAJERIA_NRO
 
 
---insert de pedidos
+select * from DATAZO.envio_de_mensajeria
 
+SELECT * FROM DATAZO.envio
+
+
+--insert de pedidos
+/*
 INSERT INTO DATAZO.envio (id_usuario, id_repartidor, id_estado, id_medioPago, precio_envio, propina, observaciones,
 fecha_pedido, fecha_entrega, tiempo_estimado_entrega, calificacion, dir_origen, dir_destino)
 SELECT u.id_usuario, r.id_repartidor, e.id_estado, mp.id_medioPago, PEDIDO_PRECIO_ENVIO,
@@ -545,10 +664,10 @@ SELECT DIRECCION_USUARIO_DIRECCION, l.nombre_localidad, pro.nombre_provincia
 FROM gd_esquema.Maestra
 JOIN DATAZO.persona as p ON DIRECCION_USUARIO_NOMBRE = p.nombre
 JOIN DATAZO.localidad as l ON l.nombre_localidad = DIRECCION_USUARIO_LOCALIDAD
-JOIN DATAZO.provincia as pro ON pro.nombre_provincia = DIRECCION_USUARIO_PROVINCIA
+JOIN DATAZO.provincia as pro ON pro.nombre_provincia = DIRECCION_USUARIO_PROVINCIA */
 
 /*Parte 4*/
-
+ /*
 INSERT INTO DATAZO.producto_por_local (codigo_producto, id_local, precio)
 SELECT  p.codigo,l.id_local, PRODUCTO_LOCAL_PRECIO
 FROM gd_esquema.Maestra
@@ -559,10 +678,10 @@ INSERT INTO DATAZO.horario ( id_local, hora_apertuta, hora_cierre, id_dia)
 SELECT  l.id_local, HORARIO_LOCAL_HORA_APERTURA, HORARIO_LOCAL_HORA_CIERRE, d.id_dia
 FROM gd_esquema.Maestra
 JOIN DATAZO.local_ l ON l.nombre =  LOCAL_NOMBRE
-JOIN DATAZO.dia d ON d.descripcion =  HORARIO_LOCAL_DIA
+JOIN DATAZO.dia d ON d.descripcion =  HORARIO_LOCAL_DIA*/
 
 /*Parte 5*/
-
+/*
 INSERT INTO DATAZO.reclamo (nro_reclamo, id_pedido, tipo_reclamo, fecha, descripcion, fecha_solucion, estado, solucion, calificacion, id_usuario)
 SELECT RECLAMO_NRO, pp.id_pedido, tr.id_tipo, RECLAMO_FECHA, RECLAMO_DESCRIPCION, RECLAMO_FECHA_SOLUCION, RECLAMO_ESTADO, RECLAMO_SOLUCION, RECLAMO_CALIFICACION, u.id_usuario
 FROM gd_esquema.Maestra
@@ -583,11 +702,11 @@ FROM gd_esquema.Maestra
 JOIN DATAZO.pedido_productos as pp ON pp.id_pedido = PEDIDO_NRO
 JOIN DATAZO.producto p ON p.codigo =  PRODUCTO_LOCAL_CODIGO
 JOIN DATAZO.local_ l ON l.nombre =  LOCAL_NOMBRE
-
+*/
 /*Parte 6*/
-
+/*
 INSERT INTO DATAZO.cupon_por_reclamo (nro_cupon, nro_reclamo)
 SELECT cd.nro, r.nro_reclamo
 FROM gd_esquema.Maestra
 JOIN DATAZO.cupon_descuento cd ON cd.nro =  CUPON_NRO 
-JOIN DATAZO.reclamo r ON r.nro_reclamo = RECLAMO_NRO -- o seria CUPON_NRO o CUPON_RECLAMO_NRO?
+JOIN DATAZO.reclamo r ON r.nro_reclamo = RECLAMO_NRO -- o seria CUPON_NRO o CUPON_RECLAMO_NRO?*/
