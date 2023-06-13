@@ -119,6 +119,7 @@ IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.envio
 	DROP TABLE DATAZO.envio_de_mensajeria
 GO
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.envio') AND type in (N'U'))
+	PRINT 'DELETE ENVIO';
 	DROP TABLE DATAZO.envio
 GO
 
@@ -290,7 +291,7 @@ CREATE TABLE DATAZO.medio_de_pago (id_medioPago INT IDENTITY(1,1), id_usuario IN
 CREATE TABLE DATAZO.cupon_descuento (nro DECIMAL(18,2) NOT NULL, id_usuario INT NOT NULL, monto DECIMAL(18,2), fecha_alta DATETIME, fecha_vencimiento DATETIME, tipo NVARCHAR(50), usado TINYINT);
 CREATE TABLE DATAZO.categoria (id_categoria INT IDENTITY(1,1) NOT NULL, id_tipo INT NOT NULL, descripcion VARCHAR(255));
 CREATE TABLE DATAZO.envio (id_envio INT IDENTITY(1,1), id_usuario INT, id_repartidor INT, id_estado INT, id_medioPago INT, precio_envio DECIMAL(18,2), propina DECIMAL(18,2), observaciones NVARCHAR(255),
-					fecha_pedido DATE, fecha_entrega DATE, tiempo_estimado_entrega DECIMAL(18,2), calificacion DECIMAL(18,0), dir_origen INT, dir_destino INT);
+					fecha_pedido DATETIME, fecha_entrega DATETIME, tiempo_estimado_entrega DECIMAL(18,2), calificacion DECIMAL(18,0), dir_origen INT, dir_destino INT);
 CREATE TABLE DATAZO.local_ (id_local INT IDENTITY(1,1), id_direccion INT, nombre NVARCHAR(100), descripcion NVARCHAR(255), tipo INT, categoria INT);
 	
 --Direccion
@@ -613,11 +614,14 @@ WHERE MASTR.LOCAL_NOMBRE IS NOT NULL
 
 
 --insert de pedidos de productos
-SELECT 
+
+SELECT DISTINCT
  	USR.id_usuario [user], REP.id_repartidor repartidor, EST.id_estado estado, MP.id_medioPago medioPago, MASTR.PEDIDO_PRECIO_ENVIO precioEnvio,
 	MASTR.PEDIDO_PROPINA propina, MASTR.PEDIDO_OBSERV observacion, MASTR.PEDIDO_FECHA fecha_pedido, MASTR.PEDIDO_FECHA_ENTREGA fecha_entrega,
-	MASTR.PEDIDO_TIEMPO_ESTIMADO_ENTREGA t_estimado, MASTR.PEDIDO_CALIFICACION calificacion, LOC.id_direccion direccion_orig,
-	MASTR.PEDIDO_NRO pedido_nro, LOC.id_local localId, MASTR.PEDIDO_TARIFA_SERVICIO tarifa, MASTR.PEDIDO_TOTAL_PRODUCTOS total
+	MASTR.PEDIDO_TIEMPO_ESTIMADO_ENTREGA t_estimado, MASTR.PEDIDO_CALIFICACION calificacion, LOC.id_direccion direccion_orig, DIR.id_direccion direccion_dest,
+	MASTR.PEDIDO_NRO pedido_nro, LOC.id_local localId, MASTR.PEDIDO_TARIFA_SERVICIO tarifa, 
+	(MASTR.PEDIDO_TOTAL_PRODUCTOS + MASTR.PEDIDO_PRECIO_ENVIO + MASTR.PEDIDO_PROPINA + MASTR.PEDIDO_TARIFA_SERVICIO - MASTR.PEDIDO_TOTAL_CUPONES ) totalPedido,
+	MASTR.PEDIDO_TOTAL_CUPONES cupones
 INTO DATAZO.[#temporal_pedido_productos] 
 FROM gd_esquema.Maestra MASTR 
 -- usuario
@@ -635,42 +639,38 @@ JOIN DATAZO.local_ LOC ON LOC.nombre = MASTR.LOCAL_NOMBRE
 JOIN DATAZO.provincia PROV ON PROV.nombre_provincia = MASTR.DIRECCION_USUARIO_PROVINCIA
 JOIN DATAZO.localidad LOCALI ON LOCALI.nombre_localidad = MASTR.DIRECCION_USUARIO_LOCALIDAD AND PROV.id_provincia = LOCALI.id_provincia
 JOIN DATAZO.direccion DIR ON DIR.direccion = MASTR.DIRECCION_USUARIO_DIRECCION AND DIR.localidad = LOCALI.id_localidad
-WHERE MASTR.PEDIDO_NRO IS NOT NULL
+WHERE MASTR.PEDIDO_NRO IS NOT NULL;
 
--- DROP TABLE DATAZO.[#temporal_pedido_productos] 
+-- SELECT * from DATAZO.[#temporal_pedido_productos] ;
+-- insert de envio
+INSERT INTO DATAZO.envio(id_usuario, id_repartidor, id_estado, id_medioPago, precio_envio, propina, observaciones,
+									fecha_pedido, fecha_entrega, tiempo_estimado_entrega, calificacion, dir_origen, dir_destino)
+SELECT DISTINCT TMP.[user], TMP.repartidor, TMP.estado, TMP.medioPago, TMP.precioEnvio, TMP.propina, TMP.observacion, TMP.fecha_pedido,
+		TMP.fecha_entrega, TMP.t_estimado, TMP.calificacion, TMP.direccion_orig, TMP.direccion_dest
+FROM DATAZO.[#temporal_pedido_productos] TMP;
 
--- SELECT
+-- insert de producto
+INSERT INTO DATAZO.pedido_productos (id_pedido, id_envio, id_local, tarifa_servicio, total_pedido, pedido_total_cupones)
+SELECT DISTINCT TMP.pedido_nro, ENV.id_envio, TMP.localId, TMP.tarifa, TMP.totalPedido, TMP.cupones  FROM DATAZO.[#temporal_pedido_productos] TMP
+JOIN DATAZO.envio ENV ON  ENV.fecha_pedido = TMP.fecha_pedido AND ENV.id_usuario = TMP.[user] AND ENV.id_repartidor = TMP.repartidor
+;
 
--- SELECT * FROM DATAZO.local_
+-- select * from DATAZO.envio
 
--- SELECT * FROM gd_esquema.Maestra WHERE PEDIDO_NRO IS NOT NULL
-
-
-/*
-INSERT INTO DATAZO.envio (id_usuario, id_repartidor, id_estado, id_medioPago, precio_envio, propina, observaciones,
-fecha_pedido, fecha_entrega, tiempo_estimado_entrega, calificacion, dir_origen, dir_destino)
-SELECT u.id_usuario, r.id_repartidor, e.id_estado, mp.id_medioPago, PEDIDO_PRECIO_ENVIO,
-PEDIDO_PROPINA, PEDIDO_OBSERV, PEDIDO_FECHA, PEDIDO_FECHA_ENTREGA,
-PEDIDO_TIEMPO_ESTIMADO_ENTREGA, PEDIDO_CALIFICACION, dest.id_direccion, orig.id_direccion
-FROM gd_esquema.Maestra
-JOIN DATAZO.persona as p1 ON p1.nombre = USUARIO_NOMBRE
-JOIN DATAZO.persona as p2 ON p2.nombre = REPARTIDOR_NOMBRE
-JOIN DATAZO.usuario as u ON p1.id_persona = u.id_persona
-JOIN DATAZO.repartidor as r ON p2.id_persona = r.id_persona
-JOIN DATAZO.estado as e ON e.descripcion = PEDIDO_ESTADO
-JOIN DATAZO.medio_de_pago as mp ON mp.nro_tarjeta = MEDIO_PAGO_NRO_TARJETA
-JOIN DATAZO.direccion as dest ON dest.direccion = DIRECCION_USUARIO_DIRECCION
-JOIN DATAZO.direccion as orig ON orig.direccion = LOCAL_DIRECCION
-WHERE PEDIDO_NRO IS NOT NULL
+-- SELECT TMP.pedido_nro,count(env.id_envio), TMP.fecha_pedido FROM DATAZO.[#temporal_pedido_productos] TMP
+-- JOIN DATAZO.envio ENV ON  ENV.fecha_pedido = TMP.fecha_pedido AND ENV.id_usuario = TMP.[user] AND ENV.id_repartidor = TMP.repartidor
+-- GROUP BY TMP.pedido_nro, TMP.fecha_pedido ORDER BY 2 DESC
 
 
+-- select * from DATAZO.[#temporal_pedido_productos] WHERE pedido_nro = 42628
+-- SELECT * FROM DATAZO.envio WHERE fecha_pedido = '2023-10-08 19:00:00.960'
 
-INSERT INTO DATAZO.direccion (id_direccion, direccion, localidad)
-SELECT DIRECCION_USUARIO_DIRECCION, l.nombre_localidad, pro.nombre_provincia
-FROM gd_esquema.Maestra
-JOIN DATAZO.persona as p ON DIRECCION_USUARIO_NOMBRE = p.nombre
-JOIN DATAZO.localidad as l ON l.nombre_localidad = DIRECCION_USUARIO_LOCALIDAD
-JOIN DATAZO.provincia as pro ON pro.nombre_provincia = DIRECCION_USUARIO_PROVINCIA */
+-- SELECT fecha_pedido, COUNT(id_envio) FROM DATAZO.envio GROUP BY fecha_pedido ORDER BY 2 DESC
+
+
+
+DROP TABLE DATAZO.[#temporal_pedido_productos] 
+
 
 /*Parte 4*/
  /*
