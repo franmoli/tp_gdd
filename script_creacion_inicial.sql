@@ -344,7 +344,7 @@ CREATE TABLE DATAZO.envio_de_mensajeria(id_envio INT, id_envio_mensajeria DECIMA
 				total_envio_mensajeria decimal(18,2));
 CREATE TABLE DATAZO.pedido_productos(id_pedido INT NOT NULL, id_envio INT, id_local INT, tarifa_servicio INT, total_pedido DECIMAL(18,2), pedido_total_cupones DECIMAL(18,2))
 CREATE TABLE DATAZO.producto_por_local(codigo_producto NVARCHAR(50) NOT NULL, id_local INT NOT NULL, precio DECIMAL(18,2))
-CREATE TABLE DATAZO.horario (id_horario INT NOT NULL, id_local INT, hora_apertuta DECIMAL(18,0), hora_cierre DECIMAL(18,0), id_dia INT);
+CREATE TABLE DATAZO.horario (id_horario INT NOT NULL IDENTITY(1,1), id_local INT, hora_apertuta DECIMAL(18,0), hora_cierre DECIMAL(18,0), id_dia INT);
 CREATE TABLE DATAZO.direccionesXpersona (id_persona INT NOT NULL, id_direccion INT NOT NULL)
 
 ALTER TABLE DATAZO.envio_de_mensajeria
@@ -379,9 +379,9 @@ GO
 
 /*Parte 5*/
 
-CREATE TABLE DATAZO.reclamo (nro_reclamo decimal(18,0) IDENTITY(1,1), id_pedido int, tipo_reclamo int, fecha datetime, descripcion nvarchar(255), fecha_solucion datetime, estado nvarchar(50), solucion nvarchar(255), calificacion decimal(18,0), id_usuario int);
-CREATE TABLE DATAZO.producto_por_pedido (id_pedido int NOT NULL, codigo_producto nvarchar(50) NOT NULL, id_local INT NOT NULL, cantidad decimal(18,0), total_producto decimal(18,2));
-CREATE TABLE DATAZO.cupon_por_pedido(nro_cupon decimal(18,2) NOT NULL, id_usuario INT NOT NULL, id_pedido INT)
+CREATE TABLE DATAZO.reclamo (nro_reclamo decimal(18,0) NOT NULL, id_pedido int, tipo_reclamo int, fecha datetime, descripcion nvarchar(255), fecha_solucion datetime, estado nvarchar(50), solucion nvarchar(255), calificacion decimal(18,0), id_usuario int);
+CREATE TABLE DATAZO.producto_por_pedido ( id_productoXpedido INT IDENTITY(1,1),id_pedido int NOT NULL, codigo_producto nvarchar(50) NOT NULL, id_local INT NOT NULL, cantidad decimal(18,0), total_producto decimal(18,2));
+CREATE TABLE DATAZO.cupon_por_pedido(nro_cupon decimal(18,2) NOT NULL, id_pedido INT)
 
 ALTER TABLE DATAZO.reclamo
 	ADD CONSTRAINT pk_reclamo PRIMARY KEY (nro_reclamo),
@@ -391,14 +391,13 @@ ALTER TABLE DATAZO.reclamo
 GO
 
 ALTER TABLE DATAZO.producto_por_pedido
-	ADD CONSTRAINT pk_pedido PRIMARY KEY (id_pedido, codigo_producto),
+	ADD CONSTRAINT pk_pedido PRIMARY KEY (id_productoXpedido),
 	CONSTRAINT fk_pedido_ppp FOREIGN KEY (id_pedido) REFERENCES DATAZO.pedido_productos(id_pedido),
 	CONSTRAINT fk_producto_ppp FOREIGN KEY (codigo_producto, id_local) REFERENCES DATAZO.producto_por_local(codigo_producto, id_local)
 GO
 
 ALTER TABLE DATAZO.cupon_por_pedido
 	ADD CONSTRAINT pk_cuponXpedido_nro_cupon PRIMARY KEY (nro_cupon),
-	CONSTRAINT fk_cuponXpedidon_cupon_nro_cupon FOREIGN KEY (nro_cupon, id_usuario) REFERENCES DATAZO.cupon_descuento(nro, id_usuario),
 	CONSTRAINT fk_cuponXpedidon_cupon_id_pedido FOREIGN KEY (id_pedido) REFERENCES DATAZO.pedido_productos(id_pedido);
 GO
 
@@ -649,13 +648,16 @@ SELECT DISTINCT TMP.[user], TMP.repartidor, TMP.estado, TMP.medioPago, TMP.preci
 		TMP.fecha_entrega, TMP.t_estimado, TMP.calificacion, TMP.direccion_orig, TMP.direccion_dest
 FROM DATAZO.[#temporal_pedido_productos] TMP;
 
--- insert de producto
+-- insert de pedido producto
 INSERT INTO DATAZO.pedido_productos (id_pedido, id_envio, id_local, tarifa_servicio, total_pedido, pedido_total_cupones)
 SELECT DISTINCT TMP.pedido_nro, ENV.id_envio, TMP.localId, TMP.tarifa, TMP.totalPedido, TMP.cupones  FROM DATAZO.[#temporal_pedido_productos] TMP
 JOIN DATAZO.envio ENV ON  ENV.fecha_pedido = TMP.fecha_pedido AND ENV.id_usuario = TMP.[user] AND ENV.id_repartidor = TMP.repartidor
 ;
 
 -- select * from DATAZO.envio
+
+
+
 
 -- SELECT TMP.pedido_nro,count(env.id_envio), TMP.fecha_pedido FROM DATAZO.[#temporal_pedido_productos] TMP
 -- JOIN DATAZO.envio ENV ON  ENV.fecha_pedido = TMP.fecha_pedido AND ENV.id_usuario = TMP.[user] AND ENV.id_repartidor = TMP.repartidor
@@ -673,46 +675,63 @@ DROP TABLE DATAZO.[#temporal_pedido_productos]
 
 
 /*Parte 4*/
- /*
+ 
 INSERT INTO DATAZO.producto_por_local (codigo_producto, id_local, precio)
-SELECT  p.codigo,l.id_local, PRODUCTO_LOCAL_PRECIO
-FROM gd_esquema.Maestra
-JOIN DATAZO.producto p ON p.codigo =  PRODUCTO_LOCAL_CODIGO
-JOIN DATAZO.local_ l ON l.nombre =  LOCAL_NOMBRE
+SELECT  DISTINCT p.codigo,l.id_local, MASTR.PRODUCTO_LOCAL_PRECIO
+FROM gd_esquema.Maestra MASTR
+JOIN DATAZO.producto p ON p.codigo =  MASTR.PRODUCTO_LOCAL_CODIGO
+JOIN DATAZO.local_ l ON l.nombre =  MASTR.LOCAL_NOMBRE
 
 INSERT INTO DATAZO.horario ( id_local, hora_apertuta, hora_cierre, id_dia)
-SELECT  l.id_local, HORARIO_LOCAL_HORA_APERTURA, HORARIO_LOCAL_HORA_CIERRE, d.id_dia
+SELECT DISTINCT l.id_local, HORARIO_LOCAL_HORA_APERTURA, HORARIO_LOCAL_HORA_CIERRE, d.id_dia
 FROM gd_esquema.Maestra
 JOIN DATAZO.local_ l ON l.nombre =  LOCAL_NOMBRE
-JOIN DATAZO.dia d ON d.descripcion =  HORARIO_LOCAL_DIA*/
+JOIN DATAZO.dia d ON d.descripcion =  HORARIO_LOCAL_DIA
+
+
 
 /*Parte 5*/
-/*
+
 INSERT INTO DATAZO.reclamo (nro_reclamo, id_pedido, tipo_reclamo, fecha, descripcion, fecha_solucion, estado, solucion, calificacion, id_usuario)
-SELECT RECLAMO_NRO, pp.id_pedido, tr.id_tipo, RECLAMO_FECHA, RECLAMO_DESCRIPCION, RECLAMO_FECHA_SOLUCION, RECLAMO_ESTADO, RECLAMO_SOLUCION, RECLAMO_CALIFICACION, u.id_usuario
-FROM gd_esquema.Maestra
-JOIN DATAZO.pedido_productos as pp ON pp.id_pedido = PEDIDO_NRO -- no se si esta bien este
-JOIN DATAZO.tipo_reclamo as tr ON tr.descripcion = RECLAMO_TIPO
-JOIN DATAZO.persona as p ON  p.nombre = USUARIO_NOMBRE 
-JOIN DATAZO.usuario as u ON u.id_usuario = p.id_persona
+SELECT MASTR.RECLAMO_NRO, pp.id_pedido, tr.id_tipo, MASTR.RECLAMO_FECHA, MASTR.RECLAMO_DESCRIPCION, MASTR.RECLAMO_FECHA_SOLUCION, MASTR.RECLAMO_ESTADO, MASTR.RECLAMO_SOLUCION, MASTR.RECLAMO_CALIFICACION, u.id_usuario
+FROM gd_esquema.Maestra MASTR
+JOIN DATAZO.pedido_productos as pp ON pp.id_pedido = MASTR.PEDIDO_NRO 
+JOIN DATAZO.tipo_reclamo as tr ON tr.descripcion = MASTR.RECLAMO_TIPO
+JOIN DATAZO.persona as p ON  p.DNI = MASTR.USUARIO_DNI 
+JOIN DATAZO.usuario as u ON u.id_persona = p.id_persona
+WHERE MASTR.RECLAMO_NRO IS NOT NULL
+
+
+
 
 INSERT INTO DATAZO.cupon_por_pedido (nro_cupon, id_pedido)
 SELECT cd.nro, pp.id_pedido
-FROM gd_esquema.Maestra
-JOIN DATAZO.cupon_descuento cd ON cd.nro =  CUPON_NRO 
-JOIN DATAZO.pedido_productos as pp ON pp.id_pedido = PEDIDO_NRO
+FROM gd_esquema.Maestra MASTR
+JOIN DATAZO.cupon_descuento cd ON cd.nro =  MASTR.CUPON_NRO 
+JOIN DATAZO.pedido_productos as pp ON pp.id_pedido = MASTR.PEDIDO_NRO
+WHERE MASTR.CUPON_NRO IS NOT NULL
+
 
 INSERT INTO DATAZO.producto_por_pedido (id_pedido, codigo_producto, id_local, cantidad, total_producto)
-SELECT  pp.id_pedido, p.codigo, l.id_local, PRODUCTO_CANTIDAD, PRODUCTO_LOCAL_PRECIO --no se si esta bien todo esto en gral, mas puntualmente el ultimo
-FROM gd_esquema.Maestra
-JOIN DATAZO.pedido_productos as pp ON pp.id_pedido = PEDIDO_NRO
-JOIN DATAZO.producto p ON p.codigo =  PRODUCTO_LOCAL_CODIGO
-JOIN DATAZO.local_ l ON l.nombre =  LOCAL_NOMBRE
-*/
+SELECT  pp.id_pedido, p.codigo, l.id_local, MASTR.PRODUCTO_CANTIDAD, MASTR.PRODUCTO_LOCAL_PRECIO * MASTR.PRODUCTO_CANTIDAD 
+FROM gd_esquema.Maestra MASTR
+JOIN DATAZO.pedido_productos as pp ON pp.id_pedido = MASTR.PEDIDO_NRO
+JOIN DATAZO.producto p ON p.codigo =  MASTR.PRODUCTO_LOCAL_CODIGO
+JOIN DATAZO.local_ l ON l.nombre =  MASTR.LOCAL_NOMBRE
+
+
+
 /*Parte 6*/
 /*
 INSERT INTO DATAZO.cupon_por_reclamo (nro_cupon, nro_reclamo)
 SELECT cd.nro, r.nro_reclamo
 FROM gd_esquema.Maestra
 JOIN DATAZO.cupon_descuento cd ON cd.nro =  CUPON_NRO 
-JOIN DATAZO.reclamo r ON r.nro_reclamo = RECLAMO_NRO -- o seria CUPON_NRO o CUPON_RECLAMO_NRO?*/
+JOIN DATAZO.reclamo r ON r.nro_reclamo = CUPON_RECLAMO_NRO -- o seria CUPON_NRO o CUPON_RECLAMO_NRO?
+
+
+select * from gd_esquema.Maestra where CUPON_RECLAMO_NRO = 81980460 or CUPON_NRO = 81980460
+
+
+select distinct CUPON_NRO, CUPON_RECLAMO_NRO, PEDIDO_NRO, RECLAMO_NRO from gd_esquema.Maestra where RECLAMO_NRO is not null
+*/
