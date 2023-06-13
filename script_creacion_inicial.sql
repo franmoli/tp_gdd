@@ -288,7 +288,7 @@ GO
 
 CREATE TABLE DATAZO.direccion (id_direccion INT IDENTITY(1,1) NOT NULL, direccion NVARCHAR(255), localidad INT);
 CREATE TABLE DATAZO.medio_de_pago (id_medioPago INT IDENTITY(1,1), id_usuario INT, id_tipo_medio_pago INT, nro_tarjeta NVARCHAR(50), marca_tarjeta NVARCHAR(100));
-CREATE TABLE DATAZO.cupon_descuento (nro DECIMAL(18,2) NOT NULL, id_usuario INT NOT NULL, monto DECIMAL(18,2), fecha_alta DATETIME, fecha_vencimiento DATETIME, tipo NVARCHAR(50), usado TINYINT);
+CREATE TABLE DATAZO.cupon_descuento ( id_cupon INT IDENTITY(1,1) NOT NULL, nro DECIMAL(18,2) NOT NULL, id_usuario INT NOT NULL, monto DECIMAL(18,2), fecha_alta DATETIME, fecha_vencimiento DATETIME, tipo NVARCHAR(50));
 CREATE TABLE DATAZO.categoria (id_categoria INT IDENTITY(1,1) NOT NULL, id_tipo INT NOT NULL, descripcion VARCHAR(255));
 CREATE TABLE DATAZO.envio (id_envio INT IDENTITY(1,1), id_usuario INT, id_repartidor INT, id_estado INT, id_medioPago INT, precio_envio DECIMAL(18,2), propina DECIMAL(18,2), observaciones NVARCHAR(255),
 					fecha_pedido DATETIME, fecha_entrega DATETIME, tiempo_estimado_entrega DECIMAL(18,2), calificacion DECIMAL(18,0), dir_origen INT, dir_destino INT);
@@ -309,7 +309,7 @@ GO
 
 --Cupon desc
 ALTER TABLE DATAZO.cupon_descuento
-	ADD CONSTRAINT pk_cupon_descuento PRIMARY KEY (nro, id_usuario),
+	ADD CONSTRAINT pk_cupon_descuento PRIMARY KEY (id_cupon),
 	CONSTRAINT fk_cupon_descuento_usuario FOREIGN KEY (id_usuario) REFERENCES DATAZO.usuario(id_usuario)
 GO
 
@@ -403,11 +403,11 @@ GO
 
 /*Parte 6*/
 
-CREATE TABLE DATAZO.cupon_por_reclamo(nro_cupon decimal(18,2) NOT NULL, id_usuario INT NOT NULL, nro_reclamo decimal(18,0))
+CREATE TABLE DATAZO.cupon_por_reclamo( id_cupon INT NOT NULL, nro_cupon decimal(18,2) NOT NULL, id_usuario INT NOT NULL, nro_reclamo decimal(18,0))
 
 ALTER TABLE DATAZO.cupon_por_reclamo
-	ADD CONSTRAINT pk_cuponXreclamo_nro_cupon PRIMARY KEY (nro_cupon),
-	CONSTRAINT fk_cuponXreclamo_nro_cupon FOREIGN KEY (nro_cupon, id_usuario) REFERENCES DATAZO.cupon_descuento(nro, id_usuario),
+	ADD CONSTRAINT pk_cuponXreclamo_nro_cupon PRIMARY KEY (id_cupon),
+	CONSTRAINT fk_cuponXreclamo_nro_cupon FOREIGN KEY (id_cupon) REFERENCES DATAZO.cupon_descuento(id_cupon),
 	CONSTRAINT fk_cuponXreclamo_nro_reclamo FOREIGN KEY (nro_reclamo) REFERENCES DATAZO.reclamo(nro_reclamo);
 GO
 
@@ -507,13 +507,12 @@ group by u.id_usuario, tmp.id_tipo_medio_pago, m.MEDIO_PAGO_NRO_TARJETA, m.MARCA
 
 
 --CUPONES DE DESCUENTO
-INSERT INTO DATAZO.cupon_descuento (nro, id_usuario, monto, fecha_alta, fecha_vencimiento, tipo, usado)
-SELECT m.CUPON_NRO, u.id_usuario, CUPON_MONTO, CUPON_FECHA_ALTA, CUPON_FECHA_VENCIMIENTO, CUPON_TIPO, 0
+INSERT INTO DATAZO.cupon_descuento (nro, id_usuario, monto, fecha_alta, fecha_vencimiento, tipo)
+SELECT m.CUPON_NRO, u.id_usuario, CUPON_MONTO, CUPON_FECHA_ALTA, CUPON_FECHA_VENCIMIENTO, CUPON_TIPO
 FROM gd_esquema.Maestra m
 JOIN DATAZO.persona p ON p.DNI = m.USUARIO_DNI
 JOIN DATAZO.usuario u ON u.id_persona = p.id_persona
 WHERE CUPON_NRO IS NOT NULL
-order BY CUPON_NRO
 GO
 
 
@@ -722,16 +721,31 @@ JOIN DATAZO.local_ l ON l.nombre =  MASTR.LOCAL_NOMBRE
 
 
 /*Parte 6*/
-/*
-INSERT INTO DATAZO.cupon_por_reclamo (nro_cupon, nro_reclamo)
-SELECT cd.nro, r.nro_reclamo
-FROM gd_esquema.Maestra
-JOIN DATAZO.cupon_descuento cd ON cd.nro =  CUPON_NRO 
-JOIN DATAZO.reclamo r ON r.nro_reclamo = CUPON_RECLAMO_NRO -- o seria CUPON_NRO o CUPON_RECLAMO_NRO?
+-- cupones por reclamo
+SELECT MASTR.CUPON_RECLAMO_NRO, U.id_usuario, MASTR.RECLAMO_NRO, MASTR.CUPON_RECLAMO_MONTO, 
+		MASTR.CUPON_RECLAMO_FECHA_ALTA, MASTR.CUPON_RECLAMO_FECHA_VENCIMIENTO, MASTR.CUPON_RECLAMO_TIPO
+		 INTO DATAZO.#temporalCuponesDesc 
+		FROM gd_esquema.Maestra MASTR
+JOIN DATAZO.persona P ON  P.DNI = MASTR.USUARIO_DNI 
+JOIN DATAZO.usuario U ON U.id_persona = P.id_persona
+WHERE MASTR.CUPON_RECLAMO_NRO IS NOT NULL
 
 
-select * from gd_esquema.Maestra where CUPON_RECLAMO_NRO = 81980460 or CUPON_NRO = 81980460
+
+INSERT INTO DATAZO.cupon_descuento(nro, id_usuario, monto, fecha_alta,  fecha_vencimiento, tipo)
+SELECT CUPON_RECLAMO_NRO, id_usuario, CUPON_RECLAMO_MONTO, CUPON_RECLAMO_FECHA_ALTA, CUPON_RECLAMO_FECHA_VENCIMIENTO, CUPON_RECLAMO_TIPO
+FROM DATAZO.#temporalCuponesDesc
 
 
-select distinct CUPON_NRO, CUPON_RECLAMO_NRO, PEDIDO_NRO, RECLAMO_NRO from gd_esquema.Maestra where RECLAMO_NRO is not null
-*/
+INSERT INTO DATAZO.cupon_por_reclamo (id_cupon, nro_cupon, id_usuario, nro_reclamo)
+SELECT CD.id_cupon, TMP.CUPON_RECLAMO_NRO, TMP.id_usuario, TMP.RECLAMO_NRO
+FROM DATAZO.#temporalCuponesDesc TMP
+JOIN DATAZO.cupon_descuento CD ON CD.nro = TMP.CUPON_RECLAMO_NRO AND CD.id_usuario = TMP.id_usuario
+
+
+DROP TABLE DATAZO.#temporalCuponesDesc
+
+-- select * from gd_esquema.Maestra where CUPON_RECLAMO_NRO = 81980460 or CUPON_NRO = 81980460
+
+
+-- select distinct CUPON_NRO, CUPON_RECLAMO_NRO, PEDIDO_NRO, RECLAMO_NRO from gd_esquema.Maestra where RECLAMO_NRO is not null
