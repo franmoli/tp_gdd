@@ -339,7 +339,7 @@ GO
 
 /*Parte 4*/
 
-CREATE TABLE DATAZO.envio_de_mensajeria(id_envio INT, id_envio_mensajeria INT NOT NULL, km DECIMAL(18,2), tipo_paquete INT, valor_asegurado decimal(18,2), precio_seguro decimal(18,2),
+CREATE TABLE DATAZO.envio_de_mensajeria(id_envio INT, id_envio_mensajeria DECIMAL(18,0) NOT NULL, km DECIMAL(18,2), tipo_paquete INT, valor_asegurado decimal(18,2), precio_seguro decimal(18,2),
 				total_envio_mensajeria decimal(18,2));
 CREATE TABLE DATAZO.pedido_productos(id_pedido INT NOT NULL, id_envio INT, id_local INT, tarifa_servicio INT, total_pedido DECIMAL(18,2), pedido_total_cupones DECIMAL(18,2))
 CREATE TABLE DATAZO.producto_por_local(codigo_producto NVARCHAR(50) NOT NULL, id_local INT NOT NULL, precio DECIMAL(18,2))
@@ -489,7 +489,8 @@ INSERT INTO DATAZO.usuario ( id_persona, fecha_registro)
 SELECT DISTINCT  p.id_persona, m.USUARIO_FECHA_REGISTRO
 FROM DATAZO.persona p JOIN gd_esquema.Maestra m ON p.DNI = m.USUARIO_DNI
 
---RAPERTIDOR
+--REPARTIDOR 
+-- TODO: PONERLE LA LOCALIDAD ACTIVA Y TIPO MOVILIDAD
 INSERT INTO DATAZO.repartidor (id_persona)
 SELECT DISTINCT p.id_persona
 FROM DATAZO.persona p
@@ -530,7 +531,6 @@ JOIN DATAZO.provincia p ON m.LOCAL_PROVINCIA = p.nombre_provincia
 
 
 
---TODO: comprobar que se metan correctamente las localidades
 INSERT INTO DATAZO.direccion (direccion, localidad)
 SELECT  m.ENVIO_MENSAJERIA_DIR_DEST, L.id_localidad FROM gd_esquema.Maestra m
 JOIN DATAZO.localidad l ON l.nombre_localidad = m.ENVIO_MENSAJERIA_LOCALIDAD
@@ -550,6 +550,8 @@ WHERE DIRECCION_USUARIO_DIRECCION IS NOT NULL
 UNION 
 SELECT  m.REPARTIDOR_DIRECION, 1 FROM gd_esquema.Maestra m
 WHERE REPARTIDOR_DIRECION IS NOT NULL
+-- TODO: PONERLE LA LOCALIDAD AL REPARTIDOR
+
 
 INSERT INTO DATAZO.direccionesXpersona (id_persona, id_direccion)
 SELECT DISTINCT P.id_persona, D.id_direccion FROM gd_esquema.Maestra m
@@ -561,80 +563,89 @@ GO
 /*Parte 3 */
 
 --insert de envio de mensajes
+/*TABLA TEMPORAL PARA INSERTAR ENVIOS DE MENSAJERIA*/
 
-IF  EXISTS (SELECT * FROM sys.triggers WHERE [name] = 'DATAZO.insert_envio_mensajeria_tr')
-	DROP TRIGGER  DATAZO.insert_envio_mensajeria_tr
-GO
-
-CREATE TRIGGER insert_envio_mensajeria_tr ON DATAZO.envio_de_mensajeria INSTEAD OF INSERT AS
-BEGIN
-		
-		declare cursor_envios_msj cursor 
-		for select id_envio_mensajeria, id_envio, km, tipo_paquete, valor_asegurado, precio_seguro, total_envio_mensajeria from inserted
-	
-		open cursor_envios_msj
-		declare @idEnvioMSJ int
-		declare @IdEnvio int
-		declare @km decimal(18,2)
-		declare @tipoPaquete int
-		declare @valorAseg decimal(18,2)
-		declare @precioSeguro decimal(18,2)
-		declare @totalEnvio decimal(18,2)
-
-		fetch cursor_envios_msj into @idEnvioMSJ ,@IdEnvio, @km , @tipoPaquete, @valorAseg, @precioSeguro, @totalEnvio
-
-
+SELECT 
+ 	MASTR.ENVIO_MENSAJERIA_NRO envio_nro,USR.id_usuario [user] , REP.id_repartidor repartidor, EST.id_estado estado, MP.id_medioPago medioPago, MASTR.ENVIO_MENSAJERIA_PRECIO_ENVIO precioEnvio,
+	MASTR.ENVIO_MENSAJERIA_PROPINA propina, MASTR.ENVIO_MENSAJERIA_OBSERV observacion, MASTR.ENVIO_MENSAJERIA_FECHA fecha_envio, MASTR.ENVIO_MENSAJERIA_FECHA_ENTREGA fecha_entrega,
+	MASTR.ENVIO_MENSAJERIA_TIEMPO_ESTIMADO t_estimado, MASTR.ENVIO_MENSAJERIA_CALIFICACION calificacion, DIR_O.id_direccion dir_origen, DIR_D.id_direccion dir_destino,
+	MASTR.ENVIO_MENSAJERIA_KM km, TP.id_tipo tipo_paquete, MASTR.ENVIO_MENSAJERIA_VALOR_ASEGURADO asegurado, MASTR.ENVIO_MENSAJERIA_PRECIO_SEGURO precio_seguro,
+	MASTR.ENVIO_MENSAJERIA_TOTAL total_env_msj
+INTO DATAZO.[#temporal_envios_msj] 
+FROM gd_esquema.Maestra MASTR 
+JOIN DATAZO.persona P_USR ON P_USR.DNI = MASTR.USUARIO_DNI
+JOIN DATAZO.usuario USR ON USR.id_persona = P_USR.id_persona
+JOIN DATAZO.persona P_REP ON P_REP.DNI = MASTR.REPARTIDOR_DNI 
+JOIN DATAZO.repartidor REP ON REP.id_persona = P_REP.id_persona
+JOIN DATAZO.estado EST ON EST.descripcion = MASTR.ENVIO_MENSAJERIA_ESTADO 
+JOIN DATAZO.medio_de_pago MP ON MP.nro_tarjeta = MASTR.MEDIO_PAGO_NRO_TARJETA 
+JOIN DATAZO.provincia PROV ON PROV.nombre_provincia = MASTR.ENVIO_MENSAJERIA_PROVINCIA
+JOIN DATAZO.localidad LOC ON LOC.nombre_localidad = MASTR.ENVIO_MENSAJERIA_LOCALIDAD AND PROV.id_provincia = LOC.id_provincia
+JOIN DATAZO.direccion DIR_O ON DIR_O.direccion = MASTR.ENVIO_MENSAJERIA_DIR_ORIG AND DIR_O.localidad = LOC.id_localidad
+JOIN DATAZO.direccion DIR_D ON DIR_D.direccion = MASTR.ENVIO_MENSAJERIA_DIR_DEST AND DIR_D.localidad = LOC.id_localidad
+JOIN DATAZO.tipo_paquete TP ON TP.tipo = MASTR.PAQUETE_TIPO
+WHERE MASTR.ENVIO_MENSAJERIA_NRO IS NOT NULL
 
 
-		while (@@FETCH_STATUS = 0)
-			begin
-
-			INSERT INTO DATAZO.envio(id_usuario, id_repartidor, id_estado, id_medioPago, precio_envio, propina, observaciones,
+/*ENVIO (MSJ)*/
+INSERT INTO DATAZO.envio(id_usuario, id_repartidor, id_estado, id_medioPago, precio_envio, propina, observaciones,
 									fecha_pedido, fecha_entrega, tiempo_estimado_entrega, calificacion, dir_origen, dir_destino)
-			SELECT USR.id_usuario [user] , REP.id_repartidor rep, EST.id_estado EST, MP.id_medioPago medioPago, MASTR.ENVIO_MENSAJERIA_PRECIO_ENVIO precioEnvio,
-					MASTR.ENVIO_MENSAJERIA_PROPINA propina, MASTR.ENVIO_MENSAJERIA_OBSERV OBS, MASTR.ENVIO_MENSAJERIA_FECHA FECHA_E, MASTR.ENVIO_MENSAJERIA_FECHA_ENTREGA ENTREGA,
-					MASTR.ENVIO_MENSAJERIA_TIEMPO_ESTIMADO ESTIMADO, MASTR.ENVIO_MENSAJERIA_CALIFICACION CALIF, DIR_O.id_direccion dir_o, DIR_D.id_direccion
-			FROM gd_esquema.Maestra MASTR 
-			JOIN DATAZO.persona P_USR ON P_USR.DNI = MASTR.USUARIO_DNI
-			JOIN DATAZO.usuario USR ON USR.id_persona = P_USR.id_persona
-			JOIN DATAZO.persona P_REP ON P_REP.DNI = MASTR.REPARTIDOR_DNI 
-			JOIN DATAZO.repartidor REP ON REP.id_persona = P_REP.id_persona
-			JOIN DATAZO.estado EST ON EST.descripcion = MASTR.ENVIO_MENSAJERIA_ESTADO 
-			JOIN DATAZO.medio_de_pago MP ON MP.nro_tarjeta = MASTR.MEDIO_PAGO_NRO_TARJETA 
-			JOIN DATAZO.localidad LOC ON LOC.nombre_localidad = MASTR.ENVIO_MENSAJERIA_LOCALIDAD
-			JOIN DATAZO.direccion DIR_O ON DIR_O.direccion = MASTR.ENVIO_MENSAJERIA_DIR_ORIG AND DIR_O.localidad = LOC.id_localidad
-			JOIN DATAZO.direccion DIR_D ON DIR_D.direccion = MASTR.ENVIO_MENSAJERIA_DIR_DEST AND DIR_D.localidad = LOC.id_localidad
-			WHERE MASTR.ENVIO_MENSAJERIA_NRO = @idEnvioMSJ
+SELECT tmp.[user], tmp.repartidor, tmp.estado, tmp.medioPago, tmp.precioEnvio, tmp.propina, tmp.observacion, tmp.fecha_envio, tmp.fecha_entrega, tmp.t_estimado, tmp.calificacion, tmp.dir_origen, tmp.dir_destino  FROM DATAZO.[#temporal_envios_msj] tmp
 
 
-		
-			INSERT INTO envio_de_mensajeria (id_envio_mensajeria, id_envio, km, tipo_paquete, valor_asegurado, precio_seguro, total_envio_mensajeria)
-			VALUES (@idEnvioMSJ, IDENT_CURRENT('DATAZO.ENVIO'), @km, @tipoPaquete, @valorAseg, @precioSeguro, @totalEnvio )
-			
-
-			fetch cursor_envios_msj into @idEnvioMSJ ,@IdEnvio, @km , @tipoPaquete, @valorAseg, @precioSeguro, @totalEnvio
-		end
-		close cursor_envios_msj
-
-		
-end
-go
-
-			-- TODO: COMPROBAR QUE REALMENTE COINCIDAN LOS IDS INSERTADOS no funciona el cursor, muy lento, poner identity en ambos
-
+/*ENVIO DE MENSAJERIA*/
 INSERT INTO DATAZO.envio_de_mensajeria (id_envio_mensajeria, id_envio, km, tipo_paquete, valor_asegurado, precio_seguro, total_envio_mensajeria) 
-SELECT m.ENVIO_MENSAJERIA_NRO, 0, m.ENVIO_MENSAJERIA_KM, tp.id_tipo, m.ENVIO_MENSAJERIA_VALOR_ASEGURADO, m.ENVIO_MENSAJERIA_PRECIO_SEGURO, m.ENVIO_MENSAJERIA_TOTAL
-FROM gd_esquema.Maestra m
-JOIN DATAZO.tipo_paquete tp ON m.PAQUETE_TIPO = tp.tipo
-ORDER BY m.ENVIO_MENSAJERIA_NRO
+SELECT tmp.[envio_nro], env.id_envio, tmp.km, tmp.tipo_paquete, tmp.asegurado, tmp.precio_seguro, tmp.total_env_msj  FROM DATAZO.[#temporal_envios_msj] tmp
+JOIN DATAZO.envio env ON env.id_usuario = tmp.[user] AND env.id_repartidor = tmp.repartidor AND env.dir_origen = tmp.dir_origen AND tmp.dir_destino = env.dir_destino
+
+drop table DATAZO.[#temporal_envios_msj];
 
 
-select * from DATAZO.envio_de_mensajeria
+/*LOCALES*/
+INSERT INTO DATAZO.local_(id_direccion, nombre, descripcion, tipo)
+SELECT DISTINCT DIR.id_direccion, MASTR.LOCAL_NOMBRE, MASTR.LOCAL_DESCRIPCION, TP.id_tipo
+FROM gd_esquema.Maestra MASTR
+JOIN DATAZO.tipo_local TP ON TP.descripcion = MASTR.LOCAL_TIPO
+JOIN DATAZO.provincia PROV ON PROV.nombre_provincia = MASTR.LOCAL_PROVINCIA
+JOIN DATAZO.localidad LOCALI ON LOCALI.nombre_localidad = MASTR.LOCAL_LOCALIDAD AND PROV.id_provincia = LOCALI.id_provincia
+JOIN DATAZO.direccion DIR ON DIR.direccion = MASTR.LOCAL_DIRECCION AND DIR.localidad = LOCALI.id_localidad
+WHERE MASTR.LOCAL_NOMBRE IS NOT NULL
 
-SELECT * FROM DATAZO.envio
+
+--insert de pedidos de productos
+SELECT 
+ 	USR.id_usuario [user], REP.id_repartidor repartidor, EST.id_estado estado, MP.id_medioPago medioPago, MASTR.PEDIDO_PRECIO_ENVIO precioEnvio,
+	MASTR.PEDIDO_PROPINA propina, MASTR.PEDIDO_OBSERV observacion, MASTR.PEDIDO_FECHA fecha_pedido, MASTR.PEDIDO_FECHA_ENTREGA fecha_entrega,
+	MASTR.PEDIDO_TIEMPO_ESTIMADO_ENTREGA t_estimado, MASTR.PEDIDO_CALIFICACION calificacion, LOC.id_direccion direccion_orig,
+	MASTR.PEDIDO_NRO pedido_nro, LOC.id_local localId, MASTR.PEDIDO_TARIFA_SERVICIO tarifa, MASTR.PEDIDO_TOTAL_PRODUCTOS total
+INTO DATAZO.[#temporal_pedido_productos] 
+FROM gd_esquema.Maestra MASTR 
+-- usuario
+JOIN DATAZO.persona P_USR ON P_USR.DNI = MASTR.USUARIO_DNI
+JOIN DATAZO.usuario USR ON USR.id_persona = P_USR.id_persona
+-- repartidor
+JOIN DATAZO.persona P_REP ON P_REP.DNI = MASTR.REPARTIDOR_DNI 
+JOIN DATAZO.repartidor REP ON REP.id_persona = P_REP.id_persona
+-- otros datos
+JOIN DATAZO.estado EST ON EST.descripcion = MASTR.PEDIDO_ESTADO 
+JOIN DATAZO.medio_de_pago MP ON MP.nro_tarjeta = MASTR.MEDIO_PAGO_NRO_TARJETA 
+-- direccion origen
+JOIN DATAZO.local_ LOC ON LOC.nombre = MASTR.LOCAL_NOMBRE
+-- direccion destino
+JOIN DATAZO.provincia PROV ON PROV.nombre_provincia = MASTR.DIRECCION_USUARIO_PROVINCIA
+JOIN DATAZO.localidad LOCALI ON LOCALI.nombre_localidad = MASTR.DIRECCION_USUARIO_LOCALIDAD AND PROV.id_provincia = LOCALI.id_provincia
+JOIN DATAZO.direccion DIR ON DIR.direccion = MASTR.DIRECCION_USUARIO_DIRECCION AND DIR.localidad = LOCALI.id_localidad
+WHERE MASTR.PEDIDO_NRO IS NOT NULL
+
+-- DROP TABLE DATAZO.[#temporal_pedido_productos] 
+
+-- SELECT
+
+-- SELECT * FROM DATAZO.local_
+
+-- SELECT * FROM gd_esquema.Maestra WHERE PEDIDO_NRO IS NOT NULL
 
 
---insert de pedidos
 /*
 INSERT INTO DATAZO.envio (id_usuario, id_repartidor, id_estado, id_medioPago, precio_envio, propina, observaciones,
 fecha_pedido, fecha_entrega, tiempo_estimado_entrega, calificacion, dir_origen, dir_destino)
@@ -652,12 +663,7 @@ JOIN DATAZO.direccion as dest ON dest.direccion = DIRECCION_USUARIO_DIRECCION
 JOIN DATAZO.direccion as orig ON orig.direccion = LOCAL_DIRECCION
 WHERE PEDIDO_NRO IS NOT NULL
 
-INSERT INTO DATAZO.local_(id_direccion, nombre, descripcion, tipo)
-SELECT DISTINCT d.id_direccion, LOCAL_NOMBRE, LOCAL_DESCRIPCION, t.id_tipo
-FROM gd_esquema.Maestra
-JOIN DATAZO.tipo_local as t ON t.descripcion = LOCAL_TIPO
-JOIN DATAZO.direccion as d ON d.direccion = LOCAL_DIRECCION
-WHERE LOCAL_NOMBRE IS NOT NULL
+
 
 INSERT INTO DATAZO.direccion (id_direccion, direccion, localidad)
 SELECT DIRECCION_USUARIO_DIRECCION, l.nombre_localidad, pro.nombre_provincia
