@@ -106,6 +106,115 @@ IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.hecho
 	DELETE FROM DATAZO.hecho_cupon_x_reclamo
 GO
 
+
+-- DROPS
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.dimension_tiempo') AND type in (N'U'))
+	DROP TABLE DATAZO.dimension_tiempo
+GO
+
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.dimension_local_') AND type in (N'U'))
+	DROP TABLE DATAZO.dimension_local_
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.dimension_categoria_tipo_local') AND type in (N'U'))
+	DROP TABLE DATAZO.dimension_categoria_tipo_local
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.dimension_rango_horario') AND type in (N'U'))
+	DROP TABLE DATAZO.dimension_rango_horario
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.dimension_rango_horario') AND type in (N'U'))
+	DROP TABLE DATAZO.dimension_rango_horario
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.dimension_estado_reclamo') AND type in (N'U'))
+	DROP TABLE DATAZO.dimension_estado_reclamo
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.dimension_tipo_reclamo') AND type in (N'U'))
+	DROP TABLE DATAZO.dimension_tipo_reclamo
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.dimension_rango_etario') AND type in (N'U'))
+	DROP TABLE DATAZO.dimension_rango_etario
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.dimension_tipo_movilidad') AND type in (N'U'))
+	DROP TABLE DATAZO.dimension_tipo_movilidad
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.dimension_dia') AND type in (N'U'))
+	DROP TABLE DATAZO.dimension_dia
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.dimension_tipo_paquete') AND type in (N'U'))
+	DROP TABLE DATAZO.dimension_tipo_paquete
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.dimension_estado_mensajeria') AND type in (N'U'))
+	DROP TABLE DATAZO.dimension_estado_mensajeria
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.dimension_tipo_medio_pago') AND type in (N'U'))
+	DROP TABLE DATAZO.dimension_tipo_medio_pago
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.dimension_estado_pedido') AND type in (N'U'))
+	DROP TABLE DATAZO.dimension_estado_pedido
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.dimension_provincia_localidad') AND type in (N'U'))
+	DROP TABLE DATAZO.dimension_provincia_localidad
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.hecho_operador') AND type in (N'U'))
+	DROP TABLE DATAZO.hecho_operador
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.hecho_usuario') AND type in (N'U'))
+	DROP TABLE DATAZO.hecho_usuario
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.hecho_repartidor') AND type in (N'U'))
+	DROP TABLE DATAZO.hecho_repartidor
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.hecho_persona') AND type in (N'U'))
+	DROP TABLE DATAZO.hecho_persona
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.hecho_envio') AND type in (N'U'))
+	DROP TABLE DATAZO.hecho_envio
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.hecho_pedido_productos') AND type in (N'U'))
+	DROP TABLE DATAZO.hecho_pedido_productos
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.hecho_envio_de_mensajeria') AND type in (N'U'))
+	DROP TABLE DATAZO.hecho_envio_de_mensajeria
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.hecho_reclamo') AND type in (N'U'))
+	DROP TABLE DATAZO.hecho_reclamo
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.hecho_cupon_de_descuento') AND type in (N'U'))
+	DROP TABLE DATAZO.hecho_cupon_de_descuento
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.hecho_cupon_x_pedido') AND type in (N'U'))
+	DROP TABLE DATAZO.hecho_cupon_x_pedido
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.hecho_cupon_x_reclamo') AND type in (N'U'))
+	DROP TABLE DATAZO.hecho_cupon_x_reclamo
+GO
+--
+	
+	
 --Create de las dimensiones
 CREATE TABLE DATAZO.dimension_tiempo(id_tiempo INT NOT NULL IDENTITY(1,1), anio INT, mes INT)
 
@@ -307,3 +416,99 @@ ALTER TABLE datazo.hecho_cupon_x_reclamo
 	ADD CONSTRAINT pk_hecho_cupon_reclamo PRIMARY KEY (id_cupon),
 	CONSTRAINT fk_hecho_cupon_reclamo FOREIGN KEY (nro_reclamo) REFERENCES DATAZO.hecho_reclamo (nro_reclamo)
 GO
+
+
+--migrar  dimensiones
+
+--Local
+INSERT INTO DATAZO.dimension_local_ (nombre varchar(50))
+SELECT  DISTINCT LOCAL_NOMBRE
+from gd_esquema.Maestra
+where LOCAL_NOMBRE IS NOT NULL
+-- categ tipo local // la categoria es la desc?????
+
+INSERT INTO DATAZO.dimension_categoria_tipo_local (categoria varchar(15), tipo varchar(15))
+SELECT  DISTINCT LOCAL_TIPO, LOCAL_DESCRIPCION
+from gd_esquema.Maestra
+where LOCAL_TIPO  IS NOT NULL and LOCAL_DESCRIPCION IS NOT NULL
+
+--dimension_rango_horario/ pasar a decimal?
+
+INSERT INTO DATAZO.dimension_rango_horario (horaInicial decimal(18,0), horaFinal decimal(18,0))
+SELECT  DISTINCT HORARIO_LOCAL_HORA_APERTURA, HORARIO_LOCAL_HORA_CIERRE
+from gd_esquema.Maestra
+where HORARIO_LOCAL_HORA_APERTURA  IS NOT NULL and HORARIO_LOCAL_HORA_CIERRE IS NOT NULL
+
+--dimension_estado_reclamo / solo aparece uno otro en null con distinct
+
+INSERT INTO DATAZO.dimension_estado_reclamo (descripcion VARCHAR(20))
+SELECT  DISTINCT RECLAMO_ESTADO
+from gd_esquema.Maestra
+where RECLAMO_ESTADO  IS NOT NULL 
+
+--dimension_tipo_reclamo
+
+INSERT INTO DATAZO.dimension_estado_reclamo (descripcion VARCHAR(20))
+SELECT  DISTINCT RECLAMO_ESTADO
+from gd_esquema.Maestra
+where RECLAMO_ESTADO  IS NOT NULL 
+
+
+--dimension_rango_etario
+
+--INSERT INTO DATAZO.dimension_rango_etario (edadInicial INT, edadFinal INT)
+--SELECT  DISTINCT RECLAMO_ESTADO
+--from gd_esquema.Maestra
+--where RECLAMO_ESTADO  IS NOT NULL 
+
+
+--dimension_tipo_movilidad
+INSERT INTO DATAZO.dimension_tipo_movilidad (descripcion VARCHAR(20))
+SELECT  DISTINCT REPARTIDOR_TIPO_MOVILIDAD
+from gd_esquema.Maestra
+where REPARTIDOR_TIPO_MOVILIDAD  IS NOT NULL 
+
+--dimension_dia
+INSERT INTO DATAZO.dimension_dia (descripcion CHAR)
+SELECT  left(HORARIO_LOCAL_DIA,1)
+from gd_esquema.Maestra
+where HORARIO_LOCAL_DIA  IS NOT NULL 
+group by HORARIO_LOCAL_DIA -- en vez d un distinct x el martes y miercoles son ambos M
+
+
+--dimension_tipo_paquete
+INSERT INTO DATAZO.dimension_tipo_paquete (tipo VARCHAR(20))
+SELECT  DISTINCT PAQUETE_TIPO
+from gd_esquema.Maestra
+where PAQUETE_TIPO  IS NOT NULL 
+
+--dimension_estado_mensajeria
+INSERT INTO DATAZO.dimension_estado_mensajeria (descripcion VARCHAR(20))
+SELECT  DISTINCT ENVIO_MENSAJERIA_ESTADO
+from gd_esquema.Maestra
+where ENVIO_MENSAJERIA_ESTADO  IS NOT NULL 
+
+--dimension_tipo_medio_pago
+
+INSERT INTO DATAZO.dimension_tipo_medio_pago (descripcion VARCHAR(20))
+SELECT  DISTINCT MEDIO_PAGO_TIPO
+from gd_esquema.Maestra
+where MEDIO_PAGO_TIPO  IS NOT NULL 
+
+--dimension_estado_pedido
+INSERT INTO DATAZO.dimension_estado_pedido (descripcion VARCHAR(20))
+SELECT  DISTINCT PEDIDO_ESTADO
+from gd_esquema.Maestra
+where PEDIDO_ESTADO  IS NOT NULL 
+
+--dimension_provincia_localidad
+
+INSERT INTO DATAZO.dimension_provincia_localidad (provincia VARCHAR(30), localidad VARCHAR (30))
+SELECT distinct LOCAL_PROVINCIA, LOCAL_LOCALIDAD from gd_esquema.Maestra 
+where LOCAL_PROVINCIA  IS NOT NULL and LOCAL_LOCALIDAD IS NOT NULL
+UNION
+SELECT  DISTINCT ENVIO_MENSAJERIA_PROVINCIA, ENVIO_MENSAJERIA_LOCALIDAD from gd_esquema.Maestra
+where ENVIO_MENSAJERIA_PROVINCIA  IS NOT NULL and ENVIO_MENSAJERIA_LOCALIDAD IS NOT NULL
+UNION
+SELECT  DISTINCT DIRECCION_USUARIO_PROVINCIA, DIRECCION_USUARIO_LOCALIDAD from gd_esquema.Maestra
+where DIRECCION_USUARIO_PROVINCIA  IS NOT NULL and DIRECCION_USUARIO_LOCALIDAD IS NOT NULL
