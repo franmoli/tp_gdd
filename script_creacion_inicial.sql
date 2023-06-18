@@ -1204,7 +1204,7 @@ END CATCH
 	 ELSE
    BEGIN
     ROLLBACK TRANSACTION;
-	THROW 50002, 'Hubo un error al migrar una o m�s tablas. Todos los cambios fueron deshechos, ninguna tabla fue cargada en la base.',1;
+	THROW 50002, 'Hubo un error al migrar una o mas tablas. Todos los cambios fueron deshechos, ninguna tabla fue cargada en la base.',1;
    END
    
 GO

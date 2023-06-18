@@ -421,34 +421,34 @@ GO
 --migrar  dimensiones
 
 --Local
-INSERT INTO DATAZO.dimension_local_ (nombre varchar(50))
+INSERT INTO DATAZO.dimension_local_ (nombre)
 SELECT  DISTINCT LOCAL_NOMBRE
 from gd_esquema.Maestra
 where LOCAL_NOMBRE IS NOT NULL
 -- categ tipo local // la categoria es la desc?????
 
-INSERT INTO DATAZO.dimension_categoria_tipo_local (categoria varchar(15), tipo varchar(15))
+INSERT INTO DATAZO.dimension_categoria_tipo_local (categoria, tipo)
 SELECT  DISTINCT LOCAL_TIPO, LOCAL_DESCRIPCION
 from gd_esquema.Maestra
 where LOCAL_TIPO  IS NOT NULL and LOCAL_DESCRIPCION IS NOT NULL
 
 --dimension_rango_horario/ pasar a decimal?
 
-INSERT INTO DATAZO.dimension_rango_horario (horaInicial decimal(18,0), horaFinal decimal(18,0))
+INSERT INTO DATAZO.dimension_rango_horario (horaInicial, horaFinal)
 SELECT  DISTINCT HORARIO_LOCAL_HORA_APERTURA, HORARIO_LOCAL_HORA_CIERRE
 from gd_esquema.Maestra
 where HORARIO_LOCAL_HORA_APERTURA  IS NOT NULL and HORARIO_LOCAL_HORA_CIERRE IS NOT NULL
 
 --dimension_estado_reclamo / solo aparece uno otro en null con distinct
 
-INSERT INTO DATAZO.dimension_estado_reclamo (descripcion VARCHAR(20))
+INSERT INTO DATAZO.dimension_estado_reclamo (descripcion )
 SELECT  DISTINCT RECLAMO_ESTADO
 from gd_esquema.Maestra
 where RECLAMO_ESTADO  IS NOT NULL 
 
 --dimension_tipo_reclamo
 
-INSERT INTO DATAZO.dimension_estado_reclamo (descripcion VARCHAR(20))
+INSERT INTO DATAZO.dimension_estado_reclamo (descripcion )
 SELECT  DISTINCT RECLAMO_ESTADO
 from gd_esquema.Maestra
 where RECLAMO_ESTADO  IS NOT NULL 
@@ -463,13 +463,13 @@ where RECLAMO_ESTADO  IS NOT NULL
 
 
 --dimension_tipo_movilidad
-INSERT INTO DATAZO.dimension_tipo_movilidad (descripcion VARCHAR(20))
+INSERT INTO DATAZO.dimension_tipo_movilidad (descripcion )
 SELECT  DISTINCT REPARTIDOR_TIPO_MOVILIDAD
 from gd_esquema.Maestra
 where REPARTIDOR_TIPO_MOVILIDAD  IS NOT NULL 
 
 --dimension_dia
-INSERT INTO DATAZO.dimension_dia (descripcion CHAR)
+INSERT INTO DATAZO.dimension_dia (descripcion )
 SELECT  left(HORARIO_LOCAL_DIA,1)
 from gd_esquema.Maestra
 where HORARIO_LOCAL_DIA  IS NOT NULL 
@@ -477,33 +477,33 @@ group by HORARIO_LOCAL_DIA -- en vez d un distinct x el martes y miercoles son a
 
 
 --dimension_tipo_paquete
-INSERT INTO DATAZO.dimension_tipo_paquete (tipo VARCHAR(20))
+INSERT INTO DATAZO.dimension_tipo_paquete (tipo )
 SELECT  DISTINCT PAQUETE_TIPO
 from gd_esquema.Maestra
 where PAQUETE_TIPO  IS NOT NULL 
 
 --dimension_estado_mensajeria
-INSERT INTO DATAZO.dimension_estado_mensajeria (descripcion VARCHAR(20))
+INSERT INTO DATAZO.dimension_estado_mensajeria (descripcion )
 SELECT  DISTINCT ENVIO_MENSAJERIA_ESTADO
 from gd_esquema.Maestra
 where ENVIO_MENSAJERIA_ESTADO  IS NOT NULL 
 
 --dimension_tipo_medio_pago
 
-INSERT INTO DATAZO.dimension_tipo_medio_pago (descripcion VARCHAR(20))
+INSERT INTO DATAZO.dimension_tipo_medio_pago (descripcion )
 SELECT  DISTINCT MEDIO_PAGO_TIPO
 from gd_esquema.Maestra
 where MEDIO_PAGO_TIPO  IS NOT NULL 
 
 --dimension_estado_pedido
-INSERT INTO DATAZO.dimension_estado_pedido (descripcion VARCHAR(20))
+INSERT INTO DATAZO.dimension_estado_pedido (descripcion )
 SELECT  DISTINCT PEDIDO_ESTADO
 from gd_esquema.Maestra
 where PEDIDO_ESTADO  IS NOT NULL 
 
 --dimension_provincia_localidad
 
-INSERT INTO DATAZO.dimension_provincia_localidad (provincia VARCHAR(30), localidad VARCHAR (30))
+INSERT INTO DATAZO.dimension_provincia_localidad (provincia , localidad )
 SELECT distinct LOCAL_PROVINCIA, LOCAL_LOCALIDAD from gd_esquema.Maestra 
 where LOCAL_PROVINCIA  IS NOT NULL and LOCAL_LOCALIDAD IS NOT NULL
 UNION
