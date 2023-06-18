@@ -10,6 +10,7 @@ IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.produ
 GO
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.cupon_por_reclamo') AND type in (N'U'))
 	DELETE FROM DATAZO.cupon_por_reclamo
+	PRINT 'cupon por reclamo deleteado'
 GO
 
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.reclamo') AND type in (N'U'))
@@ -107,6 +108,7 @@ IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.produ
 GO
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.cupon_por_reclamo') AND type in (N'U'))
 	DROP TABLE DATAZO.cupon_por_reclamo
+	PRINT 'cupon por reclamo dropeado'
 GO
 
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.reclamo') AND type in (N'U'))
@@ -152,6 +154,7 @@ IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.tipo_
 	DROP TABLE DATAZO.tipo_movilidad
 GO
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.localidad') AND type in (N'U'))
+	PRINT 'Drop localidades'
 	DROP TABLE DATAZO.localidad
 GO
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.operador') AND type in (N'U'))
@@ -194,13 +197,96 @@ IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.direc
 	DROP TABLE DATAZO.direccionesXpersona
 GO
 
---SCHEMA
-IF  EXISTS (SELECT * FROM sys.schemas WHERE [name] = 'DATAZO')
-	DROP SCHEMA  DATAZO
+-- DROP PROCEDURES
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_personas')
+	DROP PROCEDURE DATAZO.migrar_personas
 GO
-CREATE SCHEMA DATAZO
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_productos')
+	DROP PROCEDURE DATAZO.migrar_productos
+GO
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_tipo_reclamo')
+	DROP PROCEDURE DATAZO.migrar_tipo_reclamo
+GO
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_tipo_medio_pago')
+	DROP PROCEDURE DATAZO.migrar_tipo_medio_pago
+GO
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_tipo_de_paquete')
+	DROP PROCEDURE DATAZO.migrar_tipo_de_paquete
+GO
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_estado')
+	DROP PROCEDURE DATAZO.migrar_estado
+GO
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_tipos_de_local')
+	DROP PROCEDURE DATAZO.migrar_tipos_de_local
+GO
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_provincias')
+	DROP PROCEDURE DATAZO.migrar_provincias
+GO
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_tipo_movilidad')
+	DROP PROCEDURE DATAZO.migrar_tipo_movilidad
+GO
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_dia')
+	DROP PROCEDURE DATAZO.migrar_dia
+GO
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_operadores')
+	DROP PROCEDURE DATAZO.migrar_operadores
+GO
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_usuarios')
+	DROP PROCEDURE DATAZO.migrar_usuarios
+GO
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_repartidores')
+	DROP PROCEDURE DATAZO.migrar_repartidores
+GO
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_medios_de_pago')
+	DROP PROCEDURE DATAZO.migrar_medios_de_pago
+GO
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_cupones_de_descuento')
+	DROP PROCEDURE DATAZO.migrar_cupones_de_descuento
+GO
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_localidades')
+	DROP PROCEDURE DATAZO.migrar_localidades
+GO
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_direcciones')
+	DROP PROCEDURE DATAZO.migrar_direcciones
+GO
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_direcciones_por_persona')
+	DROP PROCEDURE DATAZO.migrar_direcciones_por_persona
+GO
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_envios_de_mensajeria')
+	DROP PROCEDURE DATAZO.migrar_envios_de_mensajeria
+GO
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_locales')
+	DROP PROCEDURE DATAZO.migrar_locales
+GO
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_pedidos_de_productos')
+	DROP PROCEDURE DATAZO.migrar_pedidos_de_productos
+GO
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_producto_por_local')
+	DROP PROCEDURE DATAZO.migrar_producto_por_local
+GO
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_horario')
+	DROP PROCEDURE DATAZO.migrar_horario
+GO
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_reclamo')
+	DROP PROCEDURE DATAZO.migrar_reclamo
+GO
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_cupon_por_pedido')
+	DROP PROCEDURE DATAZO.migrar_cupon_por_pedido
+GO
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_producto_por_pedido')
+	DROP PROCEDURE DATAZO.migrar_producto_por_pedido
+GO
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_cupones_descuento_por_reclamo')
+	DROP PROCEDURE DATAZO.migrar_cupones_descuento_por_reclamo
 GO
 
+-- SCHEMA
+IF EXISTS (SELECT * FROM sys.schemas WHERE [name] = 'DATAZO')
+	DROP SCHEMA DATAZO
+GO
+
+CREATE SCHEMA DATAZO
+GO
 
 --Inicio de Creacion de Tablas
 
@@ -288,7 +374,7 @@ GO
 
 CREATE TABLE DATAZO.direccion (id_direccion INT IDENTITY(1,1) NOT NULL, direccion NVARCHAR(255), localidad INT);
 CREATE TABLE DATAZO.medio_de_pago (id_medioPago INT IDENTITY(1,1), id_usuario INT, id_tipo_medio_pago INT, nro_tarjeta NVARCHAR(50), marca_tarjeta NVARCHAR(100));
-CREATE TABLE DATAZO.cupon_descuento ( id_cupon INT IDENTITY(1,1) NOT NULL, nro DECIMAL(18,2) NOT NULL, id_usuario INT NOT NULL, monto DECIMAL(18,2), fecha_alta DATETIME, fecha_vencimiento DATETIME, tipo NVARCHAR(50));
+CREATE TABLE DATAZO.cupon_descuento ( id_cupon INT IDENTITY(1,1) NOT NULL, nro DECIMAL(18,0) NOT NULL, id_usuario INT NOT NULL, monto DECIMAL(18,2), fecha_alta DATETIME, fecha_vencimiento DATETIME, tipo NVARCHAR(50));
 CREATE TABLE DATAZO.categoria (id_categoria INT IDENTITY(1,1) NOT NULL, id_tipo INT NOT NULL, descripcion VARCHAR(255));
 CREATE TABLE DATAZO.envio (id_envio INT IDENTITY(1,1), id_usuario INT, id_repartidor INT, id_estado INT, id_medioPago INT, precio_envio DECIMAL(18,2), propina DECIMAL(18,2), observaciones NVARCHAR(255),
 					fecha_pedido DATETIME, fecha_entrega DATETIME, tiempo_estimado_entrega DECIMAL(18,2), calificacion DECIMAL(18,0), dir_origen INT, dir_destino INT);
@@ -381,7 +467,7 @@ GO
 
 CREATE TABLE DATAZO.reclamo (nro_reclamo decimal(18,0) NOT NULL, id_pedido int, tipo_reclamo int, fecha datetime, descripcion nvarchar(255), fecha_solucion datetime, estado nvarchar(50), solucion nvarchar(255), calificacion decimal(18,0), id_usuario int);
 CREATE TABLE DATAZO.producto_por_pedido ( id_productoXpedido INT IDENTITY(1,1),id_pedido int NOT NULL, codigo_producto nvarchar(50) NOT NULL, id_local INT NOT NULL, cantidad decimal(18,0), total_producto decimal(18,2));
-CREATE TABLE DATAZO.cupon_por_pedido(nro_cupon decimal(18,2) NOT NULL, id_pedido INT)
+CREATE TABLE DATAZO.cupon_por_pedido(nro_cupon decimal(18,0) NOT NULL, id_pedido INT)
 
 ALTER TABLE DATAZO.reclamo
 	ADD CONSTRAINT pk_reclamo PRIMARY KEY (nro_reclamo),
@@ -403,7 +489,7 @@ GO
 
 /*Parte 6*/
 
-CREATE TABLE DATAZO.cupon_por_reclamo( id_cupon INT NOT NULL, nro_cupon decimal(18,2) NOT NULL, id_usuario INT NOT NULL, nro_reclamo decimal(18,0))
+CREATE TABLE DATAZO.cupon_por_reclamo( id_cupon INT NOT NULL, nro_cupon decimal(18,0) NOT NULL, id_usuario INT NOT NULL, nro_reclamo decimal(18,0))
 
 ALTER TABLE DATAZO.cupon_por_reclamo
 	ADD CONSTRAINT pk_cuponXreclamo_nro_cupon PRIMARY KEY (id_cupon),
@@ -415,337 +501,750 @@ GO
 
 /*Parte 1*/
 
+
 --PERSONA
-INSERT INTO DATAZO.persona (nombre, apellido, DNI, telefono, mail, fecha_nac)
-SELECT DISTINCT USUARIO_NOMBRE, USUARIO_APELLIDO, USUARIO_DNI, USUARIO_TELEFONO, USUARIO_MAIL, USUARIO_FECHA_NAC 
-FROM gd_esquema.Maestra WHERE USUARIO_DNI IS NOT NULL
-UNION
-SELECT DISTINCT OPERADOR_RECLAMO_NOMBRE, OPERADOR_RECLAMO_APELLIDO, OPERADOR_RECLAMO_DNI, OPERADOR_RECLAMO_TELEFONO, OPERADOR_RECLAMO_MAIL, OPERADOR_RECLAMO_FECHA_NAC 
-FROM gd_esquema.Maestra WHERE OPERADOR_RECLAMO_DNI IS NOT NULL
-UNION
-SELECT DISTINCT REPARTIDOR_NOMBRE, REPARTIDOR_APELLIDO, REPARTIDOR_DNI, REPARTIDOR_TELEFONO, REPARTIDOR_EMAIL, REPARTIDOR_FECHA_NAC
-FROM gd_esquema.Maestra WHERE REPARTIDOR_DNI IS NOT NULL
+CREATE PROCEDURE DATAZO.migrar_personas
+AS
+BEGIN
+	INSERT INTO DATAZO.persona (nombre, apellido, DNI, telefono, mail, fecha_nac)
+	SELECT DISTINCT USUARIO_NOMBRE, USUARIO_APELLIDO, USUARIO_DNI, USUARIO_TELEFONO, USUARIO_MAIL, USUARIO_FECHA_NAC 
+	FROM gd_esquema.Maestra WHERE USUARIO_DNI IS NOT NULL
+	UNION
+	SELECT DISTINCT OPERADOR_RECLAMO_NOMBRE, OPERADOR_RECLAMO_APELLIDO, OPERADOR_RECLAMO_DNI, OPERADOR_RECLAMO_TELEFONO, OPERADOR_RECLAMO_MAIL, OPERADOR_RECLAMO_FECHA_NAC 
+	FROM gd_esquema.Maestra WHERE OPERADOR_RECLAMO_DNI IS NOT NULL
+	UNION
+	SELECT DISTINCT REPARTIDOR_NOMBRE, REPARTIDOR_APELLIDO, REPARTIDOR_DNI, REPARTIDOR_TELEFONO, REPARTIDOR_EMAIL, REPARTIDOR_FECHA_NAC
+	FROM gd_esquema.Maestra WHERE REPARTIDOR_DNI IS NOT NULL
+
+	PRINT 'Personas migradas'
+END
+GO
 
 --PRODUCTO
-INSERT INTO DATAZO.producto (codigo, nombre, descripcion) 
-SELECT DISTINCT PRODUCTO_LOCAL_CODIGO, PRODUCTO_LOCAL_NOMBRE, PRODUCTO_LOCAL_DESCRIPCION
-FROM gd_esquema.Maestra
-WHERE PRODUCTO_LOCAL_CODIGO IS NOT NULL
+
+CREATE PROCEDURE DATAZO.migrar_productos
+AS
+BEGIN
+	INSERT INTO DATAZO.producto (codigo, nombre, descripcion) 
+	SELECT DISTINCT PRODUCTO_LOCAL_CODIGO, PRODUCTO_LOCAL_NOMBRE, PRODUCTO_LOCAL_DESCRIPCION
+	FROM gd_esquema.Maestra
+	WHERE PRODUCTO_LOCAL_CODIGO IS NOT NULL
+	PRINT 'productos migrados'
+END
+GO
 
 --TIPO DE RECLAMO
-INSERT INTO DATAZO.tipo_reclamo (descripcion) SELECT DISTINCT RECLAMO_TIPO FROM gd_esquema.Maestra WHERE RECLAMO_TIPO IS NOT NULL
+
+CREATE PROCEDURE DATAZO.migrar_tipo_reclamo
+AS
+BEGIN
+	INSERT INTO DATAZO.tipo_reclamo (descripcion) SELECT DISTINCT RECLAMO_TIPO FROM gd_esquema.Maestra WHERE RECLAMO_TIPO IS NOT NULL
+	PRINT 'tipo reclamo migrado'
+END
+GO
 
 --TIPO MEDIO DE PAGO
-INSERT INTO DATAZO.tipo_medio_pago (descripcion) SELECT DISTINCT MEDIO_PAGO_TIPO FROM gd_esquema.Maestra
+
+CREATE PROCEDURE DATAZO.migrar_tipo_medio_pago
+AS
+BEGIN
+	INSERT INTO DATAZO.tipo_medio_pago (descripcion) SELECT DISTINCT MEDIO_PAGO_TIPO FROM gd_esquema.Maestra
+
+	PRINT 'tipo medio pago migrado'
+END
+GO
 
 --TIPO DE PAQUETE
-INSERT INTO DATAZO.tipo_paquete(tipo, alto_max, ancho_max, largo_max, peso_max, tipo_precio) 
-SELECT PAQUETE_TIPO, PAQUETE_ALTO_MAX, PAQUETE_ANCHO_MAX, PAQUETE_LARGO_MAX, PAQUETE_PESO_MAX, PAQUETE_TIPO_PRECIO FROM gd_esquema.Maestra 
-WHERE PAQUETE_TIPO IS NOT NULL
-GROUP BY PAQUETE_TIPO, PAQUETE_ALTO_MAX, PAQUETE_ANCHO_MAX, PAQUETE_LARGO_MAX, PAQUETE_PESO_MAX, PAQUETE_TIPO_PRECIO
+
+CREATE PROCEDURE DATAZO.migrar_tipo_de_paquete
+AS
+BEGIN
+	INSERT INTO DATAZO.tipo_paquete(tipo, alto_max, ancho_max, largo_max, peso_max, tipo_precio) 
+	SELECT PAQUETE_TIPO, PAQUETE_ALTO_MAX, PAQUETE_ANCHO_MAX, PAQUETE_LARGO_MAX, PAQUETE_PESO_MAX, PAQUETE_TIPO_PRECIO FROM gd_esquema.Maestra 
+	WHERE PAQUETE_TIPO IS NOT NULL
+	GROUP BY PAQUETE_TIPO, PAQUETE_ALTO_MAX, PAQUETE_ANCHO_MAX, PAQUETE_LARGO_MAX, PAQUETE_PESO_MAX, PAQUETE_TIPO_PRECIO
+
+	PRINT 'tipo paquete migrado'
+END
+GO
 
 -- ESTADO (ENVIO)
-INSERT INTO DATAZO.estado (descripcion)
-SELECT DISTINCT ENVIO_MENSAJERIA_ESTADO
-FROM gd_esquema.Maestra WHERE ENVIO_MENSAJERIA_ESTADO IS NOT NULL
-UNION 
-SELECT DISTINCT PEDIDO_ESTADO FROM gd_esquema.Maestra WHERE PEDIDO_ESTADO IS NOT NULL
 
+CREATE PROCEDURE DATAZO.migrar_estado
+AS
+BEGIN
+	INSERT INTO DATAZO.estado (descripcion)
+	SELECT DISTINCT ENVIO_MENSAJERIA_ESTADO
+	FROM gd_esquema.Maestra WHERE ENVIO_MENSAJERIA_ESTADO IS NOT NULL
+	UNION 
+	SELECT DISTINCT PEDIDO_ESTADO FROM gd_esquema.Maestra WHERE PEDIDO_ESTADO IS NOT NULL
+
+	PRINT 'estado migrado'
+END
+GO
 --TIPO DE LOCAL
-INSERT INTO DATAZO.tipo_local (descripcion)
-SELECT DISTINCT LOCAL_TIPO
-FROM gd_esquema.Maestra WHERE LOCAL_TIPO IS NOT NULL
+
+CREATE PROCEDURE DATAZO.migrar_tipos_de_local
+AS
+BEGIN
+	INSERT INTO DATAZO.tipo_local (descripcion)
+	SELECT DISTINCT LOCAL_TIPO
+	FROM gd_esquema.Maestra WHERE LOCAL_TIPO IS NOT NULL
+	PRINT 'tipos de local migrado'
+END	
+GO	
 
 
 --PROVINCIA
 
-INSERT INTO DATAZO.provincia (nombre_provincia)
-SELECT DISTINCT DIRECCION_USUARIO_PROVINCIA  FROM gd_esquema.Maestra WHERE DIRECCION_USUARIO_PROVINCIA IS NOT NULL
-UNION SELECT DISTINCT LOCAL_PROVINCIA  FROM gd_esquema.Maestra WHERE LOCAL_PROVINCIA IS NOT NULL
-UNION SELECT DISTINCT ENVIO_MENSAJERIA_PROVINCIA FROM gd_esquema.Maestra WHERE ENVIO_MENSAJERIA_PROVINCIA IS NOT NULL
+CREATE PROCEDURE DATAZO.migrar_provincias
+AS
+BEGIN
+	INSERT INTO DATAZO.provincia (nombre_provincia)
+	SELECT DISTINCT DIRECCION_USUARIO_PROVINCIA  FROM gd_esquema.Maestra WHERE DIRECCION_USUARIO_PROVINCIA IS NOT NULL
+	UNION SELECT DISTINCT LOCAL_PROVINCIA  FROM gd_esquema.Maestra WHERE LOCAL_PROVINCIA IS NOT NULL
+	UNION SELECT DISTINCT ENVIO_MENSAJERIA_PROVINCIA FROM gd_esquema.Maestra WHERE ENVIO_MENSAJERIA_PROVINCIA IS NOT NULL
+
+	PRINT 'provincias migradas'
+END
+GO
+
 
 -- TIPO DE MOVILIDAD
-INSERT INTO DATAZO.tipo_movilidad (descripcion_movilidad)
-SELECT DISTINCT REPARTIDOR_TIPO_MOVILIDAD
-FROM gd_esquema.Maestra
+
+CREATE PROCEDURE DATAZO.migrar_tipo_movilidad
+AS
+BEGIN
+	INSERT INTO DATAZO.tipo_movilidad (descripcion_movilidad)
+	SELECT DISTINCT REPARTIDOR_TIPO_MOVILIDAD
+	FROM gd_esquema.Maestra
+
+	PRINT 'tipo de movilidad migrado'
+END
+GO
+
 
 -- DIA (LOCAL)
-INSERT INTO DATAZO.dia (descripcion)
-SELECT DISTINCT HORARIO_LOCAL_DIA
-FROM gd_esquema.Maestra
-WHERE HORARIO_LOCAL_DIA IS NOT NULL
+
+CREATE PROCEDURE DATAZO.migrar_dia
+AS
+BEGIN
+	INSERT INTO DATAZO.dia (descripcion)
+	SELECT DISTINCT HORARIO_LOCAL_DIA
+	FROM gd_esquema.Maestra
+	WHERE HORARIO_LOCAL_DIA IS NOT NULL
+
+	PRINT 'dia migrado'
+END
+GO
 
 
 /*Parte 2*/
 
 --OPERADOR
-INSERT INTO DATAZO.operador (id_persona)
-SELECT p.id_persona 
-FROM DATAZO.persona p
-WHERE p.DNI IN (SELECT DISTINCT OPERADOR_RECLAMO_DNI FROM gd_esquema.Maestra)
+
+CREATE PROCEDURE DATAZO.migrar_operadores
+AS
+BEGIN
+	INSERT INTO DATAZO.operador (id_persona)
+	SELECT p.id_persona 
+	FROM DATAZO.persona p
+	WHERE p.DNI IN (SELECT DISTINCT OPERADOR_RECLAMO_DNI FROM gd_esquema.Maestra)
+	
+	PRINT 'operadores migrados'
+END
+GO
+
 
 --USUARIO
-INSERT INTO DATAZO.usuario ( id_persona, fecha_registro)
-SELECT DISTINCT  p.id_persona, m.USUARIO_FECHA_REGISTRO
-FROM DATAZO.persona p JOIN gd_esquema.Maestra m ON p.DNI = m.USUARIO_DNI
+
+CREATE PROCEDURE DATAZO.migrar_usuarios
+AS
+BEGIN
+	INSERT INTO DATAZO.usuario ( id_persona, fecha_registro)
+	SELECT DISTINCT  p.id_persona, m.USUARIO_FECHA_REGISTRO
+	FROM DATAZO.persona p JOIN gd_esquema.Maestra m ON p.DNI = m.USUARIO_DNI
+
+	PRINT 'usuarios migrados'
+END
+GO
+
 
 --REPARTIDOR 
--- TODO: PONERLE LA LOCALIDAD ACTIVA Y TIPO MOVILIDAD
-INSERT INTO DATAZO.repartidor (id_persona)
-SELECT DISTINCT p.id_persona
-FROM DATAZO.persona p
-WHERE p.DNI IN (SELECT DISTINCT REPARTIDOR_DNI FROM gd_esquema.Maestra)
+
+GO
+
+CREATE PROCEDURE DATAZO.migrar_repartidores
+AS
+BEGIN
+
+-- SELECT DISTINCT REPARTIDOR_DNI FROM gd_esquema.Maestra 
+	
+	SELECT MAX(MASTR.PEDIDO_FECHA) max_pedido, MAX(MASTR.ENVIO_MENSAJERIA_FECHA) max_mensaj,
+			MASTR.REPARTIDOR_DNI,LOC.LOCAL_PROVINCIA, LOC.LOCAL_LOCALIDAD,LOC.ENVIO_MENSAJERIA_PROVINCIA,
+			LOC.ENVIO_MENSAJERIA_LOCALIDAD, LOC.REPARTIDOR_TIPO_MOVILIDAD
+		 INTO DATAZO.#TMP
+	FROM gd_esquema.Maestra MASTR
+	-- join con sus localidades
+	JOIN (SELECT LOCAL_LOCALIDAD, LOCAL_PROVINCIA, ENVIO_MENSAJERIA_LOCALIDAD, ENVIO_MENSAJERIA_PROVINCIA, REPARTIDOR_DNI, 
+			PEDIDO_FECHA, ENVIO_MENSAJERIA_FECHA, REPARTIDOR_TIPO_MOVILIDAD  FROM gd_esquema.Maestra) loc 
+	ON loc.REPARTIDOR_DNI = MASTR.REPARTIDOR_DNI
+	WHERE MASTR.PEDIDO_FECHA IS NOT NULL OR MASTR.ENVIO_MENSAJERIA_FECHA IS NOT NULL
+	GROUP BY MASTR.REPARTIDOR_DNI,LOC.LOCAL_PROVINCIA, LOC.LOCAL_LOCALIDAD,
+			LOC.ENVIO_MENSAJERIA_PROVINCIA, LOC.ENVIO_MENSAJERIA_LOCALIDAD, LOC.ENVIO_MENSAJERIA_FECHA, LOC.PEDIDO_FECHA, LOC.REPARTIDOR_TIPO_MOVILIDAD
+	-- mantengo solo la localidad que corresponde a la fecha maxima
+	HAVING(LOC.PEDIDO_FECHA	 = MAX(MASTR.PEDIDO_FECHA) OR LOC.ENVIO_MENSAJERIA_FECHA = MAX(MASTR.ENVIO_MENSAJERIA_FECHA))
+
+
+	-- SELECT REPARTIDOR_DNI, COUNT(max_pedido) FROM DATAZO.#TMP GROUP BY REPARTIDOR_DNI ORDER BY 2 DESC
+
+	-- SELECT * FROM DATAZO.#TMP WHERE REPARTIDOR_DNI = 22008691
+
+	-- SELECT PEDIDO_FECHA, ENVIO_MENSAJERIA_FECHA FROM gd_esquema.Maestra WHERE REPARTIDOR_DNI = 22008691 ORDER BY PEDIDO_FECHA DESC
+
+	SELECT * INTO DATAZO.#TMP_ULTIMO_PEDIDO_REPARTIDOR FROM (
+		SELECT max_pedido max_date, LOCAL_LOCALIDAD loc,LOCAL_PROVINCIA prov, REPARTIDOR_DNI dni, REPARTIDOR_TIPO_MOVILIDAD FROM DATAZO.#TMP tmp
+		WHERE max_pedido > max_mensaj 
+			AND LOCAL_LOCALIDAD IN (SELECT TOP 1 LOCAL_LOCALIDAD FROM DATAZO.#TMP WHERE REPARTIDOR_DNI = tmp.REPARTIDOR_DNI AND LOCAL_LOCALIDAD IS NOT NULL)
+		UNION
+		SELECT max_mensaj max_date, ENVIO_MENSAJERIA_LOCALIDAD loc, ENVIO_MENSAJERIA_PROVINCIA prov, REPARTIDOR_DNI dni, REPARTIDOR_TIPO_MOVILIDAD 
+		FROM DATAZO.#TMP tmp
+		where max_pedido < max_mensaj 
+			AND  ENVIO_MENSAJERIA_PROVINCIA IN (SELECT TOP 1 ENVIO_MENSAJERIA_PROVINCIA FROM DATAZO.#TMP WHERE REPARTIDOR_DNI = tmp.REPARTIDOR_DNI AND ENVIO_MENSAJERIA_PROVINCIA IS NOT NULL)
+	
+	) TMP;
+
+
+	INSERT INTO DATAZO.repartidor (id_persona, tipo_movilidad, localidad_activa )
+	SELECT DISTINCT  P.id_persona, TM.id_tipo_movilidad, LOC.id_localidad
+	FROM gd_esquema.Maestra MASTR
+	JOIN DATAZO.persona p ON p.DNI = MASTR.REPARTIDOR_DNI
+	JOIN DATAZO.#TMP_ULTIMO_PEDIDO_REPARTIDOR  TMP ON TMP.dni = MASTR.REPARTIDOR_DNI
+	JOIN DATAZO.provincia PR ON PR.nombre_provincia = TMP.prov
+	JOIN DATAZO.localidad LOC ON LOC.id_provincia = PR.id_provincia AND LOC.nombre_localidad = TMP.loc
+	JOIN DATAZO.tipo_movilidad TM ON TM.descripcion_movilidad = TMP.REPARTIDOR_TIPO_MOVILIDAD
+	
+
+	-- SELECT DISTINCT MASTR.REPARTIDOR_DNI
+	-- FROM gd_esquema.Maestra MASTR
+	-- JOIN DATAZO.#TMP_ULTIMO_PEDIDO_REPARTIDOR  TMP ON TMP.dni = MASTR.REPARTIDOR_DNI
+	-- JOIN DATAZO.persona p ON p.DNI = MASTR.REPARTIDOR_DNI
+	-- JOIN DATAZO.provincia PR ON PR.nombre_provincia = TMP.prov
+	-- WHERE MASTR.PEDIDO_NRO IS NOT NULL OR ENVIO_MENSAJERIA_NRO IS NOT NULL
+
+
+-- SELECT DISTINCT prov FROM DATAZO.#TMP_ULTIMO_PEDIDO_REPARTIDOR
+
+	DROP TABLE DATAZO.#TMP
+	DROP TABLE DATAZO.#TMP_ULTIMO_PEDIDO_REPARTIDOR
+	PRINT 'repartidores migrados'
+	-- SELECT * FROM DATAZO.repartidor
+END
+GO
+
 
 --MEDIOS DE PAGO
-INSERT INTO DATAZO.medio_de_pago (id_usuario, id_tipo_medio_pago, nro_tarjeta, marca_tarjeta)
-SELECT  u.id_usuario, tmp.id_tipo_medio_pago, m.MEDIO_PAGO_NRO_TARJETA, m.MARCA_TARJETA
-FROM gd_esquema.Maestra m
-JOIN DATAZO.persona p ON p.DNI = m.USUARIO_DNI
-JOIN DATAZO.usuario u ON u.id_persona = p.id_persona
-JOIN DATAZO.tipo_medio_pago tmp ON tmp.descripcion = m.MEDIO_PAGO_TIPO
-group by u.id_usuario, tmp.id_tipo_medio_pago, m.MEDIO_PAGO_NRO_TARJETA, m.MARCA_TARJETA
+
+CREATE PROCEDURE DATAZO.migrar_medios_de_pago
+AS
+BEGIN
+
+	INSERT INTO DATAZO.medio_de_pago (id_usuario, id_tipo_medio_pago, nro_tarjeta, marca_tarjeta)
+	SELECT  u.id_usuario, tmp.id_tipo_medio_pago, m.MEDIO_PAGO_NRO_TARJETA, m.MARCA_TARJETA
+	FROM gd_esquema.Maestra m
+	JOIN DATAZO.persona p ON p.DNI = m.USUARIO_DNI
+	JOIN DATAZO.usuario u ON u.id_persona = p.id_persona
+	JOIN DATAZO.tipo_medio_pago tmp ON tmp.descripcion = m.MEDIO_PAGO_TIPO
+	GROUP BY u.id_usuario, tmp.id_tipo_medio_pago, m.MEDIO_PAGO_NRO_TARJETA, m.MARCA_TARJETA
+	PRINT 'medios de pago migrados'
+END
+GO
 
 
 --CUPONES DE DESCUENTO
-INSERT INTO DATAZO.cupon_descuento (nro, id_usuario, monto, fecha_alta, fecha_vencimiento, tipo)
-SELECT m.CUPON_NRO, u.id_usuario, CUPON_MONTO, CUPON_FECHA_ALTA, CUPON_FECHA_VENCIMIENTO, CUPON_TIPO
-FROM gd_esquema.Maestra m
-JOIN DATAZO.persona p ON p.DNI = m.USUARIO_DNI
-JOIN DATAZO.usuario u ON u.id_persona = p.id_persona
-WHERE CUPON_NRO IS NOT NULL
+
+CREATE PROCEDURE DATAZO.migrar_cupones_de_descuento
+AS
+BEGIN
+	INSERT INTO DATAZO.cupon_descuento (nro, id_usuario, monto, fecha_alta, fecha_vencimiento, tipo)
+	SELECT m.CUPON_NRO, u.id_usuario, CUPON_MONTO, CUPON_FECHA_ALTA, CUPON_FECHA_VENCIMIENTO, CUPON_TIPO
+	FROM gd_esquema.Maestra m
+	JOIN DATAZO.persona p ON p.DNI = m.USUARIO_DNI
+	JOIN DATAZO.usuario u ON u.id_persona = p.id_persona
+	WHERE CUPON_NRO IS NOT NULL
+	PRINT 'cupones de descuento migrados'
+END
 GO
 
 
 --LOCALIDADES
 
-INSERT INTO DATAZO.localidad(id_provincia, nombre_localidad)
-SELECT DISTINCT p.id_provincia, ENVIO_MENSAJERIA_LOCALIDAD FROM gd_esquema.Maestra m
-JOIN DATAZO.provincia p ON m.ENVIO_MENSAJERIA_PROVINCIA = p.nombre_provincia
-UNION
-SELECT DISTINCT p.id_provincia, DIRECCION_USUARIO_LOCALIDAD FROM gd_esquema.Maestra m
-JOIN DATAZO.provincia p ON m.DIRECCION_USUARIO_PROVINCIA = p.nombre_provincia
-UNION
-SELECT DISTINCT p.id_provincia, LOCAL_LOCALIDAD FROM gd_esquema.Maestra m
-JOIN DATAZO.provincia p ON m.LOCAL_PROVINCIA = p.nombre_provincia
 
+CREATE PROCEDURE DATAZO.migrar_localidades
+AS
+BEGIN
 
-
-INSERT INTO DATAZO.direccion (direccion, localidad)
-SELECT  m.ENVIO_MENSAJERIA_DIR_DEST, L.id_localidad FROM gd_esquema.Maestra m
-JOIN DATAZO.localidad l ON l.nombre_localidad = m.ENVIO_MENSAJERIA_LOCALIDAD
-WHERE ENVIO_MENSAJERIA_DIR_DEST IS NOT NULL
-UNION
-SELECT  m.ENVIO_MENSAJERIA_DIR_ORIG, L.id_localidad FROM gd_esquema.Maestra m
-JOIN DATAZO.localidad l ON l.nombre_localidad = m.ENVIO_MENSAJERIA_LOCALIDAD
-WHERE ENVIO_MENSAJERIA_DIR_ORIG IS NOT NULL
-UNION
-SELECT  m.LOCAL_DIRECCION, L.id_localidad FROM gd_esquema.Maestra m
-JOIN DATAZO.localidad l ON l.nombre_localidad = m.LOCAL_LOCALIDAD
-WHERE LOCAL_DIRECCION IS NOT NULL
-UNION 
-SELECT  m.DIRECCION_USUARIO_DIRECCION, L.id_localidad FROM gd_esquema.Maestra m 
-JOIN DATAZO.localidad l ON l.nombre_localidad = m.DIRECCION_USUARIO_LOCALIDAD
-WHERE DIRECCION_USUARIO_DIRECCION IS NOT NULL
-UNION 
-SELECT  m.REPARTIDOR_DIRECION, 1 FROM gd_esquema.Maestra m
-WHERE REPARTIDOR_DIRECION IS NOT NULL
--- TODO: PONERLE LA LOCALIDAD AL REPARTIDOR
-
-
-INSERT INTO DATAZO.direccionesXpersona (id_persona, id_direccion)
-SELECT DISTINCT P.id_persona, D.id_direccion FROM gd_esquema.Maestra m
-JOIN DATAZO.persona p ON p.DNI = m.USUARIO_DNI
-JOIN DATAZO.direccion d ON d.direccion = m.DIRECCION_USUARIO_DIRECCION
-WHERE m.USUARIO_DNI IS NOT NULL
+	INSERT INTO DATAZO.localidad(id_provincia, nombre_localidad)(
+	SELECT DISTINCT p.id_provincia, ENVIO_MENSAJERIA_LOCALIDAD FROM gd_esquema.Maestra m
+	JOIN DATAZO.provincia p ON m.ENVIO_MENSAJERIA_PROVINCIA = p.nombre_provincia
+	UNION
+	SELECT DISTINCT p.id_provincia, DIRECCION_USUARIO_LOCALIDAD FROM gd_esquema.Maestra m
+	JOIN DATAZO.provincia p ON m.DIRECCION_USUARIO_PROVINCIA = p.nombre_provincia
+	UNION
+	SELECT DISTINCT p.id_provincia, LOCAL_LOCALIDAD FROM gd_esquema.Maestra m
+	JOIN DATAZO.provincia p ON m.LOCAL_PROVINCIA = p.nombre_provincia)
+	PRINT 'localidades migradas'
+END
 GO
+
+select distinct envio_mensajeria_dir_dest, count(distinct ENVIO_MENSAJERIA_PROVINCIA) from gd_esquema.Maestra
+group by ENVIO_MENSAJERIA_DIR_DEST
+order by 2 desc
+
+go
+CREATE PROCEDURE DATAZO.migrar_direcciones
+AS
+BEGIN
+
+	-- SELECT MAX(MASTR.PEDIDO_FECHA) max_pedido, MAX(MASTR.ENVIO_MENSAJERIA_FECHA) max_mensaj,
+	-- 		MASTR.REPARTIDOR_DNI,LOC.LOCAL_PROVINCIA, LOC.LOCAL_LOCALIDAD,LOC.ENVIO_MENSAJERIA_PROVINCIA,
+	-- 		LOC.ENVIO_MENSAJERIA_LOCALIDAD, LOC.REPARTIDOR_TIPO_MOVILIDAD
+	-- 	 INTO DATAZO.#TMP
+	-- FROM gd_esquema.Maestra MASTR
+	-- -- join con sus localidades
+	-- JOIN (SELECT LOCAL_LOCALIDAD, LOCAL_PROVINCIA, LOCAL_DIRECCION ENVIO_MENSAJERIA_LOCALIDAD, ENVIO_MENSAJERIA_PROVINCIA,ENVIO_MENSAJERIA_PROVINCIA REPARTIDOR_DNI, 
+	-- 		PEDIDO_FECHA, ENVIO_MENSAJERIA_FECHA, REPARTIDOR_TIPO_MOVILIDAD  FROM gd_esquema.Maestra) loc 
+	-- ON loc.REPARTIDOR_DNI = MASTR.REPARTIDOR_DNI
+	-- WHERE MASTR.PEDIDO_FECHA IS NOT NULL OR MASTR.ENVIO_MENSAJERIA_FECHA IS NOT NULL
+	-- GROUP BY MASTR.REPARTIDOR_DNI,LOC.LOCAL_PROVINCIA, LOC.LOCAL_LOCALIDAD,
+	-- 		LOC.ENVIO_MENSAJERIA_PROVINCIA, LOC.ENVIO_MENSAJERIA_LOCALIDAD, LOC.ENVIO_MENSAJERIA_FECHA, LOC.PEDIDO_FECHA, LOC.REPARTIDOR_TIPO_MOVILIDAD
+	-- -- mantengo solo la localidad que corresponde a la fecha maxima
+	-- HAVING(LOC.PEDIDO_FECHA	 = MAX(MASTR.PEDIDO_FECHA) OR LOC.ENVIO_MENSAJERIA_FECHA = MAX(MASTR.ENVIO_MENSAJERIA_FECHA))
+
+	-- SELECT * INTO DATAZO.#TMP_ULTIMO_PEDIDO_REPARTIDOR FROM (
+	-- 	SELECT max_pedido max_date, LOCAL_LOCALIDAD loc,LOCAL_PROVINCIA prov, REPARTIDOR_DNI dni, REPARTIDOR_TIPO_MOVILIDAD FROM DATAZO.#TMP tmp
+	-- 	WHERE max_pedido > max_mensaj 
+	-- 		AND LOCAL_LOCALIDAD IN (SELECT TOP 1 LOCAL_LOCALIDAD FROM DATAZO.#TMP WHERE REPARTIDOR_DNI = tmp.REPARTIDOR_DNI AND LOCAL_LOCALIDAD IS NOT NULL)
+	-- 	UNION
+	-- 	SELECT max_mensaj max_date, ENVIO_MENSAJERIA_LOCALIDAD loc, ENVIO_MENSAJERIA_PROVINCIA prov, REPARTIDOR_DNI dni, REPARTIDOR_TIPO_MOVILIDAD 
+	-- 	FROM DATAZO.#TMP tmp
+	-- 	where max_pedido < max_mensaj 
+	-- 		AND  ENVIO_MENSAJERIA_PROVINCIA IN (SELECT TOP 1 ENVIO_MENSAJERIA_PROVINCIA FROM DATAZO.#TMP WHERE REPARTIDOR_DNI = tmp.REPARTIDOR_DNI AND ENVIO_MENSAJERIA_PROVINCIA IS NOT NULL)
+	
+	-- ) TMP;
+
+	INSERT INTO DATAZO.direccion (direccion, localidad)
+	SELECT DISTINCT  m.ENVIO_MENSAJERIA_DIR_DEST, L.id_localidad FROM gd_esquema.Maestra m
+	JOIN DATAZO.provincia p ON p.nombre_provincia = ENVIO_MENSAJERIA_PROVINCIA
+	JOIN DATAZO.localidad l ON l.nombre_localidad = m.ENVIO_MENSAJERIA_LOCALIDAD AND l.id_provincia = P.id_provincia
+	WHERE ENVIO_MENSAJERIA_DIR_DEST IS NOT NULL
+	UNION
+	SELECT DISTINCT  m.ENVIO_MENSAJERIA_DIR_ORIG, L.id_localidad FROM gd_esquema.Maestra m
+	JOIN DATAZO.provincia p ON p.nombre_provincia = ENVIO_MENSAJERIA_PROVINCIA
+	JOIN DATAZO.localidad l ON l.nombre_localidad = m.ENVIO_MENSAJERIA_LOCALIDAD AND l.id_provincia = P.id_provincia
+	WHERE ENVIO_MENSAJERIA_DIR_ORIG IS NOT NULL
+	UNION
+	SELECT DISTINCT  m.LOCAL_DIRECCION, L.id_localidad FROM gd_esquema.Maestra m
+	JOIN DATAZO.provincia p ON p.nombre_provincia = LOCAL_PROVINCIA
+	JOIN DATAZO.localidad l ON l.nombre_localidad = m.LOCAL_LOCALIDAD AND l.id_provincia = P.id_provincia
+	WHERE LOCAL_DIRECCION IS NOT NULL
+	UNION 
+	SELECT DISTINCT  m.DIRECCION_USUARIO_DIRECCION, L.id_localidad FROM gd_esquema.Maestra m 
+	JOIN DATAZO.provincia p ON p.nombre_provincia = DIRECCION_USUARIO_PROVINCIA
+	JOIN DATAZO.localidad l ON l.nombre_localidad = m.DIRECCION_USUARIO_LOCALIDAD AND l.id_provincia = P.id_provincia
+	WHERE DIRECCION_USUARIO_DIRECCION IS NOT NULL
+	UNION 
+	SELECT DISTINCT m.REPARTIDOR_DIRECION, 1 FROM gd_esquema.Maestra m
+	-- JOIN DATAZO.#TMP_ULTIMO_PEDIDO_REPARTIDOR tmp on tmp.dni = m.REPARTIDOR_DNI
+	WHERE REPARTIDOR_DIRECION IS NOT NULL
+	-- TODO: decidir que poner si la ultima localidad o nada
+
+	
+
+
+	-- DROP TABLE #TMP
+	-- DROP TABLE #TMP_ULTIMO_PEDIDO_REPARTIDOR
+
+	
+	PRINT 'direcciones migradas'
+END
+GO
+
+-- select * from DATAZO.localidad
+
+
+
+CREATE PROCEDURE DATAZO.migrar_direcciones_por_persona
+AS
+BEGIN
+	INSERT INTO DATAZO.direccionesXpersona (id_persona, id_direccion)
+	SELECT DISTINCT P.id_persona, D.id_direccion FROM gd_esquema.Maestra m
+	JOIN DATAZO.persona p ON p.DNI = m.USUARIO_DNI
+	JOIN DATAZO.direccion d ON d.direccion = m.DIRECCION_USUARIO_DIRECCION
+	WHERE m.USUARIO_DNI IS NOT NULL
+	PRINT 'direcciones por persona migradas'
+	
+END
+GO
+
+
 
 /*Parte 3 */
 
 --insert de envio de mensajes
-/*TABLA TEMPORAL PARA INSERTAR ENVIOS DE MENSAJERIA*/
 
-SELECT 
- 	MASTR.ENVIO_MENSAJERIA_NRO envio_nro,USR.id_usuario [user] , REP.id_repartidor repartidor, EST.id_estado estado, MP.id_medioPago medioPago, MASTR.ENVIO_MENSAJERIA_PRECIO_ENVIO precioEnvio,
-	MASTR.ENVIO_MENSAJERIA_PROPINA propina, MASTR.ENVIO_MENSAJERIA_OBSERV observacion, MASTR.ENVIO_MENSAJERIA_FECHA fecha_envio, MASTR.ENVIO_MENSAJERIA_FECHA_ENTREGA fecha_entrega,
-	MASTR.ENVIO_MENSAJERIA_TIEMPO_ESTIMADO t_estimado, MASTR.ENVIO_MENSAJERIA_CALIFICACION calificacion, DIR_O.id_direccion dir_origen, DIR_D.id_direccion dir_destino,
-	MASTR.ENVIO_MENSAJERIA_KM km, TP.id_tipo tipo_paquete, MASTR.ENVIO_MENSAJERIA_VALOR_ASEGURADO asegurado, MASTR.ENVIO_MENSAJERIA_PRECIO_SEGURO precio_seguro,
-	MASTR.ENVIO_MENSAJERIA_TOTAL total_env_msj
-INTO DATAZO.[#temporal_envios_msj] 
-FROM gd_esquema.Maestra MASTR 
-JOIN DATAZO.persona P_USR ON P_USR.DNI = MASTR.USUARIO_DNI
-JOIN DATAZO.usuario USR ON USR.id_persona = P_USR.id_persona
-JOIN DATAZO.persona P_REP ON P_REP.DNI = MASTR.REPARTIDOR_DNI 
-JOIN DATAZO.repartidor REP ON REP.id_persona = P_REP.id_persona
-JOIN DATAZO.estado EST ON EST.descripcion = MASTR.ENVIO_MENSAJERIA_ESTADO 
-JOIN DATAZO.medio_de_pago MP ON MP.nro_tarjeta = MASTR.MEDIO_PAGO_NRO_TARJETA 
-JOIN DATAZO.provincia PROV ON PROV.nombre_provincia = MASTR.ENVIO_MENSAJERIA_PROVINCIA
-JOIN DATAZO.localidad LOC ON LOC.nombre_localidad = MASTR.ENVIO_MENSAJERIA_LOCALIDAD AND PROV.id_provincia = LOC.id_provincia
-JOIN DATAZO.direccion DIR_O ON DIR_O.direccion = MASTR.ENVIO_MENSAJERIA_DIR_ORIG AND DIR_O.localidad = LOC.id_localidad
-JOIN DATAZO.direccion DIR_D ON DIR_D.direccion = MASTR.ENVIO_MENSAJERIA_DIR_DEST AND DIR_D.localidad = LOC.id_localidad
-JOIN DATAZO.tipo_paquete TP ON TP.tipo = MASTR.PAQUETE_TIPO
-WHERE MASTR.ENVIO_MENSAJERIA_NRO IS NOT NULL
+CREATE PROCEDURE DATAZO.migrar_envios_de_mensajeria
+AS
+BEGIN
+	/*TABLA TEMPORAL PARA INSERTAR ENVIOS DE MENSAJERIA*/
 
+	SELECT 
+		MASTR.ENVIO_MENSAJERIA_NRO envio_nro,USR.id_usuario [user] , REP.id_repartidor repartidor, EST.id_estado estado, MP.id_medioPago medioPago, MASTR.ENVIO_MENSAJERIA_PRECIO_ENVIO precioEnvio,
+		MASTR.ENVIO_MENSAJERIA_PROPINA propina, MASTR.ENVIO_MENSAJERIA_OBSERV observacion, MASTR.ENVIO_MENSAJERIA_FECHA fecha_envio, MASTR.ENVIO_MENSAJERIA_FECHA_ENTREGA fecha_entrega,
+		MASTR.ENVIO_MENSAJERIA_TIEMPO_ESTIMADO t_estimado, MASTR.ENVIO_MENSAJERIA_CALIFICACION calificacion, DIR_O.id_direccion dir_origen, DIR_D.id_direccion dir_destino,
+		MASTR.ENVIO_MENSAJERIA_KM km, TP.id_tipo tipo_paquete, MASTR.ENVIO_MENSAJERIA_VALOR_ASEGURADO asegurado, MASTR.ENVIO_MENSAJERIA_PRECIO_SEGURO precio_seguro,
+		MASTR.ENVIO_MENSAJERIA_TOTAL total_env_msj
+	INTO DATAZO.[#temporal_envios_msj] 
+	FROM gd_esquema.Maestra MASTR 
+	JOIN DATAZO.persona P_USR ON P_USR.DNI = MASTR.USUARIO_DNI
+	JOIN DATAZO.usuario USR ON USR.id_persona = P_USR.id_persona
+	JOIN DATAZO.persona P_REP ON P_REP.DNI = MASTR.REPARTIDOR_DNI 
+	JOIN DATAZO.repartidor REP ON REP.id_persona = P_REP.id_persona
+	JOIN DATAZO.estado EST ON EST.descripcion = MASTR.ENVIO_MENSAJERIA_ESTADO 
+	JOIN DATAZO.medio_de_pago MP ON MP.nro_tarjeta = MASTR.MEDIO_PAGO_NRO_TARJETA 
+	JOIN DATAZO.provincia PROV ON PROV.nombre_provincia = MASTR.ENVIO_MENSAJERIA_PROVINCIA
+	JOIN DATAZO.localidad LOC ON LOC.nombre_localidad = MASTR.ENVIO_MENSAJERIA_LOCALIDAD AND PROV.id_provincia = LOC.id_provincia
+	JOIN DATAZO.direccion DIR_O ON DIR_O.direccion = MASTR.ENVIO_MENSAJERIA_DIR_ORIG AND DIR_O.localidad = LOC.id_localidad
+	JOIN DATAZO.direccion DIR_D ON DIR_D.direccion = MASTR.ENVIO_MENSAJERIA_DIR_DEST AND DIR_D.localidad = LOC.id_localidad
+	JOIN DATAZO.tipo_paquete TP ON TP.tipo = MASTR.PAQUETE_TIPO
+	WHERE MASTR.ENVIO_MENSAJERIA_NRO IS NOT NULL
+	-- order by ENVIO_MENSAJERIA_NRO
 
-/*ENVIO (MSJ)*/
-INSERT INTO DATAZO.envio(id_usuario, id_repartidor, id_estado, id_medioPago, precio_envio, propina, observaciones,
-									fecha_pedido, fecha_entrega, tiempo_estimado_entrega, calificacion, dir_origen, dir_destino)
-SELECT tmp.[user], tmp.repartidor, tmp.estado, tmp.medioPago, tmp.precioEnvio, tmp.propina, tmp.observacion, tmp.fecha_envio, tmp.fecha_entrega, tmp.t_estimado, tmp.calificacion, tmp.dir_origen, tmp.dir_destino  FROM DATAZO.[#temporal_envios_msj] tmp
+	-- SELECT envio_nro, count(repartidor) FROM DATAZO.[#temporal_envios_msj] group by envio_nro order by 2 desc
 
+	-- select * from DATAZO.[#temporal_envios_msj] where envio_nro = 987678192
 
-/*ENVIO DE MENSAJERIA*/
-INSERT INTO DATAZO.envio_de_mensajeria (id_envio_mensajeria, id_envio, km, tipo_paquete, valor_asegurado, precio_seguro, total_envio_mensajeria) 
-SELECT tmp.[envio_nro], env.id_envio, tmp.km, tmp.tipo_paquete, tmp.asegurado, tmp.precio_seguro, tmp.total_env_msj  FROM DATAZO.[#temporal_envios_msj] tmp
-JOIN DATAZO.envio env ON env.id_usuario = tmp.[user] AND env.id_repartidor = tmp.repartidor AND env.dir_origen = tmp.dir_origen AND tmp.dir_destino = env.dir_destino
+	-- select * from DATAZO.repartidor WHERE id_repartidor = 61 OR id_repartidor = 62
 
-drop table DATAZO.[#temporal_envios_msj];
+	/*ENVIO (MSJ)*/
+	INSERT INTO DATAZO.envio(id_usuario, id_repartidor, id_estado, id_medioPago, precio_envio, propina, observaciones,
+										fecha_pedido, fecha_entrega, tiempo_estimado_entrega, calificacion, dir_origen, dir_destino)
+	SELECT tmp.[user], tmp.repartidor, tmp.estado, tmp.medioPago, tmp.precioEnvio, tmp.propina, tmp.observacion, tmp.fecha_envio, tmp.fecha_entrega, tmp.t_estimado, tmp.calificacion, tmp.dir_origen, tmp.dir_destino  FROM DATAZO.[#temporal_envios_msj] tmp
+
+	/*ENVIO DE MENSAJERIA*/
+	INSERT INTO DATAZO.envio_de_mensajeria (id_envio_mensajeria, id_envio, km, tipo_paquete, valor_asegurado, precio_seguro, total_envio_mensajeria) 
+	SELECT tmp.[envio_nro], env.id_envio, tmp.km, tmp.tipo_paquete, tmp.asegurado, tmp.precio_seguro, tmp.total_env_msj  FROM DATAZO.[#temporal_envios_msj] tmp
+	JOIN DATAZO.envio env ON env.id_usuario = tmp.[user] AND env.id_repartidor = tmp.repartidor AND env.dir_origen = tmp.dir_origen AND tmp.dir_destino = env.dir_destino
+	drop table DATAZO.[#temporal_envios_msj];
+
+	PRINT 'envio de mensajeria migrados'
+END
+GO
+
 
 
 /*LOCALES*/
-INSERT INTO DATAZO.local_(id_direccion, nombre, descripcion, tipo)
-SELECT DISTINCT DIR.id_direccion, MASTR.LOCAL_NOMBRE, MASTR.LOCAL_DESCRIPCION, TP.id_tipo
-FROM gd_esquema.Maestra MASTR
-JOIN DATAZO.tipo_local TP ON TP.descripcion = MASTR.LOCAL_TIPO
-JOIN DATAZO.provincia PROV ON PROV.nombre_provincia = MASTR.LOCAL_PROVINCIA
-JOIN DATAZO.localidad LOCALI ON LOCALI.nombre_localidad = MASTR.LOCAL_LOCALIDAD AND PROV.id_provincia = LOCALI.id_provincia
-JOIN DATAZO.direccion DIR ON DIR.direccion = MASTR.LOCAL_DIRECCION AND DIR.localidad = LOCALI.id_localidad
-WHERE MASTR.LOCAL_NOMBRE IS NOT NULL
+
+CREATE PROCEDURE DATAZO.migrar_locales
+AS
+BEGIN
+	INSERT INTO DATAZO.local_(id_direccion, nombre, descripcion, tipo)
+	SELECT DISTINCT DIR.id_direccion, MASTR.LOCAL_NOMBRE, MASTR.LOCAL_DESCRIPCION, TP.id_tipo
+	FROM gd_esquema.Maestra MASTR
+	JOIN DATAZO.tipo_local TP ON TP.descripcion = MASTR.LOCAL_TIPO
+	JOIN DATAZO.provincia PROV ON PROV.nombre_provincia = MASTR.LOCAL_PROVINCIA
+	JOIN DATAZO.localidad LOCALI ON LOCALI.nombre_localidad = MASTR.LOCAL_LOCALIDAD AND PROV.id_provincia = LOCALI.id_provincia
+	JOIN DATAZO.direccion DIR ON DIR.direccion = MASTR.LOCAL_DIRECCION AND DIR.localidad = LOCALI.id_localidad
+	WHERE MASTR.LOCAL_NOMBRE IS NOT NULL
+	PRINT 'locales migrados'
+END
+GO
 
 
 --insert de pedidos de productos
 
-SELECT DISTINCT
- 	USR.id_usuario [user], REP.id_repartidor repartidor, EST.id_estado estado, MP.id_medioPago medioPago, MASTR.PEDIDO_PRECIO_ENVIO precioEnvio,
-	MASTR.PEDIDO_PROPINA propina, MASTR.PEDIDO_OBSERV observacion, MASTR.PEDIDO_FECHA fecha_pedido, MASTR.PEDIDO_FECHA_ENTREGA fecha_entrega,
-	MASTR.PEDIDO_TIEMPO_ESTIMADO_ENTREGA t_estimado, MASTR.PEDIDO_CALIFICACION calificacion, LOC.id_direccion direccion_orig, DIR.id_direccion direccion_dest,
-	MASTR.PEDIDO_NRO pedido_nro, LOC.id_local localId, MASTR.PEDIDO_TARIFA_SERVICIO tarifa, 
-	(MASTR.PEDIDO_TOTAL_PRODUCTOS + MASTR.PEDIDO_PRECIO_ENVIO + MASTR.PEDIDO_PROPINA + MASTR.PEDIDO_TARIFA_SERVICIO - MASTR.PEDIDO_TOTAL_CUPONES ) totalPedido,
-	MASTR.PEDIDO_TOTAL_CUPONES cupones
-INTO DATAZO.[#temporal_pedido_productos] 
-FROM gd_esquema.Maestra MASTR 
--- usuario
-JOIN DATAZO.persona P_USR ON P_USR.DNI = MASTR.USUARIO_DNI
-JOIN DATAZO.usuario USR ON USR.id_persona = P_USR.id_persona
--- repartidor
-JOIN DATAZO.persona P_REP ON P_REP.DNI = MASTR.REPARTIDOR_DNI 
-JOIN DATAZO.repartidor REP ON REP.id_persona = P_REP.id_persona
--- otros datos
-JOIN DATAZO.estado EST ON EST.descripcion = MASTR.PEDIDO_ESTADO 
-JOIN DATAZO.medio_de_pago MP ON MP.nro_tarjeta = MASTR.MEDIO_PAGO_NRO_TARJETA 
--- direccion origen
-JOIN DATAZO.local_ LOC ON LOC.nombre = MASTR.LOCAL_NOMBRE
--- direccion destino
-JOIN DATAZO.provincia PROV ON PROV.nombre_provincia = MASTR.DIRECCION_USUARIO_PROVINCIA
-JOIN DATAZO.localidad LOCALI ON LOCALI.nombre_localidad = MASTR.DIRECCION_USUARIO_LOCALIDAD AND PROV.id_provincia = LOCALI.id_provincia
-JOIN DATAZO.direccion DIR ON DIR.direccion = MASTR.DIRECCION_USUARIO_DIRECCION AND DIR.localidad = LOCALI.id_localidad
-WHERE MASTR.PEDIDO_NRO IS NOT NULL;
 
--- SELECT * from DATAZO.[#temporal_pedido_productos] ;
--- insert de envio
-INSERT INTO DATAZO.envio(id_usuario, id_repartidor, id_estado, id_medioPago, precio_envio, propina, observaciones,
-									fecha_pedido, fecha_entrega, tiempo_estimado_entrega, calificacion, dir_origen, dir_destino)
-SELECT DISTINCT TMP.[user], TMP.repartidor, TMP.estado, TMP.medioPago, TMP.precioEnvio, TMP.propina, TMP.observacion, TMP.fecha_pedido,
-		TMP.fecha_entrega, TMP.t_estimado, TMP.calificacion, TMP.direccion_orig, TMP.direccion_dest
-FROM DATAZO.[#temporal_pedido_productos] TMP;
+CREATE PROCEDURE DATAZO.migrar_pedidos_de_productos
+AS
+BEGIN
+	SELECT DISTINCT
+		USR.id_usuario [user], REP.id_repartidor repartidor, EST.id_estado estado, MP.id_medioPago medioPago, MASTR.PEDIDO_PRECIO_ENVIO precioEnvio,
+		MASTR.PEDIDO_PROPINA propina, MASTR.PEDIDO_OBSERV observacion, MASTR.PEDIDO_FECHA fecha_pedido, MASTR.PEDIDO_FECHA_ENTREGA fecha_entrega,
+		MASTR.PEDIDO_TIEMPO_ESTIMADO_ENTREGA t_estimado, MASTR.PEDIDO_CALIFICACION calificacion, LOC.id_direccion direccion_orig, DIR.id_direccion direccion_dest,
+		MASTR.PEDIDO_NRO pedido_nro, LOC.id_local localId, MASTR.PEDIDO_TARIFA_SERVICIO tarifa, 
+		(MASTR.PEDIDO_TOTAL_PRODUCTOS + MASTR.PEDIDO_PRECIO_ENVIO + MASTR.PEDIDO_PROPINA + MASTR.PEDIDO_TARIFA_SERVICIO - MASTR.PEDIDO_TOTAL_CUPONES ) totalPedido,
+		MASTR.PEDIDO_TOTAL_CUPONES cupones
+	INTO DATAZO.[#temporal_pedido_productos] 
+	FROM gd_esquema.Maestra MASTR 
+	-- usuario
+	JOIN DATAZO.persona P_USR ON P_USR.DNI = MASTR.USUARIO_DNI
+	JOIN DATAZO.usuario USR ON USR.id_persona = P_USR.id_persona
+	-- repartidor
+	JOIN DATAZO.persona P_REP ON P_REP.DNI = MASTR.REPARTIDOR_DNI 
+	JOIN DATAZO.repartidor REP ON REP.id_persona = P_REP.id_persona
+	-- otros datos
+	JOIN DATAZO.estado EST ON EST.descripcion = MASTR.PEDIDO_ESTADO 
+	JOIN DATAZO.medio_de_pago MP ON MP.nro_tarjeta = MASTR.MEDIO_PAGO_NRO_TARJETA 
+	-- direccion origen
+	JOIN DATAZO.local_ LOC ON LOC.nombre = MASTR.LOCAL_NOMBRE
+	-- direccion destino
+	JOIN DATAZO.provincia PROV ON PROV.nombre_provincia = MASTR.DIRECCION_USUARIO_PROVINCIA
+	JOIN DATAZO.localidad LOCALI ON LOCALI.nombre_localidad = MASTR.DIRECCION_USUARIO_LOCALIDAD AND PROV.id_provincia = LOCALI.id_provincia
+	JOIN DATAZO.direccion DIR ON DIR.direccion = MASTR.DIRECCION_USUARIO_DIRECCION AND DIR.localidad = LOCALI.id_localidad
+	WHERE MASTR.PEDIDO_NRO IS NOT NULL;
 
--- insert de pedido producto
-INSERT INTO DATAZO.pedido_productos (id_pedido, id_envio, id_local, tarifa_servicio, total_pedido, pedido_total_cupones)
-SELECT DISTINCT TMP.pedido_nro, ENV.id_envio, TMP.localId, TMP.tarifa, TMP.totalPedido, TMP.cupones  FROM DATAZO.[#temporal_pedido_productos] TMP
-JOIN DATAZO.envio ENV ON  ENV.fecha_pedido = TMP.fecha_pedido AND ENV.id_usuario = TMP.[user] AND ENV.id_repartidor = TMP.repartidor
-;
+	-- SELECT * FROM DATAZO.[#temporal_pedido_productos] 
 
--- select * from DATAZO.envio
+	-- SELECT * 
+	-- FROM gd_esquema.Maestra MASTR
+	-- JOIN DATAZO.persona P_USR ON P_USR.DNI = MASTR.USUARIO_DNI
+	-- JOIN DATAZO.usuario USR ON USR.id_persona = P_USR.id_persona
+	-- -- repartidor
+	-- JOIN DATAZO.persona P_REP ON P_REP.DNI = MASTR.REPARTIDOR_DNI 
+	-- JOIN DATAZO.repartidor REP ON REP.id_persona = P_REP.id_persona
+	-- WHERE MASTR.PEDIDO_NRO IS NOT NULL
+
+	-- SELECT * 
+	-- FROM gd_esquema.Maestra MASTR
+	-- JOIN DATAZO.pedido_productos as pp ON pp.id_pedido = MASTR.PEDIDO_NRO 
+	-- WHERE MASTR.RECLAMO_NRO IS NOT NULL
+
+	-- SELECT PEDIDO_NRO FROM gd_esquema.Maestra WHERE PEDIDO_NRO IS NOT NULL
+
+	-- SELECT * FROM DATAZO.pedido_productos
+
+	-- SELECT REPARTIDOR_DNI FROM gd_esquema.Maestra WHERE REPARTIDOR_DNI IS NOT NULL AND PEDIDO_NRO IS NOT NULL
+
+	-- SELECT * FROM DATAZO.repartidor
+
+	-- insert de envio
+	INSERT INTO DATAZO.envio(id_usuario, id_repartidor, id_estado, id_medioPago, precio_envio, propina, observaciones,
+										fecha_pedido, fecha_entrega, tiempo_estimado_entrega, calificacion, dir_origen, dir_destino)
+	SELECT DISTINCT TMP.[user], TMP.repartidor, TMP.estado, TMP.medioPago, TMP.precioEnvio, TMP.propina, TMP.observacion, TMP.fecha_pedido,
+			TMP.fecha_entrega, TMP.t_estimado, TMP.calificacion, TMP.direccion_orig, TMP.direccion_dest
+	FROM DATAZO.[#temporal_pedido_productos] TMP;
+
+	-- insert de pedido producto
+	INSERT INTO DATAZO.pedido_productos (id_pedido, id_envio, id_local, tarifa_servicio, total_pedido, pedido_total_cupones)
+	SELECT DISTINCT TMP.pedido_nro, ENV.id_envio, TMP.localId, TMP.tarifa, TMP.totalPedido, TMP.cupones  FROM DATAZO.[#temporal_pedido_productos] TMP
+	JOIN DATAZO.envio ENV ON  ENV.fecha_pedido = TMP.fecha_pedido AND ENV.id_usuario = TMP.[user] AND ENV.id_repartidor = TMP.repartidor
+	;
+
+	DROP TABLE DATAZO.[#temporal_pedido_productos] 
+	PRINT 'pedidos de producto migrados'
+END
+GO
 
 
 
-
--- SELECT TMP.pedido_nro,count(env.id_envio), TMP.fecha_pedido FROM DATAZO.[#temporal_pedido_productos] TMP
--- JOIN DATAZO.envio ENV ON  ENV.fecha_pedido = TMP.fecha_pedido AND ENV.id_usuario = TMP.[user] AND ENV.id_repartidor = TMP.repartidor
--- GROUP BY TMP.pedido_nro, TMP.fecha_pedido ORDER BY 2 DESC
-
-
--- select * from DATAZO.[#temporal_pedido_productos] WHERE pedido_nro = 42628
--- SELECT * FROM DATAZO.envio WHERE fecha_pedido = '2023-10-08 19:00:00.960'
-
--- SELECT fecha_pedido, COUNT(id_envio) FROM DATAZO.envio GROUP BY fecha_pedido ORDER BY 2 DESC
-
-
-
-DROP TABLE DATAZO.[#temporal_pedido_productos] 
 
 
 /*Parte 4*/
  
-INSERT INTO DATAZO.producto_por_local (codigo_producto, id_local, precio)
-SELECT  DISTINCT p.codigo,l.id_local, MASTR.PRODUCTO_LOCAL_PRECIO
-FROM gd_esquema.Maestra MASTR
-JOIN DATAZO.producto p ON p.codigo =  MASTR.PRODUCTO_LOCAL_CODIGO
-JOIN DATAZO.local_ l ON l.nombre =  MASTR.LOCAL_NOMBRE
 
-INSERT INTO DATAZO.horario ( id_local, hora_apertuta, hora_cierre, id_dia)
-SELECT DISTINCT l.id_local, HORARIO_LOCAL_HORA_APERTURA, HORARIO_LOCAL_HORA_CIERRE, d.id_dia
-FROM gd_esquema.Maestra
-JOIN DATAZO.local_ l ON l.nombre =  LOCAL_NOMBRE
-JOIN DATAZO.dia d ON d.descripcion =  HORARIO_LOCAL_DIA
+CREATE PROCEDURE DATAZO.migrar_producto_por_local
+AS
+BEGIN
+	INSERT INTO DATAZO.producto_por_local (codigo_producto, id_local, precio)
+	SELECT  DISTINCT p.codigo,l.id_local, MASTR.PRODUCTO_LOCAL_PRECIO
+	FROM gd_esquema.Maestra MASTR
+	JOIN DATAZO.producto p ON p.codigo =  MASTR.PRODUCTO_LOCAL_CODIGO
+	JOIN DATAZO.local_ l ON l.nombre =  MASTR.LOCAL_NOMBRE
+	PRINT 'producto por local migrado'
+END
+GO
+
+
+
+
+CREATE PROCEDURE DATAZO.migrar_horario
+AS
+BEGIN
+	INSERT INTO DATAZO.horario ( id_local, hora_apertuta, hora_cierre, id_dia)
+	SELECT DISTINCT l.id_local, HORARIO_LOCAL_HORA_APERTURA, HORARIO_LOCAL_HORA_CIERRE, d.id_dia
+	FROM gd_esquema.Maestra
+	JOIN DATAZO.local_ l ON l.nombre =  LOCAL_NOMBRE
+	JOIN DATAZO.dia d ON d.descripcion =  HORARIO_LOCAL_DIA
+	PRINT 'horario migrado'
+END
+GO
 
 
 
 /*Parte 5*/
 
-INSERT INTO DATAZO.reclamo (nro_reclamo, id_pedido, tipo_reclamo, fecha, descripcion, fecha_solucion, estado, solucion, calificacion, id_usuario)
-SELECT MASTR.RECLAMO_NRO, pp.id_pedido, tr.id_tipo, MASTR.RECLAMO_FECHA, MASTR.RECLAMO_DESCRIPCION, MASTR.RECLAMO_FECHA_SOLUCION, MASTR.RECLAMO_ESTADO, MASTR.RECLAMO_SOLUCION, MASTR.RECLAMO_CALIFICACION, u.id_usuario
-FROM gd_esquema.Maestra MASTR
-JOIN DATAZO.pedido_productos as pp ON pp.id_pedido = MASTR.PEDIDO_NRO 
-JOIN DATAZO.tipo_reclamo as tr ON tr.descripcion = MASTR.RECLAMO_TIPO
-JOIN DATAZO.persona as p ON  p.DNI = MASTR.USUARIO_DNI 
-JOIN DATAZO.usuario as u ON u.id_persona = p.id_persona
-WHERE MASTR.RECLAMO_NRO IS NOT NULL
+CREATE PROCEDURE DATAZO.migrar_reclamo
+AS
+BEGIN
+	INSERT INTO DATAZO.reclamo (nro_reclamo, id_pedido, tipo_reclamo, fecha, descripcion, fecha_solucion, estado, solucion, calificacion, id_usuario)
+	SELECT MASTR.RECLAMO_NRO, pp.id_pedido, tr.id_tipo, MASTR.RECLAMO_FECHA, MASTR.RECLAMO_DESCRIPCION, MASTR.RECLAMO_FECHA_SOLUCION, MASTR.RECLAMO_ESTADO, MASTR.RECLAMO_SOLUCION, MASTR.RECLAMO_CALIFICACION, u.id_usuario
+	FROM gd_esquema.Maestra MASTR
+	JOIN DATAZO.pedido_productos as pp ON pp.id_pedido = MASTR.PEDIDO_NRO 
+	JOIN DATAZO.tipo_reclamo as tr ON tr.descripcion = MASTR.RECLAMO_TIPO
+	JOIN DATAZO.persona as p ON  p.DNI = MASTR.USUARIO_DNI 
+	JOIN DATAZO.usuario as u ON u.id_persona = p.id_persona
+	WHERE MASTR.RECLAMO_NRO IS NOT NULL
+
+	PRINT 'reclamo migrado'
+END
+GO
 
 
 
 
-INSERT INTO DATAZO.cupon_por_pedido (nro_cupon, id_pedido)
-SELECT cd.nro, pp.id_pedido
-FROM gd_esquema.Maestra MASTR
-JOIN DATAZO.cupon_descuento cd ON cd.nro =  MASTR.CUPON_NRO 
-JOIN DATAZO.pedido_productos as pp ON pp.id_pedido = MASTR.PEDIDO_NRO
-WHERE MASTR.CUPON_NRO IS NOT NULL
+
+CREATE PROCEDURE DATAZO.migrar_cupon_por_pedido
+AS
+BEGIN
+	INSERT INTO DATAZO.cupon_por_pedido (nro_cupon, id_pedido)
+	SELECT cd.nro, pp.id_pedido
+	FROM gd_esquema.Maestra MASTR
+	JOIN DATAZO.cupon_descuento cd ON cd.nro =  MASTR.CUPON_NRO 
+	JOIN DATAZO.pedido_productos as pp ON pp.id_pedido = MASTR.PEDIDO_NRO
+	WHERE MASTR.CUPON_NRO IS NOT NULL
+	PRINT 'cupon por pedido migrado'
+END
+GO
 
 
-INSERT INTO DATAZO.producto_por_pedido (id_pedido, codigo_producto, id_local, cantidad, total_producto)
-SELECT  pp.id_pedido, p.codigo, l.id_local, MASTR.PRODUCTO_CANTIDAD, MASTR.PRODUCTO_LOCAL_PRECIO * MASTR.PRODUCTO_CANTIDAD 
-FROM gd_esquema.Maestra MASTR
-JOIN DATAZO.pedido_productos as pp ON pp.id_pedido = MASTR.PEDIDO_NRO
-JOIN DATAZO.producto p ON p.codigo =  MASTR.PRODUCTO_LOCAL_CODIGO
-JOIN DATAZO.local_ l ON l.nombre =  MASTR.LOCAL_NOMBRE
+
+CREATE PROCEDURE DATAZO.migrar_producto_por_pedido
+AS
+BEGIN
+	INSERT INTO DATAZO.producto_por_pedido (id_pedido, codigo_producto, id_local, cantidad, total_producto)
+	SELECT  pp.id_pedido, p.codigo, l.id_local, MASTR.PRODUCTO_CANTIDAD, MASTR.PRODUCTO_LOCAL_PRECIO * MASTR.PRODUCTO_CANTIDAD 
+	FROM gd_esquema.Maestra MASTR
+	JOIN DATAZO.pedido_productos as pp ON pp.id_pedido = MASTR.PEDIDO_NRO
+	JOIN DATAZO.producto p ON p.codigo =  MASTR.PRODUCTO_LOCAL_CODIGO
+	JOIN DATAZO.local_ l ON l.nombre =  MASTR.LOCAL_NOMBRE
+	PRINT 'producto por pedido migrado'
+END
+GO
 
 
 
 /*Parte 6*/
 -- cupones por reclamo
-SELECT MASTR.CUPON_RECLAMO_NRO, U.id_usuario, MASTR.RECLAMO_NRO, MASTR.CUPON_RECLAMO_MONTO, 
-		MASTR.CUPON_RECLAMO_FECHA_ALTA, MASTR.CUPON_RECLAMO_FECHA_VENCIMIENTO, MASTR.CUPON_RECLAMO_TIPO
-		 INTO DATAZO.#temporalCuponesDesc 
-		FROM gd_esquema.Maestra MASTR
-JOIN DATAZO.persona P ON  P.DNI = MASTR.USUARIO_DNI 
-JOIN DATAZO.usuario U ON U.id_persona = P.id_persona
-WHERE MASTR.CUPON_RECLAMO_NRO IS NOT NULL
+
+
+CREATE PROCEDURE DATAZO.migrar_cupones_descuento_por_reclamo
+AS
+BEGIN
+--  SELECT DISTINCT RECLAMO_NRO FROM gd_esquema.Maestra WHERE RECLAMO_NRO IS NOT NULL
+
+	SELECT MASTR.CUPON_RECLAMO_NRO, U.id_usuario, MASTR.RECLAMO_NRO, MASTR.CUPON_RECLAMO_MONTO, 
+			MASTR.CUPON_RECLAMO_FECHA_ALTA, MASTR.CUPON_RECLAMO_FECHA_VENCIMIENTO, MASTR.CUPON_RECLAMO_TIPO
+			INTO DATAZO.#temporalCuponesDesc 
+			FROM gd_esquema.Maestra MASTR
+	JOIN DATAZO.persona P ON  P.DNI = MASTR.USUARIO_DNI 
+	JOIN DATAZO.usuario U ON U.id_persona = P.id_persona
+	WHERE MASTR.CUPON_RECLAMO_NRO IS NOT NULL
+
+	-- SELECT DISTINCT nro_reclamo FROM DATAZO.reclamo
 
 
 
-INSERT INTO DATAZO.cupon_descuento(nro, id_usuario, monto, fecha_alta,  fecha_vencimiento, tipo)
-SELECT CUPON_RECLAMO_NRO, id_usuario, CUPON_RECLAMO_MONTO, CUPON_RECLAMO_FECHA_ALTA, CUPON_RECLAMO_FECHA_VENCIMIENTO, CUPON_RECLAMO_TIPO
-FROM DATAZO.#temporalCuponesDesc
+	INSERT INTO DATAZO.cupon_descuento(nro, id_usuario, monto, fecha_alta,  fecha_vencimiento, tipo)
+	SELECT CUPON_RECLAMO_NRO, id_usuario, CUPON_RECLAMO_MONTO, CUPON_RECLAMO_FECHA_ALTA, CUPON_RECLAMO_FECHA_VENCIMIENTO, CUPON_RECLAMO_TIPO
+	FROM DATAZO.#temporalCuponesDesc
+	-- ORDER BY CUPON_RECLAMO_NRO
+
+	-- SELECT * FROM DATAZO.cupon_descuento ORDER BY nro
+
+	-- SELECT DISTINCT RECLAMO_NRO FROM DATAZO.#temporalCuponesDesc
+
+	-- SELECT DISTINCT RECLAMO_NRO FROM gd_esquema.Maestra
+	-- select * from DATAZO.reclamo
+
+	INSERT INTO DATAZO.cupon_por_reclamo (id_cupon, nro_cupon, id_usuario, nro_reclamo)
+	SELECT CD.id_cupon, TMP.CUPON_RECLAMO_NRO, TMP.id_usuario, TMP.RECLAMO_NRO
+	FROM DATAZO.#temporalCuponesDesc TMP
+	JOIN DATAZO.cupon_descuento CD ON CD.nro = TMP.CUPON_RECLAMO_NRO AND CD.id_usuario = TMP.id_usuario
+	ORDER BY CUPON_RECLAMO_NRO
 
 
-INSERT INTO DATAZO.cupon_por_reclamo (id_cupon, nro_cupon, id_usuario, nro_reclamo)
-SELECT CD.id_cupon, TMP.CUPON_RECLAMO_NRO, TMP.id_usuario, TMP.RECLAMO_NRO
-FROM DATAZO.#temporalCuponesDesc TMP
-JOIN DATAZO.cupon_descuento CD ON CD.nro = TMP.CUPON_RECLAMO_NRO AND CD.id_usuario = TMP.id_usuario
+	DROP TABLE DATAZO.#temporalCuponesDesc
 
+	PRINT 'cupones de descuento por reclamo migrado'
+END
+GO
 
-DROP TABLE DATAZO.#temporalCuponesDesc
+-- select * from DATAZO.localidad
 
--- select * from gd_esquema.Maestra where CUPON_RECLAMO_NRO = 81980460 or CUPON_NRO = 81980460
+BEGIN TRANSACTION
+ BEGIN TRY
+	EXECUTE DATAZO.migrar_personas
+	EXECUTE DATAZO.migrar_productos
+	EXECUTE DATAZO.migrar_tipo_reclamo
+	EXECUTE DATAZO.migrar_tipo_medio_pago
+	EXECUTE DATAZO.migrar_tipo_de_paquete
+	EXECUTE DATAZO.migrar_estado
+	EXECUTE DATAZO.migrar_tipos_de_local
+	EXECUTE DATAZO.migrar_provincias
+	EXECUTE DATAZO.migrar_tipo_movilidad
+	EXECUTE DATAZO.migrar_dia
+	EXECUTE DATAZO.migrar_operadores
+	EXECUTE DATAZO.migrar_usuarios
+	EXECUTE DATAZO.migrar_localidades
+	EXECUTE DATAZO.migrar_repartidores
+	EXECUTE DATAZO.migrar_medios_de_pago
+	EXECUTE DATAZO.migrar_cupones_de_descuento
+	EXECUTE DATAZO.migrar_direcciones
+	EXECUTE DATAZO.migrar_direcciones_por_persona
+	EXECUTE DATAZO.migrar_envios_de_mensajeria
+	EXECUTE DATAZO.migrar_locales
+	EXECUTE DATAZO.migrar_pedidos_de_productos
+	EXECUTE DATAZO.migrar_producto_por_local
+	EXECUTE DATAZO.migrar_horario
+	EXECUTE DATAZO.migrar_reclamo
+	EXECUTE DATAZO.migrar_cupon_por_pedido
+	EXECUTE DATAZO.migrar_producto_por_pedido
+	EXECUTE DATAZO.migrar_cupones_descuento_por_reclamo
+END TRY
+BEGIN CATCH
+    ROLLBACK TRANSACTION;
+	THROW 50001, 'Error al migrar las tablas, verifique que las nuevas tablas se encuentren vac�as o bien ejecute un DROP de todas las nuevas tablas y vuelva a intentarlo.',1;
+END CATCH
 
-
--- select distinct CUPON_NRO, CUPON_RECLAMO_NRO, PEDIDO_NRO, RECLAMO_NRO from gd_esquema.Maestra where RECLAMO_NRO is not null
+   IF (EXISTS (SELECT 1 FROM DATAZO.envio)
+   AND EXISTS (SELECT 1 FROM DATAZO.cupon_descuento)
+   AND EXISTS (SELECT 1 FROM DATAZO.cupon_por_pedido)
+   AND EXISTS (SELECT 1 FROM DATAZO.cupon_por_reclamo)
+   AND EXISTS (SELECT 1 FROM DATAZO.dia)
+   AND EXISTS (SELECT 1 FROM DATAZO.direccion)
+   AND EXISTS (SELECT 1 FROM DATAZO.direccionesXpersona)
+   AND EXISTS (SELECT 1 FROM DATAZO.envio)
+   AND EXISTS (SELECT 1 FROM DATAZO.envio_de_mensajeria)
+   AND EXISTS (SELECT 1 FROM DATAZO.estado)
+   AND EXISTS (SELECT 1 FROM DATAZO.horario)
+   AND EXISTS (SELECT 1 FROM DATAZO.local_)
+   AND EXISTS (SELECT 1 FROM DATAZO.localidad)
+   AND EXISTS (SELECT 1 FROM DATAZO.medio_de_pago)
+   AND EXISTS (SELECT 1 FROM DATAZO.operador)
+   AND EXISTS (SELECT 1 FROM DATAZO.pedido_productos)
+   AND EXISTS (SELECT 1 FROM DATAZO.persona)
+   AND EXISTS (SELECT 1 FROM DATAZO.producto)
+   AND EXISTS (SELECT 1 FROM DATAZO.producto_por_local)
+   AND EXISTS (SELECT 1 FROM DATAZO.producto_por_pedido)
+   AND EXISTS (SELECT 1 FROM DATAZO.provincia)
+   AND EXISTS (SELECT 1 FROM DATAZO.reclamo)
+   AND EXISTS (SELECT 1 FROM DATAZO.repartidor)
+   AND EXISTS (SELECT 1 FROM DATAZO.tipo_local)
+   AND EXISTS (SELECT 1 FROM DATAZO.tipo_medio_pago)
+   AND EXISTS (SELECT 1 FROM DATAZO.tipo_movilidad)
+   AND EXISTS (SELECT 1 FROM DATAZO.tipo_paquete)
+   AND EXISTS (SELECT 1 FROM DATAZO.tipo_reclamo)
+   AND EXISTS (SELECT 1 FROM DATAZO.usuario))
+	-- IF(1 = 1)
+   
+   BEGIN
+	PRINT 'Tablas migradas correctamente.';
+	COMMIT TRANSACTION;
+   END
+	 ELSE
+   BEGIN
+    ROLLBACK TRANSACTION;
+	THROW 50002, 'Hubo un error al migrar una o m�s tablas. Todos los cambios fueron deshechos, ninguna tabla fue cargada en la base.',1;
+   END
+   
+GO
