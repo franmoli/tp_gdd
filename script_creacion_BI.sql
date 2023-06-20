@@ -375,7 +375,7 @@ ALTER TABLE DATAZO.hecho_envio_de_mensajeria
 GO
 
 CREATE TABLE DATAZO.hecho_reclamo(nro_reclamo DECIMAL(18,0) NOT NULL IDENTITY(1,1), id_pedido INT, tipo_reclamo INT, dia_fecha INT, tiempo_fecha INT,
-					dia_solucion INT, tiempo_solucion INT, id_usuario INT, id_operador INT)
+					dia_solucion INT, tiempo_solucion INT, id_usuario INT, id_operador INT, id_estado INT)
 
 ALTER TABLE DATAZO.hecho_reclamo
 	ADD CONSTRAINT pk_hecho_reclamo PRIMARY KEY (nro_reclamo),
@@ -387,6 +387,7 @@ ALTER TABLE DATAZO.hecho_reclamo
 	CONSTRAINT fk_hecho_reclamo_tiempo_fecha FOREIGN KEY (tiempo_fecha) REFERENCES DATAZO.dimension_tiempo(id_tiempo),
 	CONSTRAINT fk_hecho_reclamo_dia_solucion FOREIGN KEY (dia_solucion) REFERENCES DATAZO.dimension_dia(id_dia),
 	CONSTRAINT fk_hecho_reclamo_tiempo_solucion FOREIGN KEY (tiempo_solucion) REFERENCES DATAZO.dimension_tiempo(id_tiempo)
+	CONSTRAINT fk_hecho_reclamo_estado FOREIGN KEY (id_estado) REFERENCES DATAZO.dimension_estado_reclamo(id_estado)
 GO
 
 CREATE TABLE DATAZO.hecho_cupon_de_descuento(id_cupon INT IDENTITY(1,1) NOT NULL, nro DECIMAL(18,2) NOT NULL, id_usuario INT NOT NULL, 
