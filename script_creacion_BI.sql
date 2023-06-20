@@ -106,12 +106,14 @@ IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.hecho
 	DELETE FROM DATAZO.hecho_cupon_x_reclamo
 GO
 
-
 -- DROPS
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.hecho_envio') AND type in (N'U'))
+	DROP TABLE DATAZO.hecho_envio
+GO
+
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.dimension_tiempo') AND type in (N'U'))
 	DROP TABLE DATAZO.dimension_tiempo
 GO
-
 
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.dimension_local_') AND type in (N'U'))
 	DROP TABLE DATAZO.dimension_local_
@@ -183,10 +185,6 @@ GO
 
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.hecho_persona') AND type in (N'U'))
 	DROP TABLE DATAZO.hecho_persona
-GO
-
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.hecho_envio') AND type in (N'U'))
-	DROP TABLE DATAZO.hecho_envio
 GO
 
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.hecho_pedido_productos') AND type in (N'U'))
@@ -346,7 +344,7 @@ ALTER TABLE DATAZO.hecho_envio
 	ADD CONSTRAINT pk_hecho_envio PRIMARY KEY (id_envio),
 	CONSTRAINT fk_hecho_envio_usuario FOREIGN KEY (id_usuario) REFERENCES DATAZO.hecho_usuario(id_usuario),
 	CONSTRAINT fk_hecho_envio_repartidor FOREIGN KEY (id_repartidor) REFERENCES DATAZO.hecho_repartidor(id_repartidor),
-	CONSTRAINT fk_hecho_envio_medioPago FOREIGN KEY (id_medioPago) REFERENCES DATAZO.dimension_tipo_medio_pago (id_medioPago),
+	CONSTRAINT fk_hecho_envio_medioPago FOREIGN KEY (id_medioPago) REFERENCES DATAZO.dimension_tipo_medio_pago (id_tipo_medio_pago),
 	CONSTRAINT fk_hecho_envio_dir_origen FOREIGN KEY (dir_origen) REFERENCES DATAZO.dimension_provincia_localidad (id_provincia_localidad),
 	CONSTRAINT fk_hecho_envio_dir_destino FOREIGN KEY (dir_destino) REFERENCES DATAZO.dimension_provincia_localidad (id_provincia_localidad),
 	CONSTRAINT fk_hecho_envio_dia_pedido FOREIGN KEY (dia_pedido) REFERENCES DATAZO.dimension_dia(id_dia),
@@ -421,38 +419,55 @@ GO
 --migrar  dimensiones
 
 --Local
-INSERT INTO DATAZO.dimension_local_ (nombre)
-SELECT  DISTINCT LOCAL_NOMBRE
-from gd_esquema.Maestra
-where LOCAL_NOMBRE IS NOT NULL
--- categ tipo local // la categoria es la desc?????
+CREATE PROCEDURE DATAZO.migrar_dim_local
+AS
+BEGIN
+	INSERT INTO DATAZO.dimension_local_ (nombre)
+	SELECT  DISTINCT LOCAL_NOMBRE
+	from gd_esquema.Maestra
+	where LOCAL_NOMBRE IS NOT NULL
+	-- categ tipo local // la categoria es la desc?????
+END
+GO
 
-INSERT INTO DATAZO.dimension_categoria_tipo_local (categoria, tipo)
-SELECT  DISTINCT LOCAL_TIPO, LOCAL_DESCRIPCION
-from gd_esquema.Maestra
-where LOCAL_TIPO  IS NOT NULL and LOCAL_DESCRIPCION IS NOT NULL
+CREATE PROCEDURE DATAZO.migrar_dim_categoria_tipo_local
+AS
+BEGIN
+	INSERT INTO DATAZO.dimension_categoria_tipo_local (categoria, tipo)
+	SELECT  DISTINCT LOCAL_TIPO, LOCAL_DESCRIPCION
+	from gd_esquema.Maestra
+	where LOCAL_TIPO  IS NOT NULL and LOCAL_DESCRIPCION IS NOT NULL
+END
+GO
 
---dimension_rango_horario/ pasar a decimal?
+CREATE PROCEDURE DATAZO.migrar_dim_rango_horario
+AS
+BEGIN
+	--dimension_rango_horario/ pasar a decimal?
+	INSERT INTO DATAZO.dimension_rango_horario (horaInicial, horaFinal)
+	SELECT  DISTINCT HORARIO_LOCAL_HORA_APERTURA, HORARIO_LOCAL_HORA_CIERRE
+	from gd_esquema.Maestra
+	where HORARIO_LOCAL_HORA_APERTURA  IS NOT NULL and HORARIO_LOCAL_HORA_CIERRE IS NOT NULL
+END
+GO
 
-INSERT INTO DATAZO.dimension_rango_horario (horaInicial, horaFinal)
-SELECT  DISTINCT HORARIO_LOCAL_HORA_APERTURA, HORARIO_LOCAL_HORA_CIERRE
-from gd_esquema.Maestra
-where HORARIO_LOCAL_HORA_APERTURA  IS NOT NULL and HORARIO_LOCAL_HORA_CIERRE IS NOT NULL
 
---dimension_estado_reclamo / solo aparece uno otro en null con distinct
+CREATE PROCEDURE DATAZO.migrar_dim_estado_reclamo
+AS
+BEGIN
+	--dimension_estado_reclamo / solo aparece uno otro en null con distinct
+	INSERT INTO DATAZO.dimension_estado_reclamo (descripcion )
+	SELECT  DISTINCT RECLAMO_ESTADO
+	from gd_esquema.Maestra
+	where RECLAMO_ESTADO  IS NOT NULL 
 
-INSERT INTO DATAZO.dimension_estado_reclamo (descripcion )
-SELECT  DISTINCT RECLAMO_ESTADO
-from gd_esquema.Maestra
-where RECLAMO_ESTADO  IS NOT NULL 
-
---dimension_tipo_reclamo
-
-INSERT INTO DATAZO.dimension_estado_reclamo (descripcion )
-SELECT  DISTINCT RECLAMO_ESTADO
-from gd_esquema.Maestra
-where RECLAMO_ESTADO  IS NOT NULL 
-
+	--dimension_tipo_reclamo
+	INSERT INTO DATAZO.dimension_estado_reclamo (descripcion )
+	SELECT  DISTINCT RECLAMO_ESTADO
+	from gd_esquema.Maestra
+	where RECLAMO_ESTADO  IS NOT NULL 
+END
+GO
 
 --dimension_rango_etario
 
@@ -461,54 +476,123 @@ where RECLAMO_ESTADO  IS NOT NULL
 --from gd_esquema.Maestra
 --where RECLAMO_ESTADO  IS NOT NULL 
 
+CREATE PROCEDURE DATAZO.migrar_dim_tipo_movilidad
+AS
+BEGIN
+	--dimension_tipo_movilidad
+	INSERT INTO DATAZO.dimension_tipo_movilidad (descripcion )
+	SELECT  DISTINCT REPARTIDOR_TIPO_MOVILIDAD
+	from gd_esquema.Maestra
+	where REPARTIDOR_TIPO_MOVILIDAD  IS NOT NULL 
+END
+GO
 
---dimension_tipo_movilidad
-INSERT INTO DATAZO.dimension_tipo_movilidad (descripcion )
-SELECT  DISTINCT REPARTIDOR_TIPO_MOVILIDAD
-from gd_esquema.Maestra
-where REPARTIDOR_TIPO_MOVILIDAD  IS NOT NULL 
+CREATE PROCEDURE DATAZO.migrar_dim_dia
+AS 
+BEGIN 
+	--dimension_dia
+	INSERT INTO DATAZO.dimension_dia (descripcion )
+	SELECT  left(HORARIO_LOCAL_DIA,1)
+	from gd_esquema.Maestra
+	where HORARIO_LOCAL_DIA  IS NOT NULL 
+	group by HORARIO_LOCAL_DIA -- en vez d un distinct x el martes y miercoles son ambos M
+END 
+GO
 
---dimension_dia
-INSERT INTO DATAZO.dimension_dia (descripcion )
-SELECT  left(HORARIO_LOCAL_DIA,1)
-from gd_esquema.Maestra
-where HORARIO_LOCAL_DIA  IS NOT NULL 
-group by HORARIO_LOCAL_DIA -- en vez d un distinct x el martes y miercoles son ambos M
+CREATE PROCEDURE DATAZO.migrar_dim_tipo_paquete
+AS
+BEGIN
+	--dimension_tipo_paquete
+	INSERT INTO DATAZO.dimension_tipo_paquete (tipo )
+	SELECT  DISTINCT PAQUETE_TIPO
+	from gd_esquema.Maestra
+	where PAQUETE_TIPO  IS NOT NULL 
+END
+GO
+
+CREATE PROCEDURE DATAZO.migrar_dim_estado_mensajeria
+AS
+BEGIN
+	--dimension_estado_mensajeria
+	INSERT INTO DATAZO.dimension_estado_mensajeria (descripcion )
+	SELECT  DISTINCT ENVIO_MENSAJERIA_ESTADO
+	from gd_esquema.Maestra
+	where ENVIO_MENSAJERIA_ESTADO  IS NOT NULL 
+END
+GO
+
+CREATE PROCEDURE DATAZO.migrar_dim_tipo_medio_pago
+AS
+BEGIN
+	--dimension_tipo_medio_pago
+	INSERT INTO DATAZO.dimension_tipo_medio_pago (descripcion )
+	SELECT  DISTINCT MEDIO_PAGO_TIPO
+	from gd_esquema.Maestra
+	where MEDIO_PAGO_TIPO  IS NOT NULL 
+END
+GO
+
+CREATE PROCEDURE DATAZO.migrar_dim_estado_pedido
+AS
+BEGIN
+	--dimension_estado_pedido
+	INSERT INTO DATAZO.dimension_estado_pedido (descripcion )
+	SELECT  DISTINCT PEDIDO_ESTADO
+	from gd_esquema.Maestra
+	where PEDIDO_ESTADO  IS NOT NULL 
+END
+GO
 
 
---dimension_tipo_paquete
-INSERT INTO DATAZO.dimension_tipo_paquete (tipo )
-SELECT  DISTINCT PAQUETE_TIPO
-from gd_esquema.Maestra
-where PAQUETE_TIPO  IS NOT NULL 
+CREATE PROCEDURE DATAZO.migrar_dim_provincia_localidad
+AS
+BEGIN
+	--dimension_provincia_localidad
+	INSERT INTO DATAZO.dimension_provincia_localidad (provincia , localidad )
+	SELECT distinct LOCAL_PROVINCIA, LOCAL_LOCALIDAD from gd_esquema.Maestra 
+	where LOCAL_PROVINCIA  IS NOT NULL and LOCAL_LOCALIDAD IS NOT NULL
+	UNION
+	SELECT  DISTINCT ENVIO_MENSAJERIA_PROVINCIA, ENVIO_MENSAJERIA_LOCALIDAD from gd_esquema.Maestra
+	where ENVIO_MENSAJERIA_PROVINCIA  IS NOT NULL and ENVIO_MENSAJERIA_LOCALIDAD IS NOT NULL
+	UNION
+	SELECT  DISTINCT DIRECCION_USUARIO_PROVINCIA, DIRECCION_USUARIO_LOCALIDAD from gd_esquema.Maestra
+	where DIRECCION_USUARIO_PROVINCIA  IS NOT NULL and DIRECCION_USUARIO_LOCALIDAD IS NOT NULL
+END
+GO
 
---dimension_estado_mensajeria
-INSERT INTO DATAZO.dimension_estado_mensajeria (descripcion )
-SELECT  DISTINCT ENVIO_MENSAJERIA_ESTADO
-from gd_esquema.Maestra
-where ENVIO_MENSAJERIA_ESTADO  IS NOT NULL 
+BEGIN TRANSACTION
+ BEGIN TRY
+ 	SELECT 1
+	-- EXECUTE DATAZO.migrar_dim_local
+	-- EXECUTE DATAZO.migrar_dim_categoria_tipo_local
+	-- EXECUTE DATAZO.migrar_dim_rango_horario
+	-- EXECUTE DATAZO.migrar_dim_estado_reclamo
+	-- EXECUTE DATAZO.migrar_dim_tipo_movilidad
+	-- EXECUTE DATAZO.migrar_dim_dia
+	-- EXECUTE DATAZO.migrar_dim_tipo_paquete
+	-- EXECUTE DATAZO.migrar_dim_estado_mensajeria
+	-- EXECUTE DATAZO.migrar_dim_tipo_medio_pago
+	-- EXECUTE DATAZO.migrar_dim_estado_pedido
+	-- EXECUTE DATAZO.migrar_dim_provincia_localidad
+END TRY
+BEGIN CATCH
+    ROLLBACK TRANSACTION;
+	THROW 50001, 'Error al migrar las tablas, verifique que las nuevas tablas se encuentren vac�as o bien ejecute un DROP de todas las nuevas tablas y vuelva a intentarlo.',1;
+END CATCH
 
---dimension_tipo_medio_pago
-
-INSERT INTO DATAZO.dimension_tipo_medio_pago (descripcion )
-SELECT  DISTINCT MEDIO_PAGO_TIPO
-from gd_esquema.Maestra
-where MEDIO_PAGO_TIPO  IS NOT NULL 
-
---dimension_estado_pedido
-INSERT INTO DATAZO.dimension_estado_pedido (descripcion )
-SELECT  DISTINCT PEDIDO_ESTADO
-from gd_esquema.Maestra
-where PEDIDO_ESTADO  IS NOT NULL 
-
---dimension_provincia_localidad
-
-INSERT INTO DATAZO.dimension_provincia_localidad (provincia , localidad )
-SELECT distinct LOCAL_PROVINCIA, LOCAL_LOCALIDAD from gd_esquema.Maestra 
-where LOCAL_PROVINCIA  IS NOT NULL and LOCAL_LOCALIDAD IS NOT NULL
-UNION
-SELECT  DISTINCT ENVIO_MENSAJERIA_PROVINCIA, ENVIO_MENSAJERIA_LOCALIDAD from gd_esquema.Maestra
-where ENVIO_MENSAJERIA_PROVINCIA  IS NOT NULL and ENVIO_MENSAJERIA_LOCALIDAD IS NOT NULL
-UNION
-SELECT  DISTINCT DIRECCION_USUARIO_PROVINCIA, DIRECCION_USUARIO_LOCALIDAD from gd_esquema.Maestra
-where DIRECCION_USUARIO_PROVINCIA  IS NOT NULL and DIRECCION_USUARIO_LOCALIDAD IS NOT NULL
+--    IF (EXISTS (SELECT 1 FROM DATAZO.envio)
+--    AND EXISTS (SELECT 1 FROM DATAZO.usuario)
+--    )
+	IF(1 = 1)
+   
+   BEGIN
+	PRINT 'Tablas migradas correctamente.';
+	COMMIT TRANSACTION;
+   END
+	 ELSE
+   BEGIN
+    ROLLBACK TRANSACTION;
+	THROW 50002, 'Hubo un error al migrar una o mas tablas. Todos los cambios fueron deshechos, ninguna tabla fue cargada en la base.',1;
+   END
+   
+GO
