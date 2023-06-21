@@ -276,7 +276,7 @@ ALTER TABLE DATAZO.dimension_categoria_tipo_local
 	ADD CONSTRAINT pk_dimension_categoria_tipo_local PRIMARY KEY (id_categoria_tipo_local)
 GO
 
-CREATE TABLE DATAZO.dimension_rango_horario(id_rango_horario INT NOT NULL IDENTITY(1,1), horaInicial INT, horaFinal INT)
+CREATE TABLE DATAZO.dimension_rango_horario(id_rango_horario INT NOT NULL IDENTITY(1,1), rangoHorario NVARCHAR(13))
 
 ALTER TABLE DATAZO.dimension_rango_horario
 	ADD CONSTRAINT pk_dimension_rango_horario PRIMARY KEY (id_rango_horario)
@@ -380,7 +380,7 @@ ALTER TABLE DATAZO.hecho_repartidor
 GO
 
 CREATE TABLE DATAZO.hecho_envio(id_envio INT IDENTITY(1,1), id_usuario INT, id_repartidor INT, id_estado INT, id_medioPago INT, precio_envio DECIMAL(18,2),
-					dia_pedido INT, tiempo_pedido INT, dia_entrega INT, tiempo_entrega INT, tiempo_estimado_entrega DECIMAL(18,2), calificacion DECIMAL(18,0), dir_origen INT, dir_destino INT)
+					fecha_pedido DATETIME, id_rango_horario_pedido INT, fecha_entrega DATETIME, id_rango_horario_entrega INT, tiempo_estimado_entrega DATETIME, calificacion DECIMAL(18,0), dir_origen INT, dir_destino INT)
 
 ALTER TABLE DATAZO.hecho_envio
 	ADD CONSTRAINT pk_hecho_envio PRIMARY KEY (id_envio),
@@ -389,10 +389,8 @@ ALTER TABLE DATAZO.hecho_envio
 	CONSTRAINT fk_hecho_envio_medioPago FOREIGN KEY (id_medioPago) REFERENCES DATAZO.dimension_tipo_medio_pago (id_tipo_medio_pago),
 	CONSTRAINT fk_hecho_envio_dir_origen FOREIGN KEY (dir_origen) REFERENCES DATAZO.dimension_provincia_localidad (id_provincia_localidad),
 	CONSTRAINT fk_hecho_envio_dir_destino FOREIGN KEY (dir_destino) REFERENCES DATAZO.dimension_provincia_localidad (id_provincia_localidad),
-	CONSTRAINT fk_hecho_envio_dia_pedido FOREIGN KEY (dia_pedido) REFERENCES DATAZO.dimension_dia(id_dia),
-	CONSTRAINT fk_hecho_envio_tiempo_pedido FOREIGN KEY (tiempo_pedido) REFERENCES DATAZO.dimension_tiempo(id_tiempo),
-	CONSTRAINT fk_hecho_envio_dia_entrega FOREIGN KEY (dia_entrega) REFERENCES DATAZO.dimension_dia(id_dia),
-	CONSTRAINT fk_hecho_envio_tiempo_entrega FOREIGN KEY (tiempo_entrega) REFERENCES DATAZO.dimension_tiempo(id_tiempo)
+	CONSTRAINT fk_hecho_envio_rango_horario_pedido FOREIGN KEY (rango_horario_pedido) REFERENCES DATAZO.dimension_rango_horario(id_rango_horario),
+	CONSTRAINT fk_hecho_envio_rango_horario_entrega FOREIGN KEY (rango_horario_entrega) REFERENCES DATAZO.dimension_rango_horario(id_rango_horario),
 GO
 
 
@@ -416,8 +414,8 @@ ALTER TABLE DATAZO.hecho_envio_de_mensajeria
 	CONSTRAINT fk_hecho_pedido_tipo_paquete FOREIGN KEY (tipo_paquete) REFERENCES DATAZO.dimension_tipo_paquete(id_tipo)
 GO
 
-CREATE TABLE DATAZO.hecho_reclamo(nro_reclamo DECIMAL(18,0) NOT NULL IDENTITY(1,1), id_pedido INT, tipo_reclamo INT, dia_fecha INT, tiempo_fecha INT,
-					dia_solucion INT, tiempo_solucion INT, id_usuario INT, id_operador INT, id_estado INT)
+CREATE TABLE DATAZO.hecho_reclamo(nro_reclamo DECIMAL(18,0) NOT NULL IDENTITY(1,1), id_pedido INT, tipo_reclamo INT, dia_inicio INT, tiempo_inicio INT,
+					dia_solucion INT, tiempo_solucion INT, id_usuario INT, id_operador INT, id_estado INT, horario_inicio DATETIME, horario_solucion DATETIME)
 
 ALTER TABLE DATAZO.hecho_reclamo
 	ADD CONSTRAINT pk_hecho_reclamo PRIMARY KEY (nro_reclamo),
@@ -425,8 +423,8 @@ ALTER TABLE DATAZO.hecho_reclamo
 	CONSTRAINT fk_hecho_reclamo_tipo_reclamo FOREIGN KEY (tipo_reclamo) REFERENCES DATAZO.dimension_tipo_reclamo (id_tipo),
 	CONSTRAINT fk_hecho_reclamo_usuario FOREIGN KEY (id_usuario) REFERENCES DATAZO.hecho_usuario (id_usuario),
 	CONSTRAINT fk_hecho_reclamo_operador FOREIGN KEY (id_operador) REFERENCES DATAZO.hecho_operador (id_operador),
-	CONSTRAINT fk_hecho_reclamo_dia_fecha FOREIGN KEY (dia_fecha) REFERENCES DATAZO.dimension_dia(id_dia),
-	CONSTRAINT fk_hecho_reclamo_tiempo_fecha FOREIGN KEY (tiempo_fecha) REFERENCES DATAZO.dimension_tiempo(id_tiempo),
+	CONSTRAINT fk_hecho_reclamo_dia_inicio FOREIGN KEY (dia_inicio) REFERENCES DATAZO.dimension_dia(id_dia),
+	CONSTRAINT fk_hecho_reclamo_tiempo_inicio FOREIGN KEY (tiempo_inicio) REFERENCES DATAZO.dimension_tiempo(id_tiempo),
 	CONSTRAINT fk_hecho_reclamo_dia_solucion FOREIGN KEY (dia_solucion) REFERENCES DATAZO.dimension_dia(id_dia),
 	CONSTRAINT fk_hecho_reclamo_tiempo_solucion FOREIGN KEY (tiempo_solucion) REFERENCES DATAZO.dimension_tiempo(id_tiempo),
 	CONSTRAINT fk_hecho_reclamo_estado FOREIGN KEY (id_estado) REFERENCES DATAZO.dimension_estado_reclamo(id_estado)
