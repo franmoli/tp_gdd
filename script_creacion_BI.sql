@@ -380,7 +380,8 @@ ALTER TABLE DATAZO.hecho_repartidor
 GO
 
 CREATE TABLE DATAZO.hecho_envio(id_envio INT IDENTITY(1,1), id_usuario INT, id_repartidor INT, id_estado INT, id_medioPago INT, precio_envio DECIMAL(18,2),
-					fecha_pedido DATETIME, id_rango_horario_pedido INT, fecha_entrega DATETIME, id_rango_horario_entrega INT, tiempo_estimado_entrega DATETIME, calificacion DECIMAL(18,0), dir_origen INT, dir_destino INT)
+					fecha_pedido DATETIME, dia_pedido INT, tiempo_pedido INT, id_rango_horario_pedido INT, fecha_entrega DATETIME,
+					dia_entrega INT, tiempo_entrega INT, id_rango_horario_entrega INT, tiempo_estimado_entrega DATETIME, calificacion DECIMAL(18,0), dir_origen INT, dir_destino INT)
 
 ALTER TABLE DATAZO.hecho_envio
 	ADD CONSTRAINT pk_hecho_envio PRIMARY KEY (id_envio),
@@ -389,8 +390,12 @@ ALTER TABLE DATAZO.hecho_envio
 	CONSTRAINT fk_hecho_envio_medioPago FOREIGN KEY (id_medioPago) REFERENCES DATAZO.dimension_tipo_medio_pago (id_tipo_medio_pago),
 	CONSTRAINT fk_hecho_envio_dir_origen FOREIGN KEY (dir_origen) REFERENCES DATAZO.dimension_provincia_localidad (id_provincia_localidad),
 	CONSTRAINT fk_hecho_envio_dir_destino FOREIGN KEY (dir_destino) REFERENCES DATAZO.dimension_provincia_localidad (id_provincia_localidad),
-	CONSTRAINT fk_hecho_envio_rango_horario_pedido FOREIGN KEY (rango_horario_pedido) REFERENCES DATAZO.dimension_rango_horario(id_rango_horario),
-	CONSTRAINT fk_hecho_envio_rango_horario_entrega FOREIGN KEY (rango_horario_entrega) REFERENCES DATAZO.dimension_rango_horario(id_rango_horario),
+	CONSTRAINT fk_hecho_envio_rango_horario_pedido FOREIGN KEY (id_rango_horario_pedido) REFERENCES DATAZO.dimension_rango_horario(id_rango_horario),
+	CONSTRAINT fk_hecho_envio_rango_horario_entrega FOREIGN KEY (id_rango_horario_entrega) REFERENCES DATAZO.dimension_rango_horario(id_rango_horario),
+	CONSTRAINT fk_hecho_envio_dia_pedido FOREIGN KEY (dia_pedido) REFERENCES DATAZO.dimension_dia(id_dia),
+	CONSTRAINT fk_hecho_envio_tiempo_pedido FOREIGN KEY (tiempo_pedido) REFERENCES DATAZO.dimension_tiempo(id_tiempo),
+	CONSTRAINT fk_hecho_envio_dia_entrega FOREIGN KEY (dia_entrega) REFERENCES DATAZO.dimension_dia(id_dia),
+	CONSTRAINT fk_hecho_envio_tiempo_entrega FOREIGN KEY (tiempo_entrega) REFERENCES DATAZO.dimension_tiempo(id_tiempo)
 GO
 
 
@@ -545,11 +550,10 @@ CREATE PROCEDURE DATAZO.migrar_dim_rango_horario
 AS
 BEGIN
 	--dimension_rango_horario/ pasar a decimal?
-	INSERT INTO DATAZO.dimension_rango_horario (horaInicial, horaFinal)
-	SELECT  DISTINCT HORARIO_LOCAL_HORA_APERTURA, HORARIO_LOCAL_HORA_CIERRE
-	from gd_esquema.Maestra
-	where HORARIO_LOCAL_HORA_APERTURA  IS NOT NULL and HORARIO_LOCAL_HORA_CIERRE IS NOT NULL
-
+	INSERT INTO DATAZO.dimension_rango_horario values ('00:00 - 02:00'),('02:00 - 04:00'),
+	('04:00 - 06:00'), ('06:00 - 08:00'), ('08:00 - 10:00'), ('10:00 - 12:00'),
+	('12:00 - 14:00'), ('14:00 - 16:00'), ('16:00 - 18:00'), ('18:00 - 20:00'),
+	('20:00 - 22:00'), ('22:00 - 00:00')
 	PRINT 'dim_rango_horario migrada'
 END
 GO
@@ -657,7 +661,19 @@ END
 GO
 
 
+
 CREATE PROCEDURE DATAZO.migrar_dim_provincia_localidad
+AS
+BEGIN
+	--dimension_provincia_localidad
+	INSERT INTO DATAZO.dimension_provincia_localidad (provincia , localidad )
+	SELECT DISTINCT PROV.nombre_provincia, LOC.nombre_localidad FROM DATAZO.provincia PROV 
+	JOIN DATAZO.localidad LOC ON LOC.id_provincia = PROV.id_provincia
+	PRINT 'dim_provincia_localidad migrada'
+END
+GO
+
+CREATE PROCEDURE DATAZO.migrar_hecho_repartidor
 AS
 BEGIN
 	--dimension_provincia_localidad
