@@ -457,9 +457,9 @@ CREATE PROCEDURE DATAZO.migrar_dim_local
 AS
 BEGIN
 	INSERT INTO DATAZO.dimension_local_ (nombre)
-	SELECT  DISTINCT LOCAL_NOMBRE
-	from gd_esquema.Maestra
-	where LOCAL_NOMBRE IS NOT NULL
+	SELECT  DISTINCT nombre
+	from DATAZO.local_
+	where nombre IS NOT NULL
 	-- categ tipo local // la categoria es la desc?????
 END
 GO
@@ -467,10 +467,37 @@ GO
 CREATE PROCEDURE DATAZO.migrar_dim_categoria_tipo_local
 AS
 BEGIN
-	INSERT INTO DATAZO.dimension_categoria_tipo_local (categoria, tipo)
-	SELECT  DISTINCT LOCAL_TIPO, LOCAL_DESCRIPCION
-	from gd_esquema.Maestra
-	where LOCAL_TIPO  IS NOT NULL and LOCAL_DESCRIPCION IS NOT NULL
+	INSERT INTO DATAZO.dimension_categoria_tipo_local (tipo, categoria)
+	SELECT  DISTINCT tl.descripcion, c.descripcion
+	from DATAZO.tipo_local tl
+	LEFT JOIN DATAZO.categoria c ON c.id_tipo = tl.id_tipo
+END
+GO
+
+CREATE FUNCTION DATAZO.convertir_a_rango_horario (@horario DATETIME)
+RETURNS VARCHAR(13)
+AS
+BEGIN
+	DECLARE @resultado VARCHAR(13)
+	DECLARE @hora INT  = DATEPART(HOUR, @horario)
+
+	SELECT @resultado = 
+		CASE
+			WHEN @hora BETWEEN 0 AND 2 THEN '00:00 - 02:00'
+			WHEN @hora BETWEEN 2 AND 4 THEN '02:00 - 04:00'
+			WHEN @hora BETWEEN 4 AND 6 THEN '04:00 - 06:00'
+			WHEN @hora BETWEEN 6 AND 8 THEN '06:00 - 08:00'
+			WHEN @hora BETWEEN 8 AND 10 THEN '08:00 - 10:00'
+			WHEN @hora BETWEEN 10 AND 12 THEN '10:00 - 12:00'
+			WHEN @hora BETWEEN 12 AND 14 THEN '12:00 - 14:00'
+			WHEN @hora BETWEEN 14 AND 16 THEN '14:00 - 16:00'
+			WHEN @hora BETWEEN 16 AND 18 THEN '16:00 - 18:00'
+			WHEN @hora BETWEEN 18 AND 20 THEN '18:00 - 20:00'
+			WHEN @hora BETWEEN 20 AND 22 THEN '20:00 - 22:00'
+			WHEN @hora BETWEEN 22 AND 24 THEN '22:00 - 00:00'
+		END
+
+	RETURN @resultado
 END
 GO
 
@@ -491,15 +518,9 @@ AS
 BEGIN
 	--dimension_estado_reclamo / solo aparece uno otro en null con distinct
 	INSERT INTO DATAZO.dimension_estado_reclamo (descripcion )
-	SELECT  DISTINCT RECLAMO_ESTADO
-	from gd_esquema.Maestra
-	where RECLAMO_ESTADO  IS NOT NULL 
-
-	--dimension_tipo_reclamo
-	INSERT INTO DATAZO.dimension_estado_reclamo (descripcion )
-	SELECT  DISTINCT RECLAMO_ESTADO
-	from gd_esquema.Maestra
-	where RECLAMO_ESTADO  IS NOT NULL 
+	SELECT  DISTINCT estado
+	from DATAZO.reclamo
+	where estado  IS NOT NULL 
 END
 GO
 
@@ -515,9 +536,9 @@ AS
 BEGIN
 	--dimension_tipo_movilidad
 	INSERT INTO DATAZO.dimension_tipo_movilidad (descripcion )
-	SELECT  DISTINCT REPARTIDOR_TIPO_MOVILIDAD
-	from gd_esquema.Maestra
-	where REPARTIDOR_TIPO_MOVILIDAD  IS NOT NULL 
+	SELECT  DISTINCT descripcion_movilidad
+	from DATAZO.tipo_movilidad
+	where descripcion_movilidad  IS NOT NULL 
 END
 GO
 
@@ -526,10 +547,19 @@ AS
 BEGIN 
 	--dimension_dia
 	INSERT INTO DATAZO.dimension_dia (descripcion )
-	SELECT  left(HORARIO_LOCAL_DIA,1)
-	from gd_esquema.Maestra
-	where HORARIO_LOCAL_DIA  IS NOT NULL 
-	group by HORARIO_LOCAL_DIA -- en vez d un distinct x el martes y miercoles son ambos M
+	SELECT left(dia.descripcion, 1) from DATAZO.dia
+	ORDER BY (
+		CASE
+			WHEN descripcion = 'Lunes' THEN 1
+			WHEN descripcion = 'Martes' THEN 2
+			WHEN descripcion = 'Miercoles' THEN 3
+			WHEN descripcion = 'Jueves' THEN 4
+			WHEN descripcion = 'Viernes' THEN 5
+			WHEN descripcion = 'Sabado' THEN 6
+			WHEN descripcion = 'Domingo' THEN 7
+		END
+	)
+
 END 
 GO
 
@@ -537,10 +567,9 @@ CREATE PROCEDURE DATAZO.migrar_dim_tipo_paquete
 AS
 BEGIN
 	--dimension_tipo_paquete
-	INSERT INTO DATAZO.dimension_tipo_paquete (tipo )
-	SELECT  DISTINCT PAQUETE_TIPO
-	from gd_esquema.Maestra
-	where PAQUETE_TIPO  IS NOT NULL 
+	INSERT INTO DATAZO.dimension_tipo_paquete (tipo)
+	SELECT  DISTINCT tipo
+	from DATAZO.tipo_paquete
 END
 GO
 
@@ -560,9 +589,8 @@ AS
 BEGIN
 	--dimension_tipo_medio_pago
 	INSERT INTO DATAZO.dimension_tipo_medio_pago (descripcion )
-	SELECT  DISTINCT MEDIO_PAGO_TIPO
-	from gd_esquema.Maestra
-	where MEDIO_PAGO_TIPO  IS NOT NULL 
+	SELECT  DISTINCT descripcion
+	from DATAZO.tipo_medio_pago
 END
 GO
 
@@ -571,9 +599,8 @@ AS
 BEGIN
 	--dimension_estado_pedido
 	INSERT INTO DATAZO.dimension_estado_pedido (descripcion )
-	SELECT  DISTINCT PEDIDO_ESTADO
-	from gd_esquema.Maestra
-	where PEDIDO_ESTADO  IS NOT NULL 
+	SELECT  DISTINCT descripcion
+	from DATAZO.estado 
 END
 GO
 
@@ -583,14 +610,8 @@ AS
 BEGIN
 	--dimension_provincia_localidad
 	INSERT INTO DATAZO.dimension_provincia_localidad (provincia , localidad )
-	SELECT distinct LOCAL_PROVINCIA, LOCAL_LOCALIDAD from gd_esquema.Maestra 
-	where LOCAL_PROVINCIA  IS NOT NULL and LOCAL_LOCALIDAD IS NOT NULL
-	UNION
-	SELECT  DISTINCT ENVIO_MENSAJERIA_PROVINCIA, ENVIO_MENSAJERIA_LOCALIDAD from gd_esquema.Maestra
-	where ENVIO_MENSAJERIA_PROVINCIA  IS NOT NULL and ENVIO_MENSAJERIA_LOCALIDAD IS NOT NULL
-	UNION
-	SELECT  DISTINCT DIRECCION_USUARIO_PROVINCIA, DIRECCION_USUARIO_LOCALIDAD from gd_esquema.Maestra
-	where DIRECCION_USUARIO_PROVINCIA  IS NOT NULL and DIRECCION_USUARIO_LOCALIDAD IS NOT NULL
+	SELECT DISTINCT PROV.nombre_provincia, LOC.nombre_localidad FROM DATAZO.provincia PROV 
+	JOIN DATAZO.localidad LOC ON LOC.id_provincia = PROV.id_provincia
 END
 GO
 
