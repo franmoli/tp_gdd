@@ -597,7 +597,7 @@ GO
 BEGIN TRANSACTION
  BEGIN TRY
  	SELECT 1
-	-- EXECUTE DATAZO.migrar_dim_local
+	EXECUTE DATAZO.migrar_dim_local
 	-- EXECUTE DATAZO.migrar_dim_categoria_tipo_local
 	-- EXECUTE DATAZO.migrar_dim_rango_horario
 	-- EXECUTE DATAZO.migrar_dim_estado_reclamo
