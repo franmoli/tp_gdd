@@ -211,6 +211,9 @@ GO
 
 --DROP PROCEDURES
 	
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_dim_tiempo')
+	DROP PROCEDURE DATAZO.migrar_dim_tiempo
+GO
 IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_dim_local')
 	DROP PROCEDURE DATAZO.migrar_dim_local
 GO
@@ -245,7 +248,14 @@ IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_dim_provincia
 	DROP PROCEDURE DATAZO.migrar_dim_provincia_localidad
 GO
 
+--DROP FUNCTIONS 
+IF EXISTS(SELECT [name] FROM sys.objects WHERE [name] = 'convertir_a_rango_horario')
+	DROP FUNCTION DATAZO.convertir_a_rango_horario
+GO
 	
+
+
+
 -- CREATE TABLES
 CREATE TABLE DATAZO.dimension_tiempo(id_tiempo INT NOT NULL IDENTITY(1,1), anio INT, mes INT)
 
@@ -260,7 +270,7 @@ ALTER TABLE DATAZO.dimension_local_
 GO
 
 CREATE TABLE DATAZO.dimension_categoria_tipo_local(id_categoria_tipo_local INT NOT NULL IDENTITY(1,1), 
-categoria varchar(15), tipo varchar(15))
+categoria varchar(255), tipo varchar(255))
 
 ALTER TABLE DATAZO.dimension_categoria_tipo_local
 	ADD CONSTRAINT pk_dimension_categoria_tipo_local PRIMARY KEY (id_categoria_tipo_local)
@@ -272,13 +282,13 @@ ALTER TABLE DATAZO.dimension_rango_horario
 	ADD CONSTRAINT pk_dimension_rango_horario PRIMARY KEY (id_rango_horario)
 GO
 
-CREATE TABLE DATAZO.dimension_estado_reclamo(id_estado INT NOT NULL IDENTITY(1,1), descripcion VARCHAR(20))
+CREATE TABLE DATAZO.dimension_estado_reclamo(id_estado INT NOT NULL IDENTITY(1,1), descripcion VARCHAR(255))
 
 ALTER TABLE DATAZO.dimension_estado_reclamo
 	ADD CONSTRAINT pk_dimension_estado_reclamo PRIMARY KEY (id_estado)
 GO
 
-CREATE TABLE DATAZO.dimension_tipo_reclamo(id_tipo INT NOT NULL IDENTITY(1,1), descripcion VARCHAR(20))
+CREATE TABLE DATAZO.dimension_tipo_reclamo(id_tipo INT NOT NULL IDENTITY(1,1), descripcion VARCHAR(255))
 
 ALTER TABLE DATAZO.dimension_tipo_reclamo
 	ADD CONSTRAINT pk_dimension_tipo_reclamo PRIMARY KEY (id_tipo)
@@ -290,7 +300,7 @@ ALTER TABLE DATAZO.dimension_rango_etario
 	ADD CONSTRAINT pk_dimension_rango_etario PRIMARY KEY (id_rango)
 GO
 
-CREATE TABLE DATAZO.dimension_tipo_movilidad(id_tipo_movilidad INT NOT NULL IDENTITY(1,1), descripcion VARCHAR(20))
+CREATE TABLE DATAZO.dimension_tipo_movilidad(id_tipo_movilidad INT NOT NULL IDENTITY(1,1), descripcion VARCHAR(255))
 
 ALTER TABLE DATAZO.dimension_tipo_movilidad
 	ADD CONSTRAINT pk_dimension_tipo_movilidad PRIMARY KEY (id_tipo_movilidad)
@@ -302,40 +312,39 @@ ALTER TABLE DATAZO.dimension_dia
 	ADD CONSTRAINT pk_dimension_dia PRIMARY KEY (id_dia)
 GO
 
-CREATE TABLE DATAZO.dimension_tipo_paquete(id_tipo INT NOT NULL IDENTITY(1,1), tipo VARCHAR(20))
+CREATE TABLE DATAZO.dimension_tipo_paquete(id_tipo INT NOT NULL IDENTITY(1,1), tipo VARCHAR(255))
 
 ALTER TABLE DATAZO.dimension_tipo_paquete
 	ADD CONSTRAINT pk_dimension_tipo_paquete PRIMARY KEY (id_tipo)
 GO
 
-CREATE TABLE DATAZO.dimension_estado_mensajeria(id_estado INT NOT NULL IDENTITY(1,1), descripcion VARCHAR(20))
+CREATE TABLE DATAZO.dimension_estado_mensajeria(id_estado INT NOT NULL IDENTITY(1,1), descripcion VARCHAR(255))
 
 ALTER TABLE DATAZO.dimension_estado_mensajeria
 	ADD CONSTRAINT pk_dimension_estado_mensajeria PRIMARY KEY (id_estado)
 GO
 
-CREATE TABLE DATAZO.dimension_tipo_medio_pago(id_tipo_medio_pago INT NOT NULL IDENTITY(1,1), descripcion VARCHAR(20))
+CREATE TABLE DATAZO.dimension_tipo_medio_pago(id_tipo_medio_pago INT NOT NULL IDENTITY(1,1), descripcion VARCHAR(255))
 
 ALTER TABLE DATAZO.dimension_tipo_medio_pago
 	ADD CONSTRAINT pk_dimension_tipo_medio_pago PRIMARY KEY (id_tipo_medio_pago)
 GO
 
 
-CREATE TABLE DATAZO.dimension_estado_pedido(id_estado INT NOT NULL IDENTITY(1,1), descripcion VARCHAR(20))
+CREATE TABLE DATAZO.dimension_estado_pedido(id_estado INT NOT NULL IDENTITY(1,1), descripcion VARCHAR(255))
 
 ALTER TABLE DATAZO.dimension_estado_pedido
 	ADD CONSTRAINT pk_dimension_estado_pedido PRIMARY KEY (id_estado)
 GO
 
-CREATE TABLE DATAZO.dimension_provincia_localidad(id_provincia_localidad INT NOT NULL IDENTITY(1,1), provincia VARCHAR(30),
-localidad VARCHAR (30))
+CREATE TABLE DATAZO.dimension_provincia_localidad(id_provincia_localidad INT NOT NULL IDENTITY(1,1), provincia VARCHAR(255),
+localidad VARCHAR (255))
 
 ALTER TABLE DATAZO.dimension_provincia_localidad
 	ADD CONSTRAINT pk_dimension_provincia_localidad PRIMARY KEY (id_provincia_localidad)
 GO
 
 --Create de hechos
-
 
 CREATE TABLE DATAZO.hecho_persona(id_persona INT NOT NULL IDENTITY(1,1), dia_nac INT, tiempo_nac INT)
 
@@ -453,6 +462,36 @@ GO
 --migrar  dimensiones
 
 --Local
+CREATE PROCEDURE DATAZO.migrar_dim_tiempo
+AS
+BEGIN
+	INSERT INTO DATAZO.dimension_tiempo(anio, mes)
+	SELECT DISTINCT * FROM (
+		SELECT DATEPART(YEAR, fecha_pedido) anio, DATEPART(MONTH, fecha_pedido) mes
+		FROM DATAZO.envio
+		UNION
+		SELECT DATEPART(YEAR, fecha_entrega)anio , DATEPART(MONTH, fecha_entrega) mes
+		FROM DATAZO.envio
+		UNION
+		SELECT DATEPART(YEAR, fecha)anio , DATEPART(MONTH, fecha) mes
+		FROM DATAZO.reclamo
+		UNION
+		SELECT DATEPART(YEAR, fecha_registro)anio , DATEPART(MONTH, fecha_registro) mes
+		FROM DATAZO.usuario
+		UNION
+		SELECT DATEPART(YEAR, fecha_nac)anio , DATEPART(MONTH, fecha_nac) mes
+		FROM DATAZO.persona
+		UNION
+		SELECT DATEPART(YEAR, fecha_alta)anio , DATEPART(MONTH, fecha_alta) mes
+		FROM DATAZO.cupon_descuento
+		UNION
+		SELECT DATEPART(YEAR, fecha_vencimiento)anio , DATEPART(MONTH, fecha_vencimiento) mes
+		FROM DATAZO.cupon_descuento
+	) tiempo
+
+END
+GO
+
 CREATE PROCEDURE DATAZO.migrar_dim_local
 AS
 BEGIN
@@ -461,6 +500,7 @@ BEGIN
 	from DATAZO.local_
 	where nombre IS NOT NULL
 	-- categ tipo local // la categoria es la desc?????
+	PRINT 'dim_local migrada'
 END
 GO
 
@@ -471,6 +511,8 @@ BEGIN
 	SELECT  DISTINCT tl.descripcion, c.descripcion
 	from DATAZO.tipo_local tl
 	LEFT JOIN DATAZO.categoria c ON c.id_tipo = tl.id_tipo
+
+	PRINT 'dim_categoria_tipo_local migrada'
 END
 GO
 
@@ -509,6 +551,8 @@ BEGIN
 	SELECT  DISTINCT HORARIO_LOCAL_HORA_APERTURA, HORARIO_LOCAL_HORA_CIERRE
 	from gd_esquema.Maestra
 	where HORARIO_LOCAL_HORA_APERTURA  IS NOT NULL and HORARIO_LOCAL_HORA_CIERRE IS NOT NULL
+
+	PRINT 'dim_rango_horario migrada'
 END
 GO
 
@@ -521,8 +565,12 @@ BEGIN
 	SELECT  DISTINCT estado
 	from DATAZO.reclamo
 	where estado  IS NOT NULL 
+
+	PRINT 'dim_estado_reclamo_migrada'
 END
 GO
+
+-- dim_tipo_reclamo
 
 --dimension_rango_etario
 
@@ -539,6 +587,7 @@ BEGIN
 	SELECT  DISTINCT descripcion_movilidad
 	from DATAZO.tipo_movilidad
 	where descripcion_movilidad  IS NOT NULL 
+	PRINT 'dim_tipo_movilidad migrada'
 END
 GO
 
@@ -560,6 +609,7 @@ BEGIN
 		END
 	)
 
+	PRINT 'dim_dia migrada'
 END 
 GO
 
@@ -570,6 +620,7 @@ BEGIN
 	INSERT INTO DATAZO.dimension_tipo_paquete (tipo)
 	SELECT  DISTINCT tipo
 	from DATAZO.tipo_paquete
+	PRINT 'dim_tipo_paquete_migrada'
 END
 GO
 
@@ -581,6 +632,7 @@ BEGIN
 	SELECT  DISTINCT ENVIO_MENSAJERIA_ESTADO
 	from gd_esquema.Maestra
 	where ENVIO_MENSAJERIA_ESTADO  IS NOT NULL 
+	PRINT 'dim_estado_mensajeria migrada'
 END
 GO
 
@@ -591,6 +643,7 @@ BEGIN
 	INSERT INTO DATAZO.dimension_tipo_medio_pago (descripcion )
 	SELECT  DISTINCT descripcion
 	from DATAZO.tipo_medio_pago
+	PRINT 'dim_tipo_medio_pago migrada'
 END
 GO
 
@@ -601,6 +654,7 @@ BEGIN
 	INSERT INTO DATAZO.dimension_estado_pedido (descripcion )
 	SELECT  DISTINCT descripcion
 	from DATAZO.estado 
+	PRINT 'dim_estado_pedido migrada'
 END
 GO
 
@@ -612,23 +666,25 @@ BEGIN
 	INSERT INTO DATAZO.dimension_provincia_localidad (provincia , localidad )
 	SELECT DISTINCT PROV.nombre_provincia, LOC.nombre_localidad FROM DATAZO.provincia PROV 
 	JOIN DATAZO.localidad LOC ON LOC.id_provincia = PROV.id_provincia
+	PRINT 'dim_provincia_localidad migrada'
 END
 GO
 
 BEGIN TRANSACTION
  BEGIN TRY
- 	SELECT 1
+ 	-- SELECT 1
+	EXECUTE DATAZO.migrar_dim_tiempo
 	EXECUTE DATAZO.migrar_dim_local
-	-- EXECUTE DATAZO.migrar_dim_categoria_tipo_local
-	-- EXECUTE DATAZO.migrar_dim_rango_horario
-	-- EXECUTE DATAZO.migrar_dim_estado_reclamo
-	-- EXECUTE DATAZO.migrar_dim_tipo_movilidad
-	-- EXECUTE DATAZO.migrar_dim_dia
-	-- EXECUTE DATAZO.migrar_dim_tipo_paquete
-	-- EXECUTE DATAZO.migrar_dim_estado_mensajeria
-	-- EXECUTE DATAZO.migrar_dim_tipo_medio_pago
-	-- EXECUTE DATAZO.migrar_dim_estado_pedido
-	-- EXECUTE DATAZO.migrar_dim_provincia_localidad
+	EXECUTE DATAZO.migrar_dim_categoria_tipo_local
+	EXECUTE DATAZO.migrar_dim_rango_horario
+	EXECUTE DATAZO.migrar_dim_estado_reclamo
+	EXECUTE DATAZO.migrar_dim_tipo_movilidad
+	EXECUTE DATAZO.migrar_dim_dia
+	EXECUTE DATAZO.migrar_dim_tipo_paquete
+	EXECUTE DATAZO.migrar_dim_estado_mensajeria
+	EXECUTE DATAZO.migrar_dim_tipo_medio_pago
+	EXECUTE DATAZO.migrar_dim_estado_pedido
+	EXECUTE DATAZO.migrar_dim_provincia_localidad
 END TRY
 BEGIN CATCH
     ROLLBACK TRANSACTION;
