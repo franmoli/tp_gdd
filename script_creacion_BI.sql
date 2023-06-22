@@ -247,6 +247,9 @@ GO
 IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_dim_provincia_localidad')
 	DROP PROCEDURE DATAZO.migrar_dim_provincia_localidad
 GO
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_hecho_repartidor')
+	DROP PROCEDURE DATAZO.migrar_hecho_repartidor
+GO
 
 --DROP FUNCTIONS 
 IF EXISTS(SELECT [name] FROM sys.objects WHERE [name] = 'convertir_a_rango_horario')
@@ -354,14 +357,14 @@ ALTER TABLE DATAZO.hecho_persona
 	CONSTRAINT fk_hecho_persona_tiempo FOREIGN KEY (tiempo_nac) REFERENCES DATAZO.dimension_tiempo(id_tiempo)
 GO
 
-CREATE TABLE DATAZO.hecho_operador(id_operador INT NOT NULL IDENTITY(1,1), id_persona INT)
+CREATE TABLE DATAZO.hecho_operador(id_operador INT NOT NULL, id_persona INT)
 
 ALTER TABLE DATAZO.hecho_operador
 	ADD CONSTRAINT pk_hecho_operador PRIMARY KEY (id_operador),
 	CONSTRAINT fk_hecho_operador_persona FOREIGN KEY (id_persona) REFERENCES DATAZO.hecho_persona(id_persona)
 GO
 
-CREATE TABLE DATAZO.hecho_usuario(id_usuario INT NOT NULL IDENTITY(1,1), id_persona INT, dia_registro INT, tiempo_registro INT)
+CREATE TABLE DATAZO.hecho_usuario(id_usuario INT NOT NULL, id_persona INT, dia_registro INT, tiempo_registro INT)
 
 ALTER TABLE DATAZO.hecho_usuario
 	ADD CONSTRAINT pk_hecho_usuario PRIMARY KEY (id_usuario),
@@ -370,7 +373,7 @@ ALTER TABLE DATAZO.hecho_usuario
 	CONSTRAINT fk_hecho_usuario_tiempo FOREIGN KEY (tiempo_registro) REFERENCES DATAZO.dimension_tiempo(id_tiempo)
 GO
 
-CREATE TABLE DATAZO.hecho_repartidor(id_repartidor INT NOT NULL IDENTITY(1,1), id_persona INT, tipo_movilidad INT, localidad_activa INT)
+CREATE TABLE DATAZO.hecho_repartidor(id_repartidor INT NOT NULL, id_persona INT, tipo_movilidad INT, localidad_activa INT)
 
 ALTER TABLE DATAZO.hecho_repartidor
 	ADD CONSTRAINT pk_hecho_repartidor PRIMARY KEY (id_repartidor),
@@ -379,7 +382,7 @@ ALTER TABLE DATAZO.hecho_repartidor
 	CONSTRAINT fk_hecho_repartidor_localidad FOREIGN KEY (localidad_activa) REFERENCES DATAZO.dimension_provincia_localidad (id_provincia_localidad)
 GO
 
-CREATE TABLE DATAZO.hecho_envio(id_envio INT IDENTITY(1,1), id_usuario INT, id_repartidor INT, id_estado INT, id_medioPago INT, precio_envio DECIMAL(18,2),
+CREATE TABLE DATAZO.hecho_envio(id_envio INT NOT NULL, id_usuario INT, id_repartidor INT, id_estado INT, id_medioPago INT, precio_envio DECIMAL(18,2),
 					fecha_pedido DATETIME, dia_pedido INT, tiempo_pedido INT, id_rango_horario_pedido INT, fecha_entrega DATETIME,
 					dia_entrega INT, tiempo_entrega INT, id_rango_horario_entrega INT, tiempo_estimado_entrega DATETIME, calificacion DECIMAL(18,0), dir_origen INT, dir_destino INT)
 
@@ -399,7 +402,7 @@ ALTER TABLE DATAZO.hecho_envio
 GO
 
 
-CREATE TABLE DATAZO.hecho_pedido_productos(id_pedido INT NOT NULL IDENTITY(1,1), id_envio INT, id_local INT,
+CREATE TABLE DATAZO.hecho_pedido_productos(id_pedido INT NOT NULL, id_envio INT, id_local INT,
 					id_estado_pedido INT, tarifa_servicio INT, total_pedido DECIMAL(18,2))
 
 ALTER TABLE DATAZO.hecho_pedido_productos
@@ -419,7 +422,7 @@ ALTER TABLE DATAZO.hecho_envio_de_mensajeria
 	CONSTRAINT fk_hecho_pedido_tipo_paquete FOREIGN KEY (tipo_paquete) REFERENCES DATAZO.dimension_tipo_paquete(id_tipo)
 GO
 
-CREATE TABLE DATAZO.hecho_reclamo(nro_reclamo DECIMAL(18,0) NOT NULL IDENTITY(1,1), id_pedido INT, tipo_reclamo INT, dia_inicio INT, tiempo_inicio INT,
+CREATE TABLE DATAZO.hecho_reclamo(nro_reclamo DECIMAL(18,0) NOT NULL, id_pedido INT, tipo_reclamo INT, dia_inicio INT, tiempo_inicio INT,
 					dia_solucion INT, tiempo_solucion INT, id_usuario INT, id_operador INT, id_estado INT, horario_inicio DATETIME, horario_solucion DATETIME)
 
 ALTER TABLE DATAZO.hecho_reclamo
@@ -435,7 +438,7 @@ ALTER TABLE DATAZO.hecho_reclamo
 	CONSTRAINT fk_hecho_reclamo_estado FOREIGN KEY (id_estado) REFERENCES DATAZO.dimension_estado_reclamo(id_estado)
 GO
 
-CREATE TABLE DATAZO.hecho_cupon_de_descuento(id_cupon INT IDENTITY(1,1) NOT NULL, nro DECIMAL(18,2) NOT NULL, id_usuario INT NOT NULL, 
+CREATE TABLE DATAZO.hecho_cupon_de_descuento(id_cupon INT NOT NULL, nro DECIMAL(18,2) NOT NULL, id_usuario INT NOT NULL, 
 					monto DECIMAL(18,2), dia_alta INT, tiempo_alta INT, dia_vencimiento INT, tiempo_vencimiento INT)
 
 ALTER TABLE datazo.hecho_cupon_de_descuento
@@ -447,14 +450,14 @@ ALTER TABLE datazo.hecho_cupon_de_descuento
 	CONSTRAINT fk_hecho_cupon_tiempo_vencimiento FOREIGN KEY (tiempo_vencimiento) REFERENCES DATAZO.dimension_tiempo(id_tiempo)
 GO
 
-CREATE TABLE DATAZO.hecho_cupon_x_pedido(id_cupon INT NOT NULL IDENTITY(1,1), nro_cupon INT, id_pedido INT)
+CREATE TABLE DATAZO.hecho_cupon_x_pedido(id_cupon INT NOT NULL, nro_cupon INT, id_pedido INT)
 
 ALTER TABLE datazo.hecho_cupon_x_pedido
 	ADD CONSTRAINT pk_hecho_cupon_pedido PRIMARY KEY (id_cupon),
 	CONSTRAINT fk_hecho_cupon_pedido FOREIGN KEY (id_pedido) REFERENCES DATAZO.hecho_pedido_productos (id_pedido)
 GO
 
-CREATE TABLE DATAZO.hecho_cupon_x_reclamo(id_cupon INT NOT NULL IDENTITY(1,1), nro_cupon decimal(18,2) NOT NULL, nro_reclamo decimal(18,0))
+CREATE TABLE DATAZO.hecho_cupon_x_reclamo(id_cupon INT NOT NULL, nro_cupon decimal(18,2) NOT NULL, nro_reclamo decimal(18,0))
 
 ALTER TABLE datazo.hecho_cupon_x_reclamo
 	ADD CONSTRAINT pk_hecho_cupon_reclamo PRIMARY KEY (id_cupon),
@@ -673,16 +676,26 @@ BEGIN
 END
 GO
 
+--CREATE TABLE DATAZO.hecho_repartidor(id_repartidor INT NOT NULL IDENTITY(1,1),
+-- id_persona INT, tipo_movilidad INT, localidad_activa INT)
+
 CREATE PROCEDURE DATAZO.migrar_hecho_repartidor
 AS
 BEGIN
-	--dimension_provincia_localidad
-	INSERT INTO DATAZO.dimension_provincia_localidad (provincia , localidad )
-	SELECT DISTINCT PROV.nombre_provincia, LOC.nombre_localidad FROM DATAZO.provincia PROV 
-	JOIN DATAZO.localidad LOC ON LOC.id_provincia = PROV.id_provincia
-	PRINT 'dim_provincia_localidad migrada'
+	INSERT INTO DATAZO.hecho_repartidor (id_repartidor, id_persona, tipo_movilidad, localidad_activa)
+		SELECT r.id_repartidor, pe.id_persona, dtm.id_tipo_movilidad, dpl.id_provincia_localidad
+		FROM DATAZO.repartidor as r
+		LEFT JOIN DATAZO.hecho_persona as pe ON pe.id_persona = r.id_persona 
+		LEFT JOIN DATAZO.tipo_movilidad as tm ON id_tipo_movilidad = tipo_movilidad
+		LEFT JOIN DATAZO.localidad as l ON id_localidad = localidad_activa
+		LEFT JOIN DATAZO.provincia as p ON p.id_provincia = l.id_provincia
+		LEFT JOIN DATAZO.dimension_tipo_movilidad as dtm ON dtm.descripcion = tm.descripcion_movilidad
+		LEFT JOIN DATAZO.dimension_provincia_localidad as dpl ON
+		provincia = p.nombre_provincia AND localidad = l.nombre_localidad
+		PRINT 'hecho_repartidor migrado'
 END
 GO
+
 
 BEGIN TRANSACTION
  BEGIN TRY
@@ -699,6 +712,7 @@ BEGIN TRANSACTION
 	EXECUTE DATAZO.migrar_dim_tipo_medio_pago
 	EXECUTE DATAZO.migrar_dim_estado_pedido
 	EXECUTE DATAZO.migrar_dim_provincia_localidad
+	EXECUTE DATAZO.migrar_hecho_repartidor
 END TRY
 BEGIN CATCH
     ROLLBACK TRANSACTION;
