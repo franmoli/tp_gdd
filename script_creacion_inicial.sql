@@ -467,7 +467,7 @@ GO
 
 CREATE TABLE DATAZO.reclamo (nro_reclamo decimal(18,0) NOT NULL, id_pedido int, tipo_reclamo int, fecha datetime, descripcion nvarchar(255), fecha_solucion datetime, estado nvarchar(50), solucion nvarchar(255), calificacion decimal(18,0), id_usuario int, id_operador int);
 CREATE TABLE DATAZO.producto_por_pedido ( id_productoXpedido INT IDENTITY(1,1),id_pedido int NOT NULL, codigo_producto nvarchar(50) NOT NULL, id_local INT NOT NULL, cantidad decimal(18,0), total_producto decimal(18,2));
-CREATE TABLE DATAZO.cupon_por_pedido(nro_cupon decimal(18,0) NOT NULL, id_pedido INT)
+CREATE TABLE DATAZO.cupon_por_pedido(nro_cupon decimal(18,0) NOT NULL, id_pedido INT, id_cupon INT)
 
 ALTER TABLE DATAZO.reclamo
 	ADD CONSTRAINT pk_reclamo PRIMARY KEY (nro_reclamo),
@@ -1069,13 +1069,13 @@ GO
 
 
 
-
+-- MATCHEAR CON CNUMERO DE CUPON MATCHEARIA CON LOS QUE ESTAN POR RECLAMO Y CON LOS GENERADOS PORQUE SI ACA CREO QUE FUNCIONA POR MIGRAr primero una cosa y despues la otra
 
 CREATE PROCEDURE DATAZO.migrar_cupon_por_pedido
 AS
 BEGIN
-	INSERT INTO DATAZO.cupon_por_pedido (nro_cupon, id_pedido)
-	SELECT cd.nro, pp.id_pedido
+	INSERT INTO DATAZO.cupon_por_pedido (nro_cupon, id_pedido, id_cupon)
+	SELECT cd.nro, pp.id_pedido, cd.id_cupon
 	FROM gd_esquema.Maestra MASTR
 	JOIN DATAZO.cupon_descuento cd ON cd.nro =  MASTR.CUPON_NRO 
 	JOIN DATAZO.pedido_productos as pp ON pp.id_pedido = MASTR.PEDIDO_NRO

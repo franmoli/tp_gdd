@@ -254,6 +254,12 @@ GO
 IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_cupon_descuento')
 	DROP PROCEDURE DATAZO.migrar_cupon_descuento
 GO
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_cuponxpedido')
+	DROP PROCEDURE DATAZO.migrar_cuponxpedido
+GO
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_cuponxreclamo')
+	DROP PROCEDURE DATAZO.migrar_cuponxreclamo
+GO
 
 --DROP FUNCTIONS 
 IF EXISTS(SELECT [name] FROM sys.objects WHERE [name] = 'convertir_a_rango_horario')
@@ -451,7 +457,8 @@ CREATE TABLE DATAZO.hecho_cupon_x_pedido(id_cupon INT NOT NULL, nro_cupon INT, i
 
 ALTER TABLE datazo.hecho_cupon_x_pedido
 	ADD CONSTRAINT pk_hecho_cupon_pedido PRIMARY KEY (id_cupon),
-	CONSTRAINT fk_hecho_cupon_pedido FOREIGN KEY (id_pedido) REFERENCES DATAZO.hecho_pedido_productos (id_pedido)
+	CONSTRAINT fk_hecho_cupon_pedido FOREIGN KEY (id_pedido) REFERENCES DATAZO.hecho_pedido_productos (id_pedido),
+	CONSTRAINT fk_hecho_cupon_pedido_id_cup FOREIGN KEY (id_cupon) REFERENCES DATAZO.hecho_cupon_de_descuento (id_cupon)
 GO
 
 CREATE TABLE DATAZO.hecho_cupon_x_reclamo(id_cupon INT NOT NULL, nro_cupon decimal(18,2) NOT NULL, nro_reclamo decimal(18,0))
@@ -749,7 +756,7 @@ BEGIN
 	JOIN DATAZO.dimension_tiempo tm2 ON tm2.anio = DATEPART(YEAR, rec.fecha_solucion) AND tm2.mes = DATEPART(MONTH, rec.fecha_solucion)
 	JOIN DATAZO.dimension_estado_reclamo est ON est.descripcion = rec.estado
 
-	PRINT 'hecho_envio migrado'
+	PRINT 'hecho_reclamo migrado'
 END
 GO
 
@@ -764,7 +771,30 @@ BEGIN
 	JOIN DATAZO.dimension_tiempo tm2 ON tm2.anio = DATEPART(YEAR, cup.fecha_vencimiento) AND tm2.mes = DATEPART(MONTH, cup.fecha_vencimiento)
 	
 
-	PRINT 'hecho_envio migrado'
+	PRINT 'hecho_cupon_descuento migrado'
+END
+GO
+
+CREATE PROCEDURE DATAZO.migrar_cuponxpedido
+AS
+BEGIN
+	INSERT INTO DATAZO.hecho_cupon_x_pedido (id_cupon, nro_cupon, id_pedido)
+	SELECT cup.id_cupon, cup.nro_cupon, cup.id_pedido
+	FROM DATAZO.cupon_por_pedido cup
+
+	PRINT 'hecho_cupon_x_pedido migrado'
+END
+GO
+
+
+CREATE PROCEDURE DATAZO.migrar_cuponxreclamo
+AS
+BEGIN
+	INSERT INTO DATAZO.hecho_cupon_x_reclamo (id_cupon, nro_cupon, nro_reclamo)
+	SELECT cup.id_cupon, cup.nro_cupon, cup.nro_reclamo
+	FROM DATAZO.cupon_por_reclamo cup
+
+	PRINT 'hecho_cupon_x_reclamo migrado'
 END
 GO
 
@@ -786,6 +816,8 @@ BEGIN TRANSACTION
 	EXECUTE DATAZO.migrar_dim_provincia_localidad
 	EXECUTE DATAZO.migrar_hecho_repartidor
 	-- EXECUTE DATAZO.migrar_cupon_descuento
+	-- EXECUTE DATAZO.migrar_cuponxpedido
+	-- EXECUTE DATAZO.migrar_cuponxreclamo
 	-- EXECUTE DATAZO.migrar_hecho_reclamo
 	-- EXECUTE DATAZO.migrar_hecho_envio
 END TRY
