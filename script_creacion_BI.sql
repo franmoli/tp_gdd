@@ -204,6 +204,8 @@ IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.dimen
 	DROP TABLE DATAZO.dimension_provincia_localidad
 GO
 
+--DROP TABLE DATAZO.dimension_estado_mensajeria
+--DROP TABLE DATAZO.dimension_estado_pedido
 --DROP PROCEDURES
 	
 IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_dim_tiempo')
@@ -248,6 +250,9 @@ GO
 IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_dim_provincia_localidad')
 	DROP PROCEDURE DATAZO.migrar_dim_provincia_localidad
 GO
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_hecho_repartidor')
+	DROP PROCEDURE DATAZO.migrar_hecho_repartidor
+GO
 IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_hecho_persona')
 	DROP PROCEDURE DATAZO.migrar_hecho_persona
 GO
@@ -256,9 +261,6 @@ IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_hecho_usuario
 GO
 IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_hecho_operador')
 	DROP PROCEDURE DATAZO.migrar_hecho_operador
-GO	
-IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_hecho_repartidor')
-	DROP PROCEDURE DATAZO.migrar_hecho_repartidor
 GO
 IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_hecho_envio')
 	DROP PROCEDURE DATAZO.migrar_hecho_envio
@@ -285,7 +287,8 @@ IF EXISTS(SELECT [name] FROM sys.objects WHERE [name] = 'convertir_a_rango_etari
 GO
 IF EXISTS(SELECT [name] FROM sys.objects WHERE [name] = 'calcular_edad')
 	DROP FUNCTION DATAZO.calcular_edad
-GO		
+GO	
+	 
 
 
 
@@ -388,13 +391,13 @@ ALTER TABLE DATAZO.hecho_operador
 	CONSTRAINT fk_hecho_operador_persona FOREIGN KEY (id_persona) REFERENCES DATAZO.hecho_persona(id_persona)
 GO
 
-CREATE TABLE DATAZO.hecho_usuario(id_usuario INT NOT NULL, id_persona INT)--, dia_registro INT, tiempo_registro INT)
+CREATE TABLE DATAZO.hecho_usuario(id_usuario INT NOT NULL, id_persona INT, dia_registro INT, tiempo_registro INT)
 
 ALTER TABLE DATAZO.hecho_usuario
 	ADD CONSTRAINT pk_hecho_usuario PRIMARY KEY (id_usuario),
 	CONSTRAINT fk_hecho_usuario_persona FOREIGN KEY (id_persona) REFERENCES DATAZO.hecho_persona(id_persona),
-	--CONSTRAINT fk_hecho_usuario_dia FOREIGN KEY (dia_registro) REFERENCES DATAZO.dimension_dia(id_dia),
-	--CONSTRAINT fk_hecho_usuario_tiempo FOREIGN KEY (tiempo_registro) REFERENCES DATAZO.dimension_tiempo(id_tiempo)
+	CONSTRAINT fk_hecho_usuario_dia FOREIGN KEY (dia_registro) REFERENCES DATAZO.dimension_dia(id_dia),
+	CONSTRAINT fk_hecho_usuario_tiempo FOREIGN KEY (tiempo_registro) REFERENCES DATAZO.dimension_tiempo(id_tiempo)
 GO
 
 CREATE TABLE DATAZO.hecho_repartidor(id_repartidor INT NOT NULL, id_persona INT, tipo_movilidad INT, localidad_activa INT)
@@ -586,7 +589,7 @@ BEGIN
 END
 GO
 
-	
+
 CREATE FUNCTION DATAZO.convertir_a_rango_etario (@edad INT)
 RETURNS VARCHAR(7)
 AS
@@ -649,12 +652,7 @@ END
 GO
 
 
---dimension_rango_etario
 
---INSERT INTO DATAZO.dimension_rango_etario (edadInicial INT, edadFinal INT)
---SELECT  DISTINCT RECLAMO_ESTADO
---from gd_esquema.Maestra
---where RECLAMO_ESTADO  IS NOT NULL 
 
 CREATE PROCEDURE DATAZO.migrar_dim_tipo_movilidad
 AS
@@ -747,8 +745,7 @@ BEGIN
 END
 GO
 
---CREATE TABLE DATAZO.hecho_repartidor(id_repartidor INT NOT NULL IDENTITY(1,1),
--- id_persona INT, tipo_movilidad INT, localidad_activa INT)
+
 
 CREATE PROCEDURE DATAZO.migrar_hecho_persona
 AS
@@ -790,7 +787,11 @@ BEGIN
 	
 END
 GO
-	
+
+
+--CREATE TABLE DATAZO.hecho_repartidor(id_repartidor INT NOT NULL IDENTITY(1,1),
+-- id_persona INT, tipo_movilidad INT, localidad_activa INT)
+
 CREATE PROCEDURE DATAZO.migrar_hecho_repartidor
 AS
 BEGIN
@@ -955,3 +956,4 @@ END CATCH
    END
    
 GO
+
