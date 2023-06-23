@@ -929,7 +929,7 @@ BEGIN TRANSACTION
 	EXECUTE DATAZO.migrar_hecho_usuario
 	EXECUTE DATAZO.migrar_hecho_operador		
 	EXECUTE DATAZO.migrar_hecho_repartidor
-	EXECUTE DATAZO.migrar_cupon_descuento
+	--EXECUTE DATAZO.migrar_cupon_descuento
 	--EXECUTE DATAZO.migrar_cuponxpedido
 	--EXECUTE DATAZO.migrar_cuponxreclamo
 	--EXECUTE DATAZO.migrar_hecho_reclamo
@@ -956,4 +956,3 @@ END CATCH
    END
    
 GO
-
