@@ -85,22 +85,17 @@ IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.dimen
 	DELETE FROM DATAZO.dimension_tipo_paquete
 GO
 
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.dimension_estado_mensajeria') AND type in (N'U'))
-	DELETE FROM DATAZO.dimension_estado_mensajeria
-GO
-
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.dimension_tipo_medio_pago') AND type in (N'U'))
 	DELETE FROM DATAZO.dimension_tipo_medio_pago
-GO
-
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.dimension_estado_pedido') AND type in (N'U'))
-	DELETE FROM DATAZO.dimension_estado_pedido
 GO
 
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.dimension_provincia_localidad') AND type in (N'U'))
 	DELETE FROM DATAZO.dimension_provincia_localidad
 GO
 
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.dimension_estado_mensajeria_pedido') AND type in (N'U'))
+	DELETE FROM DATAZO.dimension_estado_mensajeria_pedido
+GO
 
 
 
@@ -193,8 +188,8 @@ IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.dimen
 	DROP TABLE DATAZO.dimension_tipo_paquete
 GO
 
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.dimension_estado') AND type in (N'U'))
-	DROP TABLE DATAZO.dimension_estado
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.dimension_estado_mensajeria_pedido') AND type in (N'U'))
+	DROP TABLE DATAZO.dimension_estado_mensajeria_pedido
 
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.dimension_tipo_medio_pago') AND type in (N'U'))
 	DROP TABLE DATAZO.dimension_tipo_medio_pago
@@ -238,14 +233,11 @@ GO
 IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_dim_tipo_paquete')
 	DROP PROCEDURE DATAZO.migrar_dim_tipo_paquete
 GO
-IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_dim_estado_mensajeria')
-	DROP PROCEDURE DATAZO.migrar_dim_estado_mensajeria
-GO
 IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_dim_tipo_medio_pago')
 	DROP PROCEDURE DATAZO.migrar_dim_tipo_medio_pago
 GO
-IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_dim_estado_pedido')
-	DROP PROCEDURE DATAZO.migrar_dim_estado_pedido
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_dim_estado_mensajeria_pedido')
+	DROP PROCEDURE DATAZO.migrar_dim_estado_mensajeria_pedido
 GO
 IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_dim_provincia_localidad')
 	DROP PROCEDURE DATAZO.migrar_dim_provincia_localidad
@@ -265,6 +257,10 @@ GO
 IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_hecho_envio')
 	DROP PROCEDURE DATAZO.migrar_hecho_envio
 GO
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_hecho_pedido_productos')
+	DROP PROCEDURE DATAZO.migrar_hecho_pedido_productos
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_hecho_envio_de_mensajeria')
+	DROP PROCEDURE DATAZO.migrar_hecho_envio_de_mensajeria
 IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_hecho_reclamo')
 	DROP PROCEDURE DATAZO.migrar_hecho_reclamo
 GO
@@ -361,11 +357,10 @@ ALTER TABLE DATAZO.dimension_tipo_medio_pago
 	ADD CONSTRAINT pk_dimension_tipo_medio_pago PRIMARY KEY (id_tipo_medio_pago)
 GO
 
+CREATE TABLE DATAZO.dimension_estado_mensajeria_pedido(id_estado INT NOT NULL IDENTITY(1,1), descripcion VARCHAR(255))
 
-CREATE TABLE DATAZO.dimension_estado(id_estado INT NOT NULL IDENTITY(1,1), descripcion VARCHAR(255))
-
-ALTER TABLE DATAZO.dimension_estado
-	ADD CONSTRAINT pk_dimension_estado PRIMARY KEY (id_estado)
+ALTER TABLE DATAZO.dimension_estado_mensajeria_pedido
+	ADD CONSTRAINT pk_dimension_estado_mensajeria_pedido PRIMARY KEY (id_estado)
 GO
 
 CREATE TABLE DATAZO.dimension_provincia_localidad(id_provincia_localidad INT NOT NULL IDENTITY(1,1), provincia VARCHAR(255),
@@ -417,6 +412,7 @@ ALTER TABLE DATAZO.hecho_envio
 	ADD CONSTRAINT pk_hecho_envio PRIMARY KEY (id_envio),
 	CONSTRAINT fk_hecho_envio_usuario FOREIGN KEY (id_usuario) REFERENCES DATAZO.hecho_usuario(id_usuario),
 	CONSTRAINT fk_hecho_envio_repartidor FOREIGN KEY (id_repartidor) REFERENCES DATAZO.hecho_repartidor(id_repartidor),
+	CONSTRAINT fk_hecho_envio_estado FOREIGN KEY (id_estado) REFERENCES DATAZO.dimension_estado_mensajeria_pedido(id_estado),
 	CONSTRAINT fk_hecho_envio_medioPago FOREIGN KEY (id_medioPago) REFERENCES DATAZO.dimension_tipo_medio_pago (id_tipo_medio_pago),
 	CONSTRAINT fk_hecho_envio_dir_origen FOREIGN KEY (dir_origen) REFERENCES DATAZO.dimension_provincia_localidad (id_provincia_localidad),
 	CONSTRAINT fk_hecho_envio_dir_destino FOREIGN KEY (dir_destino) REFERENCES DATAZO.dimension_provincia_localidad (id_provincia_localidad),
@@ -438,7 +434,7 @@ ALTER TABLE DATAZO.hecho_pedido_productos
 	CONSTRAINT fk_hecho_pedido_local FOREIGN KEY (id_local) REFERENCES DATAZO.dimension_local_(id_local)
 GO
 
-CREATE TABLE DATAZO.hecho_envio_de_mensajeria(id_envio INT, id_envio_mensajeria DECIMAL(18,0) NOT NULL IDENTITY(1,1), 
+CREATE TABLE DATAZO.hecho_envio_de_mensajeria(id_envio INT, id_envio_mensajeria DECIMAL(18,0) NOT NULL, 
 									 tipo_paquete INT, valor_asegurado decimal(18,2), precio_seguro decimal(18,2),)
 
 ALTER TABLE DATAZO.hecho_envio_de_mensajeria
@@ -698,18 +694,6 @@ BEGIN
 END
 GO
 
-CREATE PROCEDURE DATAZO.migrar_dim_estado_mensajeria
-AS
-BEGIN
-	--dimension_estado_mensajeria
-	INSERT INTO DATAZO.dimension_estado_mensajeria (descripcion )
-	SELECT  DISTINCT ENVIO_MENSAJERIA_ESTADO
-	from gd_esquema.Maestra
-	where ENVIO_MENSAJERIA_ESTADO  IS NOT NULL 
-	PRINT 'dim_estado_mensajeria migrada'
-END
-GO
-
 CREATE PROCEDURE DATAZO.migrar_dim_tipo_medio_pago
 AS
 BEGIN
@@ -721,11 +705,11 @@ BEGIN
 END
 GO
 
-CREATE PROCEDURE DATAZO.migrar_dim_estado_pedido
+CREATE PROCEDURE DATAZO.migrar_dim_estado_mensajeria_pedido
 AS
 BEGIN
 	--dimension_estado_pedido
-	INSERT INTO DATAZO.dimension_estado_pedido (descripcion )
+	INSERT INTO DATAZO.dimension_estado_mensajeria_pedido (descripcion )
 	SELECT  DISTINCT descripcion
 	from DATAZO.estado 
 	PRINT 'dim_estado_pedido migrada'
@@ -789,33 +773,26 @@ END
 GO
 
 
---CREATE TABLE DATAZO.hecho_repartidor(id_repartidor INT NOT NULL IDENTITY(1,1),
--- id_persona INT, tipo_movilidad INT, localidad_activa INT)
-
 CREATE PROCEDURE DATAZO.migrar_hecho_repartidor
 AS
 BEGIN
 	INSERT INTO DATAZO.hecho_repartidor (id_repartidor, id_persona, tipo_movilidad, localidad_activa)
 		SELECT r.id_repartidor, pe.id_persona, dtm.id_tipo_movilidad, dpl.id_provincia_localidad
 		FROM DATAZO.repartidor as r
-		LEFT JOIN DATAZO.hecho_persona as pe ON pe.id_persona = r.id_persona 
-		LEFT JOIN DATAZO.tipo_movilidad as tm ON id_tipo_movilidad = tipo_movilidad
-		LEFT JOIN DATAZO.localidad as l ON id_localidad = localidad_activa
-		LEFT JOIN DATAZO.provincia as p ON p.id_provincia = l.id_provincia
-		LEFT JOIN DATAZO.dimension_tipo_movilidad as dtm ON dtm.descripcion = tm.descripcion_movilidad
-		LEFT JOIN DATAZO.dimension_provincia_localidad as dpl ON
+		JOIN DATAZO.hecho_persona as pe ON pe.id_persona = r.id_persona 
+		JOIN DATAZO.tipo_movilidad as tm ON id_tipo_movilidad = tipo_movilidad
+		JOIN DATAZO.localidad as l ON id_localidad = localidad_activa
+		JOIN DATAZO.provincia as p ON p.id_provincia = l.id_provincia
+		JOIN DATAZO.dimension_tipo_movilidad as dtm ON dtm.descripcion = tm.descripcion_movilidad
+		JOIN DATAZO.dimension_provincia_localidad as dpl ON
 		provincia = p.nombre_provincia AND localidad = l.nombre_localidad
 		PRINT 'hecho_repartidor migrado'
 END
 GO
 
-/*CREATE TABLE DATAZO.hecho_envio(id_envio INT NOT NULL, id_usuario INT, id_repartidor INT, 
-id_estado INT, id_medioPago INT, precio_envio DECIMAL(18,2),
-					fecha_pedido DATETIME, dia_pedido INT, tiempo_pedido INT, id_rango_horario_pedido INT, fecha_entrega DATETIME,
-					dia_entrega INT, tiempo_entrega INT, id_rango_horario_entrega INT, tiempo_estimado_entrega DATETIME, calificacion DECIMAL(18,0), dir_origen INT, dir_destino INT)*/
-
 CREATE PROCEDURE DATAZO.migrar_hecho_envio
 AS
+
 BEGIN
 	INSERT INTO DATAZO.hecho_envio (id_envio, id_usuario, id_repartidor, id_estado, id_medioPago,
 	precio_envio, fecha_pedido, dia_pedido, tiempo_pedido, id_rango_horario_pedido, fecha_entrega,
@@ -823,29 +800,66 @@ BEGIN
 		SELECT e.id_envio, u.id_usuario, r.id_repartidor,
 			dest.id_estado, dmp.id_tipo_medio_pago, e.precio_envio,
 			e.fecha_pedido, ddp.id_dia, dtp.id_tiempo,
-			DATAZO.convertir_a_rango_horario(e.fecha_pedido),
+			drhp.id_rango_horario,
 			e.fecha_entrega, dde.id_dia, dte.id_tiempo,
-			DATAZO.convertir_a_rango_horario(e.fecha_entrega),
+			drhe.id_rango_horario,
 			e.tiempo_estimado_entrega, e.calificacion
 		FROM DATAZO.envio as e
-		LEFT JOIN DATAZO.hecho_usuario as u ON u.id_usuario = e.id_usuario
-		LEFT JOIN DATAZO.hecho_repartidor as r ON r.id_repartidor = e.id_repartidor
-		LEFT JOIN DATAZO.estado as est ON est.id_estado = e.id_estado
-		LEFT JOIN DATAZO.dimension_estado as dest ON dest.descripcion = est.descripcion
-		LEFT JOIN DATAZO.medio_de_pago as mp ON mp.id_medioPago = e.id_medioPago
-		LEFT JOIN DATAZO.tipo_medio_pago as tmp ON tmp.id_tipo_medio_pago = mp.id_tipo_medio_pago
-		LEFT JOIN DATAZO.dimension_tipo_medio_pago as dmp ON tmp.descripcion = dmp.descripcion
-		LEFT JOIN DATAZO.dimension_dia as ddp ON ddp.descripcion = DATENAME(dw, e.fecha_pedido)
-		LEFT JOIN DATAZO.dimension_tiempo as dtp ON dtp.anio = YEAR(e.fecha_pedido) AND
+		JOIN DATAZO.hecho_usuario as u ON u.id_usuario = e.id_usuario
+		JOIN DATAZO.hecho_repartidor as r ON r.id_repartidor = e.id_repartidor
+		JOIN DATAZO.estado as est ON est.id_estado = e.id_estado
+		JOIN DATAZO.dimension_estado_mensajeria_pedido as dest ON dest.descripcion = est.descripcion
+		JOIN DATAZO.medio_de_pago as mp ON mp.id_medioPago = e.id_medioPago
+		JOIN DATAZO.tipo_medio_pago as tmp ON tmp.id_tipo_medio_pago = mp.id_tipo_medio_pago
+		JOIN DATAZO.dimension_tipo_medio_pago as dmp ON tmp.descripcion = dmp.descripcion
+		JOIN DATAZO.dimension_dia as ddp ON ddp.descripcion = DATENAME(dw, e.fecha_pedido)
+		JOIN DATAZO.dimension_tiempo as dtp ON dtp.anio = YEAR(e.fecha_pedido) AND
 			dtp.mes = MONTH(fecha_pedido)
-		LEFT JOIN DATAZO.dimension_dia as dde ON dde.descripcion = DATENAME(dw, e.fecha_entrega)
-		LEFT JOIN DATAZO.dimension_tiempo as dte ON dte.anio = YEAR(e.fecha_entrega) AND
+		JOIN DATAZO.dimension_dia as dde ON dde.descripcion = DATENAME(dw, e.fecha_entrega)
+		JOIN DATAZO.dimension_tiempo as dte ON dte.anio = YEAR(e.fecha_entrega) AND
 			dtp.mes = MONTH(fecha_entrega)
+		JOIN DATAZO.dimension_rango_horario as drhp ON drhp.rangoHorario = 
+			DATAZO.convertir_a_rango_horario(DATEPART(HOUR, e.fecha_pedido))
+		JOIN DATAZO.dimension_rango_horario as drhe ON drhp.rangoHorario = 
+			DATAZO.convertir_a_rango_horario(DATEPART(HOUR, e.fecha_entrega))
 
+		PRINT 'hecho_evento migrado'
+END
+GO
 
-		
+CREATE PROCEDURE DATAZO.migrar_hecho_pedido_productos
+AS
+BEGIN
 
-		PRINT 'hecho_envio migrado'
+	INSERT INTO DATAZO.hecho_pedido_productos (id_pedido, id_envio, id_local,
+	tarifa_servicio, total_pedido)
+		SELECT p.id_pedido, e.id_envio, l.id_local, 
+		p.tarifa_servicio, p.total_pedido
+		FROM DATAZO.pedido_productos as p
+		JOIN DATAZO.hecho_envio as e ON e.id_envio = p.id_envio
+		JOIN DATAZO.dimension_local_ as l ON l.id_local = p.id_local
+		PRINT 'hecho_pedido_productos migrado'
+
+END
+GO
+
+/*CREATE TABLE DATAZO.hecho_envio_de_mensajeria(id_envio INT, id_envio_mensajeria DECIMAL(18,0) NOT NULL IDENTITY(1,1), 
+									 tipo_paquete INT, valor_asegurado decimal(18,2), precio_seguro decimal(18,2),)*/
+
+CREATE PROCEDURE DATAZO.migrar_hecho_envio_de_mensajeria
+AS
+BEGIN
+
+	INSERT INTO DATAZO.hecho_envio_de_mensajeria (id_envio, id_envio_mensajeria,
+	tipo_paquete, valor_asegurado, precio_seguro)
+		SELECT en.id_envio, e.id_envio_mensajeria, htp.tipo,
+		e.valor_asegurado, e.precio_seguro
+		FROM DATAZO.envio_de_mensajeria as e
+		JOIN DATAZO.hecho_envio as en ON en.id_envio = e.id_envio
+		JOIN DATAZO.tipo_paquete as tp ON tp.id_tipo = e.tipo_paquete
+		JOIN DATAZO.dimension_tipo_paquete as htp ON htp.tipo = tp.tipo
+		PRINT 'hecho_envio_mensajeria migrado'
+
 END
 GO
 
@@ -921,19 +935,20 @@ BEGIN TRANSACTION
 	EXECUTE DATAZO.migrar_dim_tipo_movilidad
 	EXECUTE DATAZO.migrar_dim_dia
 	EXECUTE DATAZO.migrar_dim_tipo_paquete
-	--EXECUTE DATAZO.migrar_dim_estado_mensajeria
 	EXECUTE DATAZO.migrar_dim_tipo_medio_pago
-	--EXECUTE DATAZO.migrar_dim_estado_pedido
+	EXECUTE DATAZO.migrar_dim_estado_mensajeria_pedido
 	EXECUTE DATAZO.migrar_dim_provincia_localidad
 	EXECUTE DATAZO.migrar_hecho_persona
 	EXECUTE DATAZO.migrar_hecho_usuario
 	EXECUTE DATAZO.migrar_hecho_operador		
 	EXECUTE DATAZO.migrar_hecho_repartidor
-	--EXECUTE DATAZO.migrar_cupon_descuento
-	--EXECUTE DATAZO.migrar_cuponxpedido
-	--EXECUTE DATAZO.migrar_cuponxreclamo
-	--EXECUTE DATAZO.migrar_hecho_reclamo
-	--EXECUTE DATAZO.migrar_hecho_envio
+	EXECUTE DATAZO.migrar_hecho_envio
+	EXECUTE DATAZO.migrar_hecho_pedido_productos
+	EXECUTE DATAZO.migrar_hecho_envio_de_mensajeria
+	EXECUTE DATAZO.migrar_cupon_descuento
+	EXECUTE DATAZO.migrar_cuponxpedido
+	EXECUTE DATAZO.migrar_cuponxreclamo
+	EXECUTE DATAZO.migrar_hecho_reclamo
 END TRY
 BEGIN CATCH
     ROLLBACK TRANSACTION;
