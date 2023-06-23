@@ -221,6 +221,12 @@ GO
 IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_dim_estado_reclamo')
 	DROP PROCEDURE DATAZO.migrar_dim_estado_reclamo
 GO
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_dim_tipo_reclamo')
+	DROP PROCEDURE DATAZO.migrar_dim_tipo_reclamo
+GO
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_dim_rango_etario')
+	DROP PROCEDURE DATAZO.migrar_dim_rango_etario
+GO
 IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_dim_tipo_movilidad')
 	DROP PROCEDURE DATAZO.migrar_dim_tipo_movilidad
 GO
@@ -264,6 +270,9 @@ GO
 --DROP FUNCTIONS 
 IF EXISTS(SELECT [name] FROM sys.objects WHERE [name] = 'convertir_a_rango_horario')
 	DROP FUNCTION DATAZO.convertir_a_rango_horario
+GO
+IF EXISTS(SELECT [name] FROM sys.objects WHERE [name] = 'convertir_a_rango_etario')
+	DROP FUNCTION DATAZO.convertir_a_rango_etario
 GO
 	
 
@@ -509,7 +518,6 @@ BEGIN
 	SELECT  DISTINCT nombre
 	from DATAZO.local_
 	where nombre IS NOT NULL
-	-- categ tipo local // la categoria es la desc?????
 	PRINT 'dim_local migrada'
 END
 GO
@@ -553,10 +561,27 @@ BEGIN
 END
 GO
 
+CREATE FUNCTION DATAZO.convertir_a_rango_etario (@edad INT)
+RETURNS VARCHAR(6)
+AS
+BEGIN
+	DECLARE @resultado VARCHAR(6)
+
+	SELECT @resultado = 
+		CASE
+			WHEN @edad < 25 THEN '<25'
+			WHEN @edad BETWEEN 25 AND 35 THEN '25 - 35'
+			WHEN @edad BETWEEN 35 AND 55 THEN '35 - 55'
+			WHEN @edad > 55 THEN '>55'
+		END
+
+	RETURN @resultado
+END
+GO
+
 CREATE PROCEDURE DATAZO.migrar_dim_rango_horario
 AS
 BEGIN
-	--dimension_rango_horario/ pasar a decimal?
 	INSERT INTO DATAZO.dimension_rango_horario values ('00:00 - 02:00'),('02:00 - 04:00'),
 	('04:00 - 06:00'), ('06:00 - 08:00'), ('08:00 - 10:00'), ('10:00 - 12:00'),
 	('12:00 - 14:00'), ('14:00 - 16:00'), ('16:00 - 18:00'), ('18:00 - 20:00'),
@@ -569,7 +594,6 @@ GO
 CREATE PROCEDURE DATAZO.migrar_dim_estado_reclamo
 AS
 BEGIN
-	--dimension_estado_reclamo / solo aparece uno otro en null con distinct
 	INSERT INTO DATAZO.dimension_estado_reclamo (descripcion )
 	SELECT  DISTINCT estado
 	from DATAZO.reclamo
@@ -579,7 +603,25 @@ BEGIN
 END
 GO
 
---TODO: MIGRAR dim_tipo_reclamo
+CREATE PROCEDURE DATAZO.migrar_dim_tipo_reclamo
+AS
+BEGIN
+	INSERT INTO DATAZO.dimension_tipo_reclamo (descripcion)
+	SELECT  DISTINCT descripcion
+	from DATAZO.tipo_reclamo
+
+	PRINT 'dim_tipo_reclamo_migrada'
+END
+GO
+CREATE PROCEDURE DATAZO.migrar_dim_rango_etario
+AS
+BEGIN
+	INSERT INTO DATAZO.dimension_rango_etario values ('<25'),('25 - 35'),
+	('35 - 55'), ('>55')
+	PRINT 'dim_rango_etario migrada'
+END
+GO
+
 
 --dimension_rango_etario
 
