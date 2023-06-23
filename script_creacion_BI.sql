@@ -248,6 +248,15 @@ GO
 IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_dim_provincia_localidad')
 	DROP PROCEDURE DATAZO.migrar_dim_provincia_localidad
 GO
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_hecho_persona')
+	DROP PROCEDURE DATAZO.migrar_hecho_persona
+GO
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_hecho_usuario')
+	DROP PROCEDURE DATAZO.migrar_hecho_usuario
+GO
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_hecho_operador')
+	DROP PROCEDURE DATAZO.migrar_hecho_operador
+GO	
 IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_hecho_repartidor')
 	DROP PROCEDURE DATAZO.migrar_hecho_repartidor
 GO
@@ -274,7 +283,9 @@ GO
 IF EXISTS(SELECT [name] FROM sys.objects WHERE [name] = 'convertir_a_rango_etario')
 	DROP FUNCTION DATAZO.convertir_a_rango_etario
 GO
-	
+IF EXISTS(SELECT [name] FROM sys.objects WHERE [name] = 'calcular_edad')
+	DROP FUNCTION DATAZO.calcular_edad
+GO		
 
 
 
@@ -316,7 +327,7 @@ ALTER TABLE DATAZO.dimension_tipo_reclamo
 	ADD CONSTRAINT pk_dimension_tipo_reclamo PRIMARY KEY (id_tipo)
 GO
 
-CREATE TABLE DATAZO.dimension_rango_etario(id_rango INT NOT NULL IDENTITY(1,1), edadInicial INT, edadFinal INT)
+CREATE TABLE DATAZO.dimension_rango_etario(id_rango INT NOT NULL IDENTITY(1,1), rango_etario VARCHAR(7))
 
 ALTER TABLE DATAZO.dimension_rango_etario
 	ADD CONSTRAINT pk_dimension_rango_etario PRIMARY KEY (id_rango)
@@ -363,12 +374,11 @@ GO
 
 --Create de hechos
 
-CREATE TABLE DATAZO.hecho_persona(id_persona INT NOT NULL IDENTITY(1,1), dia_nac INT, tiempo_nac INT)
+CREATE TABLE DATAZO.hecho_persona(id_persona INT NOT NULL , id_rango int)
 
 ALTER TABLE DATAZO.hecho_persona
 	ADD CONSTRAINT pk_hecho_persona PRIMARY KEY (id_persona),
-	CONSTRAINT fk_hecho_persona_dia FOREIGN KEY (dia_nac) REFERENCES DATAZO.dimension_dia(id_dia),
-	CONSTRAINT fk_hecho_persona_tiempo FOREIGN KEY (tiempo_nac) REFERENCES DATAZO.dimension_tiempo(id_tiempo)
+	CONSTRAINT fk_hecho_persona_dia FOREIGN KEY (id_rango) REFERENCES DATAZO.dimension_rango_etario(id_rango)
 GO
 
 CREATE TABLE DATAZO.hecho_operador(id_operador INT NOT NULL, id_persona INT)
@@ -378,13 +388,13 @@ ALTER TABLE DATAZO.hecho_operador
 	CONSTRAINT fk_hecho_operador_persona FOREIGN KEY (id_persona) REFERENCES DATAZO.hecho_persona(id_persona)
 GO
 
-CREATE TABLE DATAZO.hecho_usuario(id_usuario INT NOT NULL, id_persona INT, dia_registro INT, tiempo_registro INT)
+CREATE TABLE DATAZO.hecho_usuario(id_usuario INT NOT NULL, id_persona INT)--, dia_registro INT, tiempo_registro INT)
 
 ALTER TABLE DATAZO.hecho_usuario
 	ADD CONSTRAINT pk_hecho_usuario PRIMARY KEY (id_usuario),
 	CONSTRAINT fk_hecho_usuario_persona FOREIGN KEY (id_persona) REFERENCES DATAZO.hecho_persona(id_persona),
-	CONSTRAINT fk_hecho_usuario_dia FOREIGN KEY (dia_registro) REFERENCES DATAZO.dimension_dia(id_dia),
-	CONSTRAINT fk_hecho_usuario_tiempo FOREIGN KEY (tiempo_registro) REFERENCES DATAZO.dimension_tiempo(id_tiempo)
+	--CONSTRAINT fk_hecho_usuario_dia FOREIGN KEY (dia_registro) REFERENCES DATAZO.dimension_dia(id_dia),
+	--CONSTRAINT fk_hecho_usuario_tiempo FOREIGN KEY (tiempo_registro) REFERENCES DATAZO.dimension_tiempo(id_tiempo)
 GO
 
 CREATE TABLE DATAZO.hecho_repartidor(id_repartidor INT NOT NULL, id_persona INT, tipo_movilidad INT, localidad_activa INT)
@@ -561,11 +571,27 @@ BEGIN
 END
 GO
 
-CREATE FUNCTION DATAZO.convertir_a_rango_etario (@edad INT)
-RETURNS VARCHAR(6)
+CREATE FUNCTION DATAZO.calcular_edad (@anio_nacimiento INT)
+RETURNS INT
 AS
 BEGIN
-	DECLARE @resultado VARCHAR(6)
+    DECLARE @edad INT
+
+    SELECT @edad =  year(GETDATE()) - @anio_nacimiento 
+
+    IF ((@edad + @anio_nacimiento) > year(GETDATE()) )
+        SET @edad = @edad - 1
+
+    RETURN @edad
+END
+GO
+
+	
+CREATE FUNCTION DATAZO.convertir_a_rango_etario (@edad INT)
+RETURNS VARCHAR(7)
+AS
+BEGIN
+	DECLARE @resultado VARCHAR(7)
 
 	SELECT @resultado = 
 		CASE
@@ -724,6 +750,47 @@ GO
 --CREATE TABLE DATAZO.hecho_repartidor(id_repartidor INT NOT NULL IDENTITY(1,1),
 -- id_persona INT, tipo_movilidad INT, localidad_activa INT)
 
+CREATE PROCEDURE DATAZO.migrar_hecho_persona
+AS
+BEGIN
+	
+	INSERT INTO DATAZO.hecho_persona(id_persona, id_rango) 
+		select id_persona, id_rango
+		from DATAZO.persona 
+		join DATAZO.dimension_rango_etario on rango_etario = DATAZO.convertir_a_rango_etario(DATAZO.calcular_edad(year(fecha_nac)))
+		PRINT 'hecho_persona migrada'
+	
+END
+GO
+
+
+CREATE PROCEDURE DATAZO.migrar_hecho_operador
+AS
+BEGIN
+	
+	INSERT INTO DATAZO.hecho_operador(id_operador, id_persona ) 
+		select o.id_operador, p.id_persona
+		from DATAZO.operador o
+		join DATAZO.hecho_persona p on o.id_persona = p.id_persona
+		PRINT 'hecho_operador migrado'
+	
+END
+GO
+
+
+CREATE PROCEDURE DATAZO.migrar_hecho_usuario
+AS
+BEGIN
+	
+	INSERT INTO DATAZO.hecho_usuario(id_usuario, id_persona) 
+		select u.id_usuario, p.id_persona
+		from DATAZO.usuario u
+		join DATAZO.hecho_persona p on u.id_persona = p.id_persona
+		PRINT 'hecho_usuario migrado'
+	
+END
+GO
+	
 CREATE PROCEDURE DATAZO.migrar_hecho_repartidor
 AS
 BEGIN
@@ -848,20 +915,24 @@ BEGIN TRANSACTION
 	EXECUTE DATAZO.migrar_dim_local
 	EXECUTE DATAZO.migrar_dim_categoria_tipo_local
 	EXECUTE DATAZO.migrar_dim_rango_horario
+	EXECUTE DATAZO.migrar_dim_rango_etario
 	EXECUTE DATAZO.migrar_dim_estado_reclamo
 	EXECUTE DATAZO.migrar_dim_tipo_movilidad
 	EXECUTE DATAZO.migrar_dim_dia
 	EXECUTE DATAZO.migrar_dim_tipo_paquete
-	EXECUTE DATAZO.migrar_dim_estado_mensajeria
+	--EXECUTE DATAZO.migrar_dim_estado_mensajeria
 	EXECUTE DATAZO.migrar_dim_tipo_medio_pago
-	EXECUTE DATAZO.migrar_dim_estado_pedido
+	--EXECUTE DATAZO.migrar_dim_estado_pedido
 	EXECUTE DATAZO.migrar_dim_provincia_localidad
+	EXECUTE DATAZO.migrar_hecho_persona
+	EXECUTE DATAZO.migrar_hecho_usuario
+	EXECUTE DATAZO.migrar_hecho_operador		
 	EXECUTE DATAZO.migrar_hecho_repartidor
-	-- EXECUTE DATAZO.migrar_cupon_descuento
-	-- EXECUTE DATAZO.migrar_cuponxpedido
-	-- EXECUTE DATAZO.migrar_cuponxreclamo
-	-- EXECUTE DATAZO.migrar_hecho_reclamo
-	-- EXECUTE DATAZO.migrar_hecho_envio
+	EXECUTE DATAZO.migrar_cupon_descuento
+	--EXECUTE DATAZO.migrar_cuponxpedido
+	--EXECUTE DATAZO.migrar_cuponxreclamo
+	--EXECUTE DATAZO.migrar_hecho_reclamo
+	--EXECUTE DATAZO.migrar_hecho_envio
 END TRY
 BEGIN CATCH
     ROLLBACK TRANSACTION;
