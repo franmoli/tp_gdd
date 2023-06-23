@@ -251,6 +251,9 @@ GO
 IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_hecho_reclamo')
 	DROP PROCEDURE DATAZO.migrar_hecho_reclamo
 GO
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_cupon_descuento')
+	DROP PROCEDURE DATAZO.migrar_cupon_descuento
+GO
 
 --DROP FUNCTIONS 
 IF EXISTS(SELECT [name] FROM sys.objects WHERE [name] = 'convertir_a_rango_horario')
@@ -729,6 +732,8 @@ BEGIN
 END
 GO
 
+-- TODO: MIGRAR id_pedido
+
 CREATE PROCEDURE DATAZO.migrar_hecho_reclamo
 AS
 BEGIN
@@ -742,14 +747,27 @@ BEGIN
 	FROM DATAZO.reclamo rec
 	JOIN DATAZO.dimension_tiempo tm ON tm.anio = DATEPART(YEAR, rec.fecha) AND tm.mes = DATEPART(MONTH, rec.fecha)
 	JOIN DATAZO.dimension_tiempo tm2 ON tm2.anio = DATEPART(YEAR, rec.fecha_solucion) AND tm2.mes = DATEPART(MONTH, rec.fecha_solucion)
-	JOIN DATAZO.dimension_estado est ON est.descripcion = rec.estado
+	JOIN DATAZO.dimension_estado_reclamo est ON est.descripcion = rec.estado
 
 	PRINT 'hecho_envio migrado'
 END
 GO
 
+-- TODO: MIGRAR USUARIO
+CREATE PROCEDURE DATAZO.migrar_cupon_descuento
+AS
+BEGIN
+	INSERT INTO DATAZO.hecho_cupon_de_descuento (id_cupon, nro, id_usuario, monto, dia_alta, tiempo_alta, dia_vencimiento, tiempo_vencimiento)
+	SELECT cup.id_cupon, cup.nro, CUP.id_usuario, cup.monto, DATEPART(WEEKDAY, cup.fecha_alta), tm.id_tiempo, DATEPART(WEEKDAY, cup.fecha_vencimiento), tm2.id_tiempo
+	FROM DATAZO.cupon_descuento cup
+	JOIN DATAZO.dimension_tiempo tm ON tm.anio = DATEPART(YEAR, cup.fecha_alta) AND tm.mes = DATEPART(MONTH, cup.fecha_alta)
+	JOIN DATAZO.dimension_tiempo tm2 ON tm2.anio = DATEPART(YEAR, cup.fecha_vencimiento) AND tm2.mes = DATEPART(MONTH, cup.fecha_vencimiento)
+	
 
-select * from datazo.reclamo
+	PRINT 'hecho_envio migrado'
+END
+GO
+
 
 BEGIN TRANSACTION
  BEGIN TRY
@@ -767,6 +785,7 @@ BEGIN TRANSACTION
 	EXECUTE DATAZO.migrar_dim_estado_pedido
 	EXECUTE DATAZO.migrar_dim_provincia_localidad
 	EXECUTE DATAZO.migrar_hecho_repartidor
+	-- EXECUTE DATAZO.migrar_cupon_descuento
 	-- EXECUTE DATAZO.migrar_hecho_reclamo
 	-- EXECUTE DATAZO.migrar_hecho_envio
 END TRY
