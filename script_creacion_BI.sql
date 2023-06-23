@@ -248,6 +248,9 @@ GO
 IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_hecho_envio')
 	DROP PROCEDURE DATAZO.migrar_hecho_envio
 GO
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_hecho_reclamo')
+	DROP PROCEDURE DATAZO.migrar_hecho_reclamo
+GO
 
 --DROP FUNCTIONS 
 IF EXISTS(SELECT [name] FROM sys.objects WHERE [name] = 'convertir_a_rango_horario')
@@ -307,7 +310,7 @@ ALTER TABLE DATAZO.dimension_tipo_movilidad
 	ADD CONSTRAINT pk_dimension_tipo_movilidad PRIMARY KEY (id_tipo_movilidad)
 GO
 
-CREATE TABLE DATAZO.dimension_dia(id_dia INT NOT NULL IDENTITY(1,1), descripcion CHAR)
+CREATE TABLE DATAZO.dimension_dia(id_dia INT NOT NULL, descripcion CHAR)
 
 ALTER TABLE DATAZO.dimension_dia
 	ADD CONSTRAINT pk_dimension_dia PRIMARY KEY (id_dia)
@@ -566,7 +569,7 @@ BEGIN
 END
 GO
 
--- dim_tipo_reclamo
+--TODO: MIGRAR dim_tipo_reclamo
 
 --dimension_rango_etario
 
@@ -591,19 +594,18 @@ CREATE PROCEDURE DATAZO.migrar_dim_dia
 AS 
 BEGIN 
 	--dimension_dia
-	INSERT INTO DATAZO.dimension_dia (descripcion )
-	SELECT left(dia.descripcion, 1) from DATAZO.dia
-	ORDER BY (
+	INSERT INTO DATAZO.dimension_dia (id_dia, descripcion )
+	SELECT (
 		CASE
-			WHEN descripcion = 'Monday' THEN 1
-			WHEN descripcion = 'Tuesday' THEN 2
-			WHEN descripcion = 'Wednesday' THEN 3
-			WHEN descripcion = 'Thursday' THEN 4
-			WHEN descripcion = 'Friday' THEN 5
-			WHEN descripcion = 'Saturday' THEN 6
-			WHEN descripcion = 'Sunday' THEN 7
+			WHEN descripcion = 'Domingo' THEN 1
+			WHEN descripcion = 'Lunes' THEN 2
+			WHEN descripcion = 'Martes' THEN 3
+			WHEN descripcion = 'Miercoles' THEN 4
+			WHEN descripcion = 'Jueves' THEN 5
+			WHEN descripcion = 'Viernes' THEN 6
+			WHEN descripcion = 'Sabado' THEN 7
 		END
-	)
+	), left(dia.descripcion, 1) from DATAZO.dia
 
 	PRINT 'dim_dia migrada'
 END 
@@ -694,7 +696,6 @@ id_estado INT, id_medioPago INT, precio_envio DECIMAL(18,2),
 
 CREATE PROCEDURE DATAZO.migrar_hecho_envio
 AS
-
 BEGIN
 	INSERT INTO DATAZO.hecho_envio (id_envio, id_usuario, id_repartidor, id_estado, id_medioPago,
 	precio_envio, fecha_pedido, dia_pedido, tiempo_pedido, id_rango_horario_pedido, fecha_entrega,
@@ -702,9 +703,9 @@ BEGIN
 		SELECT e.id_envio, u.id_usuario, r.id_repartidor,
 			dest.id_estado, dmp.id_tipo_medio_pago, e.precio_envio,
 			e.fecha_pedido, ddp.id_dia, dtp.id_tiempo,
-			DATAZO.convertir_a_rango_horario(DATEPART(HOUR, e.fecha_pedido)),
+			DATAZO.convertir_a_rango_horario(e.fecha_pedido),
 			e.fecha_entrega, dde.id_dia, dte.id_tiempo,
-			DATAZO.convertir_a_rango_horario(DATEPART(HOUR, e.fecha_entrega)),
+			DATAZO.convertir_a_rango_horario(e.fecha_entrega),
 			e.tiempo_estimado_entrega, e.calificacion
 		FROM DATAZO.envio as e
 		LEFT JOIN DATAZO.hecho_usuario as u ON u.id_usuario = e.id_usuario
@@ -721,9 +722,34 @@ BEGIN
 		LEFT JOIN DATAZO.dimension_tiempo as dte ON dte.anio = YEAR(e.fecha_entrega) AND
 			dtp.mes = MONTH(fecha_entrega)
 
-		PRINT 'hecho_evento migrado'
+
+		
+
+		PRINT 'hecho_envio migrado'
 END
 GO
+
+CREATE PROCEDURE DATAZO.migrar_hecho_reclamo
+AS
+BEGIN
+	INSERT INTO DATAZO.hecho_reclamo (nro_reclamo, id_pedido, tipo_reclamo, dia_inicio, tiempo_inicio,
+	dia_solucion, tiempo_solucion, id_usuario, id_operador, id_estado, 
+	horario_inicio, horario_solucion)
+	SELECT rec.nro_reclamo, rec.id_pedido, rec.tipo_reclamo, 
+				DATEPART(WEEKDAY,rec.fecha) dia, tm.id_tiempo aniomes, 
+				DATEPART(WEEKDAY,rec.fecha_solucion) dia_fin, tm2.id_tiempo aniomes_fin,
+				rec.id_usuario, rec.id_operador, est.id_estado, rec.fecha, rec.fecha_solucion
+	FROM DATAZO.reclamo rec
+	JOIN DATAZO.dimension_tiempo tm ON tm.anio = DATEPART(YEAR, rec.fecha) AND tm.mes = DATEPART(MONTH, rec.fecha)
+	JOIN DATAZO.dimension_tiempo tm2 ON tm2.anio = DATEPART(YEAR, rec.fecha_solucion) AND tm2.mes = DATEPART(MONTH, rec.fecha_solucion)
+	JOIN DATAZO.dimension_estado est ON est.descripcion = rec.estado
+
+	PRINT 'hecho_envio migrado'
+END
+GO
+
+
+select * from datazo.reclamo
 
 BEGIN TRANSACTION
  BEGIN TRY
@@ -741,7 +767,8 @@ BEGIN TRANSACTION
 	EXECUTE DATAZO.migrar_dim_estado_pedido
 	EXECUTE DATAZO.migrar_dim_provincia_localidad
 	EXECUTE DATAZO.migrar_hecho_repartidor
-	EXECUTE DATAZO.migrar_hecho_envio
+	-- EXECUTE DATAZO.migrar_hecho_reclamo
+	-- EXECUTE DATAZO.migrar_hecho_envio
 END TRY
 BEGIN CATCH
     ROLLBACK TRANSACTION;

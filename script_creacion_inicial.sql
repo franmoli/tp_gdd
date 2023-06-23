@@ -465,7 +465,7 @@ GO
 
 /*Parte 5*/
 
-CREATE TABLE DATAZO.reclamo (nro_reclamo decimal(18,0) NOT NULL, id_pedido int, tipo_reclamo int, fecha datetime, descripcion nvarchar(255), fecha_solucion datetime, estado nvarchar(50), solucion nvarchar(255), calificacion decimal(18,0), id_usuario int);
+CREATE TABLE DATAZO.reclamo (nro_reclamo decimal(18,0) NOT NULL, id_pedido int, tipo_reclamo int, fecha datetime, descripcion nvarchar(255), fecha_solucion datetime, estado nvarchar(50), solucion nvarchar(255), calificacion decimal(18,0), id_usuario int, id_operador int);
 CREATE TABLE DATAZO.producto_por_pedido ( id_productoXpedido INT IDENTITY(1,1),id_pedido int NOT NULL, codigo_producto nvarchar(50) NOT NULL, id_local INT NOT NULL, cantidad decimal(18,0), total_producto decimal(18,2));
 CREATE TABLE DATAZO.cupon_por_pedido(nro_cupon decimal(18,0) NOT NULL, id_pedido INT)
 
@@ -473,7 +473,8 @@ ALTER TABLE DATAZO.reclamo
 	ADD CONSTRAINT pk_reclamo PRIMARY KEY (nro_reclamo),
 	CONSTRAINT fk_pedido FOREIGN KEY (id_pedido) REFERENCES DATAZO.pedido_productos(id_pedido),
 	CONSTRAINT fk_tipo_reclamo FOREIGN KEY (tipo_reclamo) REFERENCES DATAZO.tipo_reclamo(id_tipo),
-	CONSTRAINT fk_usuario FOREIGN KEY (id_usuario) REFERENCES DATAZO.usuario(id_usuario)
+	CONSTRAINT fk_usuario FOREIGN KEY (id_usuario) REFERENCES DATAZO.usuario(id_usuario),
+	CONSTRAINT fk_operador FOREIGN KEY (id_operador) REFERENCES DATAZO.operador(operador)
 GO
 
 ALTER TABLE DATAZO.producto_por_pedido
@@ -1051,13 +1052,15 @@ GO
 CREATE PROCEDURE DATAZO.migrar_reclamo
 AS
 BEGIN
-	INSERT INTO DATAZO.reclamo (nro_reclamo, id_pedido, tipo_reclamo, fecha, descripcion, fecha_solucion, estado, solucion, calificacion, id_usuario)
-	SELECT MASTR.RECLAMO_NRO, pp.id_pedido, tr.id_tipo, MASTR.RECLAMO_FECHA, MASTR.RECLAMO_DESCRIPCION, MASTR.RECLAMO_FECHA_SOLUCION, MASTR.RECLAMO_ESTADO, MASTR.RECLAMO_SOLUCION, MASTR.RECLAMO_CALIFICACION, u.id_usuario
+	INSERT INTO DATAZO.reclamo (nro_reclamo, id_pedido, tipo_reclamo, fecha, descripcion, fecha_solucion, estado, solucion, calificacion, id_usuario, id_operador)
+	SELECT MASTR.RECLAMO_NRO, pp.id_pedido, tr.id_tipo, MASTR.RECLAMO_FECHA, MASTR.RECLAMO_DESCRIPCION, MASTR.RECLAMO_FECHA_SOLUCION, MASTR.RECLAMO_ESTADO, MASTR.RECLAMO_SOLUCION, MASTR.RECLAMO_CALIFICACION, u.id_usuario, u_o.id_operador
 	FROM gd_esquema.Maestra MASTR
 	JOIN DATAZO.pedido_productos as pp ON pp.id_pedido = MASTR.PEDIDO_NRO 
 	JOIN DATAZO.tipo_reclamo as tr ON tr.descripcion = MASTR.RECLAMO_TIPO
 	JOIN DATAZO.persona as p ON  p.DNI = MASTR.USUARIO_DNI 
 	JOIN DATAZO.usuario as u ON u.id_persona = p.id_persona
+	JOIN DATAZO.persona as p_o ON  p_o.DNI = MASTR.OPERADOR_RECLAMO_DNI 
+	JOIN DATAZO.operador as u_o ON u_o.id_persona = p_o.id_persona
 	WHERE MASTR.RECLAMO_NRO IS NOT NULL
 
 	PRINT 'reclamo migrado'
