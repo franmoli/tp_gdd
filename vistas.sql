@@ -13,6 +13,18 @@ localidad y categoría del local, para cada mes de cada año.*/
 cancelados según el día de la semana y la franja horaria (cuentan como
 pedidos cancelados tanto los que cancela el usuario como el local).*/
 
+CREATE VIEW DATAZO.total_no_cobrado_por_local (local_, Dia,franja_horaria, total) --solo agarre pedidos producto
+AS
+SELECT l.nombre, d.descripcion, rh.rangoHorario, sum(pp.total_pedido) as 'Total No Cobrado'
+FROM DATAZO.hecho_envio e join DATAZO.hecho_pedido_productos pp on pp.id_envio = e.id_envio
+join DATAZO.dimension_dia d on d.id_dia = e.dia_pedido
+join DATAZO.dimension_rango_horario rh on rh.rangoHorario = e.id_rango_horario_pedido
+join DATAZO.dimension_local_ l on l.id_local = pp.id_local
+where e.id_estado = '1' 
+group by l.nombre, d.descripcion, rh.rangoHorario,
+order by 1 
+GO
+
 
 /*Valor promedio mensual que tienen los envíos de pedidos en cada
 localidad.*/
