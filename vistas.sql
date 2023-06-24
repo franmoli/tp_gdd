@@ -142,7 +142,8 @@ go
 
 CREATE VIEW DATAZO.monto_mensual_cupones_por_reclamos (Monto, Mes)
 AS
-SELECT SUM(monto), MONTH(tiempo_alta)
-FROM hecho_cupones_x_reclamo AS cxr JOIN hecho_cupon_de_descuento AS c ON c.id_cupon = cxr.id_cupon
-GROUP BY MONTH(tiempo_alta)
+SELECT SUM(monto) as 'Monsto Mensual Generado Por Cupones', t.mes
+FROM DATAZO.hecho_cupon_x_reclamo AS cxr JOIN DATAZO.hecho_cupon_de_descuento AS c ON c.id_cupon = cxr.id_cupon
+join DATAZO.dimension_tiempo t on t.id_tiempo = c.tiempo_alta 
+GROUP BY t.mes
 GO
