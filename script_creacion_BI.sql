@@ -406,7 +406,7 @@ GO
 
 CREATE TABLE DATAZO.hecho_envio(id_envio INT NOT NULL, id_usuario INT, id_repartidor INT, id_estado INT, id_medioPago INT, precio_envio DECIMAL(18,2),
 					fecha_pedido DATETIME, dia_pedido INT, tiempo_pedido INT, id_rango_horario_pedido INT, fecha_entrega DATETIME,
-					dia_entrega INT, tiempo_entrega INT, id_rango_horario_entrega INT, tiempo_estimado_entrega DATETIME, calificacion DECIMAL(18,0), dir_origen INT, dir_destino INT)
+					dia_entrega INT, tiempo_entrega INT, id_rango_horario_entrega INT, tiempo_estimado_entrega DATETIME, calificacion DECIMAL(18,0), prov_localidad INT)
 
 ALTER TABLE DATAZO.hecho_envio
 	ADD CONSTRAINT pk_hecho_envio PRIMARY KEY (id_envio),
@@ -414,8 +414,7 @@ ALTER TABLE DATAZO.hecho_envio
 	CONSTRAINT fk_hecho_envio_repartidor FOREIGN KEY (id_repartidor) REFERENCES DATAZO.hecho_repartidor(id_repartidor),
 	CONSTRAINT fk_hecho_envio_estado FOREIGN KEY (id_estado) REFERENCES DATAZO.dimension_estado_mensajeria_pedido(id_estado),
 	CONSTRAINT fk_hecho_envio_medioPago FOREIGN KEY (id_medioPago) REFERENCES DATAZO.dimension_tipo_medio_pago (id_tipo_medio_pago),
-	CONSTRAINT fk_hecho_envio_dir_origen FOREIGN KEY (dir_origen) REFERENCES DATAZO.dimension_provincia_localidad (id_provincia_localidad),
-	CONSTRAINT fk_hecho_envio_dir_destino FOREIGN KEY (dir_destino) REFERENCES DATAZO.dimension_provincia_localidad (id_provincia_localidad),
+	CONSTRAINT fk_hecho_envio_prov_localidad FOREIGN KEY (prov_localidad) REFERENCES DATAZO.dimension_provincia_localidad (id_provincia_localidad),
 	CONSTRAINT fk_hecho_envio_rango_horario_pedido FOREIGN KEY (id_rango_horario_pedido) REFERENCES DATAZO.dimension_rango_horario(id_rango_horario),
 	CONSTRAINT fk_hecho_envio_rango_horario_entrega FOREIGN KEY (id_rango_horario_entrega) REFERENCES DATAZO.dimension_rango_horario(id_rango_horario),
 	CONSTRAINT fk_hecho_envio_dia_pedido FOREIGN KEY (dia_pedido) REFERENCES DATAZO.dimension_dia(id_dia),
@@ -796,7 +795,7 @@ AS
 BEGIN
 	INSERT INTO DATAZO.hecho_envio (id_envio, id_usuario, id_repartidor, id_estado, id_medioPago,
 	precio_envio, fecha_pedido, dia_pedido, tiempo_pedido, id_rango_horario_pedido, fecha_entrega,
-	dia_entrega, tiempo_entrega, id_rango_horario_entrega, tiempo_estimado_entrega, calificacion)
+	dia_entrega, tiempo_entrega, id_rango_horario_entrega, tiempo_estimado_entrega, calificacion, prov_localidad)
 		SELECT e.id_envio, u.id_usuario, r.id_repartidor,
 			dest.id_estado, dmp.id_tipo_medio_pago, e.precio_envio,
 			e.fecha_pedido, ddp.id_dia, dtp.id_tiempo,
@@ -820,6 +819,11 @@ BEGIN
 												dte.mes = MONTH(fecha_entrega)
 		JOIN DATAZO.dimension_rango_horario as drhp ON drhp.rangoHorario = DATAZO.convertir_a_rango_horario( e.fecha_pedido)
 		JOIN DATAZO.dimension_rango_horario as drhe ON drhe.rangoHorario = DATAZO.convertir_a_rango_horario( e.fecha_entrega)
+		JOIN DATAZO.direccion dir ON dir.id_direccion = e.dir_origen 
+		JOIN DATAZO.localidad loc ON loc.id_localidad = dir.localidad
+		JOIN DATAZO.provincia prov ON prov.id_provincia = loc.id_provincia
+		JOIN DATAZO.dimension_provincia_localidad prov_loc ON prov_loc.localidad = loc.nombre_localidad AND prov_loc.provincia = prov.nombre_provincia
+		
 
 
 
@@ -879,7 +883,7 @@ BEGIN
 	JOIN DATAZO.dimension_tiempo tm2 ON tm2.anio = DATEPART(YEAR, rec.fecha_solucion) AND tm2.mes = DATEPART(MONTH, rec.fecha_solucion)
 	JOIN DATAZO.dimension_estado_reclamo est ON est.descripcion = rec.estado
 
-	SELECT * FROM DATAZO.dimension_tipo_reclamo
+	-- SELECT * FROM DATAZO.dimension_tipo_reclamo
 
 	PRINT 'hecho_reclamo migrado'
 END
