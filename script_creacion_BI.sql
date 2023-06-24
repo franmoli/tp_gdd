@@ -802,7 +802,7 @@ BEGIN
 			drhp.id_rango_horario,
 			e.fecha_entrega, dde.id_dia, dte.id_tiempo,
 			drhe.id_rango_horario,
-			e.tiempo_estimado_entrega, e.calificacion
+			e.tiempo_estimado_entrega, e.calificacion, prov_loc.id_provincia_localidad
 		FROM DATAZO.envio as e
 		JOIN DATAZO.hecho_usuario as u ON u.id_usuario = e.id_usuario
 		JOIN DATAZO.hecho_repartidor as r ON r.id_repartidor = e.id_repartidor
