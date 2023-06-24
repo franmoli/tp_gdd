@@ -78,12 +78,13 @@ GO
 
 /*Promedio de calificación mensual por local.*/
 
-CREATE VIEW DATAZO.promedio_calificacion_mensual (CalificacionPromedio, NombreLocal)
+CREATE VIEW DATAZO.promedio_calificacion_mensual (mes, CalificacionPromedio, NombreLocal)
 AS
-SELECT AVG(calificacion), nombre
-FROM hecho_pedido_productos AS p JOIN dimension_local_ AS l ON l.id_local = p.id_local 
-                                 JOIN hecho_envio AS e ON e.id_envio = p.id_envio
-GROUP BY nombre
+SELECT  t.mes, AVG(e.calificacion) as 'Calificacion Promedio', l.nombre
+FROM DATAZO.hecho_pedido_productos AS p JOIN DATAZO.dimension_local_ AS l ON l.id_local = p.id_local 
+JOIN DATAZO.hecho_envio AS e ON e.id_envio = p.id_envio
+join DATAZO.dimension_tiempo t on t.id_tiempo = e.tiempo_pedido
+GROUP BY t.mes, l.nombre
 GO
 
 /*Porcentaje de pedidos y mensajería entregados mensualmente según el
@@ -93,20 +94,33 @@ como los de mensajería.
 El porcentaje se calcula en función del total general de pedidos y envíos
 mensuales entregados.*/
 
+
+CREATE VIEW DATAZO.porcentaje_entregas_rango_etario (mes, rango_etario, localidad, porcentaje)
+AS
+SELECT t.mes, re.rango_etario, pl.localidad,(SUM(CASE WHEN e.id_estado = 2 THEN 1 ELSE 0 END) / CAST(COUNT(*) AS FLOAT)) * 100 AS 'Porcentaje Entregados'
+FROM DATAZO.hecho_envio e join DATAZO.dimension_tiempo t on t.id_tiempo = e.tiempo_pedido
+join DATAZO.hecho_repartidor r on r.id_repartidor = e.id_repartidor
+join DATAZO.hecho_persona p on p.id_persona = r.id_persona
+join DATAZO.dimension_rango_etario re on re.id_rango = p.id_rango
+join DATAZO.dimension_provincia_localidad pl on pl.id_provincia_localidad = e.dir_origen
+group by t.mes, re.rango_etario, pl.localidad
+GO
+
+
+
 /*Promedio mensual del valor asegurado (valor declarado por el usuario) de
 los paquetes enviados a través del servicio de mensajería en función del
 tipo de paquete.*/
 
 CREATE VIEW DATAZO.promedio_mensual_valor_asegurado (mes, tipo_paquete , promedio)
 AS
-SELECT t.mes, tp.tipo, avg(sum(em.valor_asegurado)) as 'Promedio valores asegurados'
+SELECT t.mes, tp.tipo, avg(em.valor_asegurado) as 'Promedio valores asegurados'
 FROM  DATAZO.hecho_envio_de_mensajeria em join DATAZO.dimension_tipo_paquete tp on tp.id_tipo = em.tipo_paquete
 join DATAZO.hecho_envio e on e.id_envio = em.id_envio
 join DATAZO.dimension_tiempo t on t.id_tiempo = e.tiempo_pedido
 group by t.mes, tp.tipo 
-order by 1
-
 go
+
   
 /*Cantidad de reclamos mensuales recibidos por cada local en función del
 día de la semana y rango horario.*/
@@ -120,8 +134,6 @@ join DATAZO.dimension_dia d on d.id_dia = r.dia_inicio
 join DATAZO.dimension_tiempo t on t.id_tiempo = r.tiempo_inicio
 join DATAZO.dimension_rango_horario rh on rh.rangoHorario = DATAZO.convertir_a_rango_horario(r.horario_inicio)  
 group by t.mes,l.nombre, d.descripcion, rh.rangoHorario 
-order by 1,3
-
 go
 
   
@@ -139,8 +151,6 @@ join DATAZO.hecho_operador o on o.id_operador = r.id_operador
 join DATAZO.hecho_persona p on p.id_persona = o.id_persona
 join DATAZO.dimension_rango_etario re on re.id_rango = p.id_rango
 group by tr.descripcion, re.rango_etario
-order by 1
-
 go
   
 /*Monto mensual generado en cupones a partir de reclamos.*/
