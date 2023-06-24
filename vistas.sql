@@ -129,8 +129,6 @@ join DATAZO.dimension_dia d on d.id_dia = r.dia_inicio
 join DATAZO.dimension_tiempo t on t.id_tiempo = r.tiempo_inicio
 join DATAZO.dimension_rango_horario rh on rh.rangoHorario = DATAZO.convertir_a_rango_horario(r.horario_inicio)  
 group by t.mes,l.nombre, d.descripcion, rh.rangoHorario 
-order by 1,3
-
 go
 
   
@@ -148,8 +146,6 @@ join DATAZO.hecho_operador o on o.id_operador = r.id_operador
 join DATAZO.hecho_persona p on p.id_persona = o.id_persona
 join DATAZO.dimension_rango_etario re on re.id_rango = p.id_rango
 group by tr.descripcion, re.rango_etario
-order by 1
-
 go
   
 /*Monto mensual generado en cupones a partir de reclamos.*/
