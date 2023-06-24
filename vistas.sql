@@ -65,12 +65,15 @@ los envíos de pedidos como los de mensajería.*/
 
 CREATE VIEW DATAZO.desvio_promedio_de_entrega (Promedio, Movilidad, Dia, FranjaHoraria)
 AS  --lo que esta adentro del average esta mal, lo tengo que repensar. el problema esta en que tenes datetime y decimal
-SELECT AVG(HOUR(fecha_entrega - fecha_pedido)*60 + MINUTE(fecha_entrega - fecha_pedido) - tiempo_estimado_entrega), tipo_movilidad, descripcion, rangoHorario
-FROM hecho_envio AS e JOIN hecho_repartidor AS r ON e.id_repartidor = r.id_repartidor 
-                      JOIN dimension_tipo_movilidad AS tm ON tm.id_tipo_movilidad = r.tipo_movilidad 
-                      JOIN dimension_dia AS d ON d.id_dia = e.? --hecho_envio no tiene id_dia asi que no se
-                      JOIN dimension_rango_horario AS rh ON rh.id_rango_horario = e.id_rango_horario_entrega
-GROUP BY 2,3,4
+-- SELECT AVG(HOUR(fecha_entrega - fecha_pedido)*60 + MINUTE(fecha_entrega - fecha_pedido) - tiempo_estimado_entrega), tipo_movilidad, descripcion, rangoHorario
+-- FROM hecho_envio AS e JOIN hecho_repartidor AS r ON e.id_repartidor = r.id_repartidor 
+--                       JOIN dimension_tipo_movilidad AS tm ON tm.id_tipo_movilidad = r.tipo_movilidad 
+--                       JOIN dimension_dia AS d ON d.id_dia = e.? --hecho_envio no tiene id_dia asi que no se
+--                       JOIN dimension_rango_horario AS rh ON rh.id_rango_horario = e.id_rango_horario_entrega
+-- GROUP BY 2,3,4
+
+SELECT * FROM DATAZO.repartidor
+
 GO
 
 
