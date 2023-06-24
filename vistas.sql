@@ -21,7 +21,7 @@ join DATAZO.dimension_dia d on d.id_dia = e.dia_pedido
 join DATAZO.dimension_rango_horario rh on rh.rangoHorario = e.id_rango_horario_pedido
 join DATAZO.dimension_local_ l on l.id_local = pp.id_local
 where e.id_estado = '1' 
-group by l.nombre, d.descripcion, rh.rangoHorario,
+group by l.nombre, d.descripcion, rh.rangoHorario
 order by 1 
 GO
 
@@ -29,11 +29,16 @@ GO
 /*Valor promedio mensual que tienen los envíos de pedidos en cada
 localidad.*/
 
-CREATE VIEW DATAZO.promedio_mensual_envios (Dia,Localidad)
+CREATE VIEW DATAZO.promedio_mensual_envios (localidad, provincia, promedio)
 AS
-SELECT AVG(tarifa_servicio), dir_origen
-FROM hecho_pedido_productos AS p JOIN hecho_envio AS e ON p.id_envio = e.id_envio
-GROUP BY dir_origen, MONTH(fecha_entrega)
+
+
+    SELECT PROV_LOC.localidad, PROV_LOC.provincia, AVG(E.precio_envio)
+    FROM DATAZO.dimension_provincia_localidad PROV_LOC
+    JOIN DATAZO.hecho_envio E ON E.prov_localidad = PROV_LOC.id_provincia_localidad
+    JOIN DATAZO.hecho_pedido_productos P ON P.id_envio = E.id_envio
+    GROUP BY PROV_LOC.localidad,PROV_LOC.provincia
+
 GO
 
 /*Desvío promedio en tiempo de entrega según el tipo de movilidad, el día
