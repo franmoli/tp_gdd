@@ -386,13 +386,11 @@ ALTER TABLE DATAZO.hecho_operador
 	CONSTRAINT fk_hecho_operador_persona FOREIGN KEY (id_persona) REFERENCES DATAZO.hecho_persona(id_persona)
 GO
 
-CREATE TABLE DATAZO.hecho_usuario(id_usuario INT NOT NULL, id_persona INT, dia_registro INT, tiempo_registro INT)
+CREATE TABLE DATAZO.hecho_usuario(id_usuario INT NOT NULL, id_persona INT)
 
 ALTER TABLE DATAZO.hecho_usuario
 	ADD CONSTRAINT pk_hecho_usuario PRIMARY KEY (id_usuario),
-	CONSTRAINT fk_hecho_usuario_persona FOREIGN KEY (id_persona) REFERENCES DATAZO.hecho_persona(id_persona),
-	CONSTRAINT fk_hecho_usuario_dia FOREIGN KEY (dia_registro) REFERENCES DATAZO.dimension_dia(id_dia),
-	CONSTRAINT fk_hecho_usuario_tiempo FOREIGN KEY (tiempo_registro) REFERENCES DATAZO.dimension_tiempo(id_tiempo)
+	CONSTRAINT fk_hecho_usuario_persona FOREIGN KEY (id_persona) REFERENCES DATAZO.hecho_persona(id_persona)
 GO
 
 CREATE TABLE DATAZO.hecho_repartidor(id_repartidor INT NOT NULL, id_persona INT, tipo_movilidad INT, localidad_activa INT)
@@ -424,13 +422,15 @@ ALTER TABLE DATAZO.hecho_envio
 GO
 
 
-CREATE TABLE DATAZO.hecho_pedido_productos(id_pedido INT NOT NULL, id_envio INT, id_local INT,
-									 tarifa_servicio INT, total_pedido DECIMAL(18,2))
+CREATE TABLE DATAZO.hecho_pedido_productos(id_pedido INT NOT NULL, id_envio INT, id_local INT, id_categoria_tipo INT,
+									id_prov_localidad INT, tarifa_servicio INT, total_pedido DECIMAL(18,2))
 
 ALTER TABLE DATAZO.hecho_pedido_productos
 	ADD CONSTRAINT pk_hecho_pedido PRIMARY KEY (id_pedido),
 	CONSTRAINT fk_hecho_pedido_envio FOREIGN KEY (id_envio) REFERENCES DATAZO.hecho_envio(id_envio),
-	CONSTRAINT fk_hecho_pedido_local FOREIGN KEY (id_local) REFERENCES DATAZO.dimension_local_(id_local)
+	CONSTRAINT fk_hecho_pedido_local FOREIGN KEY (id_local) REFERENCES DATAZO.dimension_local_(id_local),
+	CONSTRAINT fk_hecho_pedido_categoria FOREIGN KEY (id_categoria_tipo) REFERENCES DATAZO.dimension_categoria_tipo_local,
+	CONSTRAINT fk_hecho_pedido_prov_loc FOREIGN KEY (id_prov_localidad) REFERENCES DATAZO.dimension_provincia_localidad
 GO
 
 CREATE TABLE DATAZO.hecho_envio_de_mensajeria(id_envio INT, id_envio_mensajeria DECIMAL(18,0) NOT NULL, 
@@ -836,12 +836,23 @@ AS
 BEGIN
 
 	INSERT INTO DATAZO.hecho_pedido_productos (id_pedido, id_envio, id_local,
-	tarifa_servicio, total_pedido)
-		SELECT p.id_pedido, e.id_envio, l.id_local, 
+	id_categoria_tipo, id_prov_localidad, tarifa_servicio, total_pedido)
+		SELECT p.id_pedido, e.id_envio, dl.id_local, 
+		dc.id_categoria_tipo_local, dpl.id_provincia_localidad, 
 		p.tarifa_servicio, p.total_pedido
 		FROM DATAZO.pedido_productos as p
 		JOIN DATAZO.hecho_envio as e ON e.id_envio = p.id_envio
-		JOIN DATAZO.dimension_local_ as l ON l.id_local = p.id_local
+		JOIN DATAZO.local_ as l ON l.id_local = p.id_local
+		LEFT JOIN DATAZO.categoria as c ON c.id_categoria = l.categoria
+		JOIN DATAZO.tipo_local as tl ON tl.id_tipo = l.tipo
+		JOIN DATAZO.dimension_local_ as dl ON dl.id_local = p.id_local
+		LEFT JOIN DATAZO.dimension_categoria_tipo_local as dc ON dc.categoria = c.descripcion
+		AND dc.tipo = tl.descripcion 
+		JOIN DATAZO.direccion as d ON d.id_direccion = l.id_direccion
+		JOIN DATAZO.localidad as loc ON d.localidad = loc.id_localidad
+		JOIN DATAZO.provincia as pro ON pro.id_provincia = loc.id_provincia
+		JOIN DATAZO.dimension_provincia_localidad as dpl ON dpl.localidad = loc.nombre_localidad AND
+		dpl.provincia = pro.nombre_provincia
 		PRINT 'hecho_pedido_productos migrado'
 
 END
@@ -882,8 +893,6 @@ BEGIN
 	JOIN DATAZO.dimension_tiempo tm ON tm.anio = DATEPART(YEAR, rec.fecha) AND tm.mes = DATEPART(MONTH, rec.fecha)
 	JOIN DATAZO.dimension_tiempo tm2 ON tm2.anio = DATEPART(YEAR, rec.fecha_solucion) AND tm2.mes = DATEPART(MONTH, rec.fecha_solucion)
 	JOIN DATAZO.dimension_estado_reclamo est ON est.descripcion = rec.estado
-
-	-- SELECT * FROM DATAZO.dimension_tipo_reclamo
 
 	PRINT 'hecho_reclamo migrado'
 END
