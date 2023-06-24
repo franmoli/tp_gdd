@@ -404,7 +404,7 @@ GO
 
 CREATE TABLE DATAZO.hecho_envio(id_envio INT NOT NULL, id_usuario INT, id_repartidor INT, id_estado INT, id_medioPago INT, precio_envio DECIMAL(18,2),
 					fecha_pedido DATETIME, dia_pedido INT, tiempo_pedido INT, id_rango_horario_pedido INT, fecha_entrega DATETIME,
-					dia_entrega INT, tiempo_entrega INT, id_rango_horario_entrega INT, tiempo_estimado_entrega DATETIME, calificacion DECIMAL(18,0), prov_localidad INT)
+					dia_entrega INT, tiempo_entrega INT, id_rango_horario_entrega INT, tiempo_estimado_entrega DECIMAL(18,2), calificacion DECIMAL(18,0), prov_localidad INT)
 
 ALTER TABLE DATAZO.hecho_envio
 	ADD CONSTRAINT pk_hecho_envio PRIMARY KEY (id_envio),
