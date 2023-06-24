@@ -357,6 +357,11 @@ ALTER TABLE DATAZO.repartidor
 	CONSTRAINT fk_repartidor_persona FOREIGN KEY (id_persona) REFERENCES DATAZO.persona(id_persona)
 GO
 
+--operador
+ALTER TABLE DATAZO.operador 
+	ADD CONSTRAINT pk_operador PRIMARY KEY (id_operador),
+	CONSTRAINT fk_operador_persona FOREIGN KEY (id_persona) REFERENCES DATAZO.persona(id_persona)
+GO
 	
 --Localidad
 ALTER TABLE DATAZO.localidad
@@ -474,7 +479,7 @@ ALTER TABLE DATAZO.reclamo
 	CONSTRAINT fk_pedido FOREIGN KEY (id_pedido) REFERENCES DATAZO.pedido_productos(id_pedido),
 	CONSTRAINT fk_tipo_reclamo FOREIGN KEY (tipo_reclamo) REFERENCES DATAZO.tipo_reclamo(id_tipo),
 	CONSTRAINT fk_usuario FOREIGN KEY (id_usuario) REFERENCES DATAZO.usuario(id_usuario),
-	CONSTRAINT fk_operador FOREIGN KEY (id_operador) REFERENCES DATAZO.operador(operador)
+	CONSTRAINT fk_operador FOREIGN KEY (id_operador) REFERENCES DATAZO.operador(id_operador)
 GO
 
 ALTER TABLE DATAZO.producto_por_pedido
