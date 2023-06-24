@@ -281,9 +281,9 @@ IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_cupones_descu
 GO
 
 -- SCHEMA
-IF EXISTS (SELECT * FROM sys.schemas WHERE [name] = 'DATAZO')
-	DROP SCHEMA DATAZO
-GO
+-- IF EXISTS (SELECT * FROM sys.schemas WHERE [name] = 'DATAZO')
+-- 	DROP SCHEMA DATAZO
+-- GO
 
 CREATE SCHEMA DATAZO
 GO
@@ -1064,9 +1064,25 @@ BEGIN
 	JOIN DATAZO.tipo_reclamo as tr ON tr.descripcion = MASTR.RECLAMO_TIPO
 	JOIN DATAZO.persona as p ON  p.DNI = MASTR.USUARIO_DNI 
 	JOIN DATAZO.usuario as u ON u.id_persona = p.id_persona
-	JOIN DATAZO.persona as p_o ON  p_o.DNI = MASTR.OPERADOR_RECLAMO_DNI 
+	JOIN DATAZO.persona as p_o ON  p_o.DNI = MASTR.OPERADOR_RECLAMO_DNI  AND p_o.nombre = MASTR.OPERADOR_RECLAMO_NOMBRE
 	JOIN DATAZO.operador as u_o ON u_o.id_persona = p_o.id_persona
 	WHERE MASTR.RECLAMO_NRO IS NOT NULL
+
+	-- SELECT RECLAMO_NRO
+	-- FROM gd_esquema.Maestra MASTR
+	-- JOIN DATAZO.pedido_productos as pp ON pp.id_pedido = MASTR.PEDIDO_NRO 
+	-- JOIN DATAZO.tipo_reclamo as tr ON tr.descripcion = MASTR.RECLAMO_TIPO
+	-- JOIN DATAZO.persona as p ON  p.DNI = MASTR.USUARIO_DNI 
+	-- JOIN DATAZO.usuario as u ON u.id_persona = p.id_persona
+	-- JOIN DATAZO.persona as p_o ON  p_o.DNI = MASTR.OPERADOR_RECLAMO_DNI
+	-- WHERE MASTR.RECLAMO_NRO IS NOT NULL
+
+	-- SELECT  * FROM DATAZO.persona pers
+	-- join DATAZO.operador op on op.id_persona = pers.id_persona
+	-- WHERE dni = 4170422
+
+
+	-- SELECT  OPERADOR_RECLAMO_DNI, OPERADOR_RECLAMO_NOMBRE FROM gd_esquema.Maestra WHERE RECLAMO_NRO IS NOT NULL and OPERADOR_RECLAMO_DNI = 4170422
 
 	PRINT 'reclamo migrado'
 END
@@ -1138,6 +1154,8 @@ BEGIN
 	PRINT 'cupones de descuento por reclamo migrado'
 END
 GO
+
+-- select * from DATAZO.cupon_por_pedido
 
 BEGIN TRANSACTION
  BEGIN TRY

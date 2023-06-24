@@ -812,16 +812,16 @@ BEGIN
 		JOIN DATAZO.medio_de_pago as mp ON mp.id_medioPago = e.id_medioPago
 		JOIN DATAZO.tipo_medio_pago as tmp ON tmp.id_tipo_medio_pago = mp.id_tipo_medio_pago
 		JOIN DATAZO.dimension_tipo_medio_pago as dmp ON tmp.descripcion = dmp.descripcion
-		JOIN DATAZO.dimension_dia as ddp ON ddp.descripcion = DATENAME(dw, e.fecha_pedido)
+		JOIN DATAZO.dimension_dia as ddp ON ddp.id_dia = DATEPART(WEEKDAY, e.fecha_pedido)
 		JOIN DATAZO.dimension_tiempo as dtp ON dtp.anio = YEAR(e.fecha_pedido) AND
-			dtp.mes = MONTH(fecha_pedido)
-		JOIN DATAZO.dimension_dia as dde ON dde.descripcion = DATENAME(dw, e.fecha_entrega)
+												dtp.mes = MONTH(fecha_pedido)
+		JOIN DATAZO.dimension_dia as dde ON dde.id_dia = DATEPART(WEEKDAY, e.fecha_entrega)
 		JOIN DATAZO.dimension_tiempo as dte ON dte.anio = YEAR(e.fecha_entrega) AND
-			dtp.mes = MONTH(fecha_entrega)
-		JOIN DATAZO.dimension_rango_horario as drhp ON drhp.rangoHorario = 
-			DATAZO.convertir_a_rango_horario(DATEPART(HOUR, e.fecha_pedido))
-		JOIN DATAZO.dimension_rango_horario as drhe ON drhp.rangoHorario = 
-			DATAZO.convertir_a_rango_horario(DATEPART(HOUR, e.fecha_entrega))
+												dte.mes = MONTH(fecha_entrega)
+		JOIN DATAZO.dimension_rango_horario as drhp ON drhp.rangoHorario = DATAZO.convertir_a_rango_horario( e.fecha_pedido)
+		JOIN DATAZO.dimension_rango_horario as drhe ON drhe.rangoHorario = DATAZO.convertir_a_rango_horario( e.fecha_entrega)
+
+
 
 		PRINT 'hecho_evento migrado'
 END
@@ -852,7 +852,7 @@ BEGIN
 
 	INSERT INTO DATAZO.hecho_envio_de_mensajeria (id_envio, id_envio_mensajeria,
 	tipo_paquete, valor_asegurado, precio_seguro)
-		SELECT en.id_envio, e.id_envio_mensajeria, htp.tipo,
+		SELECT en.id_envio, e.id_envio_mensajeria, htp.id_tipo,
 		e.valor_asegurado, e.precio_seguro
 		FROM DATAZO.envio_de_mensajeria as e
 		JOIN DATAZO.hecho_envio as en ON en.id_envio = e.id_envio
@@ -863,7 +863,6 @@ BEGIN
 END
 GO
 
--- TODO: MIGRAR id_pedido
 
 CREATE PROCEDURE DATAZO.migrar_hecho_reclamo
 AS
@@ -880,11 +879,12 @@ BEGIN
 	JOIN DATAZO.dimension_tiempo tm2 ON tm2.anio = DATEPART(YEAR, rec.fecha_solucion) AND tm2.mes = DATEPART(MONTH, rec.fecha_solucion)
 	JOIN DATAZO.dimension_estado_reclamo est ON est.descripcion = rec.estado
 
+	SELECT * FROM DATAZO.dimension_tipo_reclamo
+
 	PRINT 'hecho_reclamo migrado'
 END
 GO
 
--- TODO: MIGRAR USUARIO
 CREATE PROCEDURE DATAZO.migrar_cupon_descuento
 AS
 BEGIN
@@ -918,6 +918,8 @@ BEGIN
 	SELECT cup.id_cupon, cup.nro_cupon, cup.nro_reclamo
 	FROM DATAZO.cupon_por_reclamo cup
 
+	-- select distinct nro_reclamo from DATAZO.hecho_reclamo
+
 	PRINT 'hecho_cupon_x_reclamo migrado'
 END
 GO
@@ -947,8 +949,9 @@ BEGIN TRANSACTION
 	EXECUTE DATAZO.migrar_hecho_envio_de_mensajeria
 	EXECUTE DATAZO.migrar_cupon_descuento
 	EXECUTE DATAZO.migrar_cuponxpedido
-	EXECUTE DATAZO.migrar_cuponxreclamo
+	EXECUTE DATAZO.migrar_dim_tipo_reclamo
 	EXECUTE DATAZO.migrar_hecho_reclamo
+	EXECUTE DATAZO.migrar_cuponxreclamo
 END TRY
 BEGIN CATCH
     ROLLBACK TRANSACTION;
