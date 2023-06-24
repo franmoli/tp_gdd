@@ -796,14 +796,16 @@ AS
 BEGIN
 	INSERT INTO DATAZO.hecho_envio (id_envio, id_usuario, id_repartidor, id_estado, id_medioPago,
 	precio_envio, fecha_pedido, dia_pedido, tiempo_pedido, id_rango_horario_pedido, fecha_entrega,
-	dia_entrega, tiempo_entrega, id_rango_horario_entrega, tiempo_estimado_entrega, calificacion)
+	dia_entrega, tiempo_entrega, id_rango_horario_entrega, tiempo_estimado_entrega, calificacion,
+	dir_origen, dir_destino)
 		SELECT e.id_envio, u.id_usuario, r.id_repartidor,
 			dest.id_estado, dmp.id_tipo_medio_pago, e.precio_envio,
 			e.fecha_pedido, ddp.id_dia, dtp.id_tiempo,
 			drhp.id_rango_horario,
 			e.fecha_entrega, dde.id_dia, dte.id_tiempo,
 			drhe.id_rango_horario,
-			e.tiempo_estimado_entrega, e.calificacion
+			e.tiempo_estimado_entrega, e.calificacion,
+			dplo.id_provincia_localidad, dpld.id_provincia_localidad
 		FROM DATAZO.envio as e
 		JOIN DATAZO.hecho_usuario as u ON u.id_usuario = e.id_usuario
 		JOIN DATAZO.hecho_repartidor as r ON r.id_repartidor = e.id_repartidor
@@ -820,7 +822,16 @@ BEGIN
 												dte.mes = MONTH(fecha_entrega)
 		JOIN DATAZO.dimension_rango_horario as drhp ON drhp.rangoHorario = DATAZO.convertir_a_rango_horario( e.fecha_pedido)
 		JOIN DATAZO.dimension_rango_horario as drhe ON drhe.rangoHorario = DATAZO.convertir_a_rango_horario( e.fecha_entrega)
-
+		JOIN DATAZO.direccion as diro ON diro.id_direccion = e.dir_origen
+		JOIN DATAZO.direccion as dird ON dird.id_direccion = e.dir_destino
+		JOIN DATAZO.localidad as loco ON loco.id_localidad = diro.localidad
+		JOIN DATAZO.localidad as locd ON locd.id_localidad = dird.localidad
+		JOIN DATAZO.provincia as proo ON proo.id_provincia = loco.id_provincia
+		JOIN DATAZO.provincia as prod ON prod.id_provincia = locd.id_provincia
+		JOIN DATAZO.dimension_provincia_localidad as dplo ON dplo.localidad = loco.nombre_localidad
+		AND dplo.provincia = proo.nombre_provincia
+		JOIN DATAZO.dimension_provincia_localidad as dpld ON dpld.localidad = locd.nombre_localidad
+		AND dpld.provincia = prod.nombre_provincia
 
 
 		PRINT 'hecho_evento migrado'
@@ -878,8 +889,6 @@ BEGIN
 	JOIN DATAZO.dimension_tiempo tm ON tm.anio = DATEPART(YEAR, rec.fecha) AND tm.mes = DATEPART(MONTH, rec.fecha)
 	JOIN DATAZO.dimension_tiempo tm2 ON tm2.anio = DATEPART(YEAR, rec.fecha_solucion) AND tm2.mes = DATEPART(MONTH, rec.fecha_solucion)
 	JOIN DATAZO.dimension_estado_reclamo est ON est.descripcion = rec.estado
-
-	SELECT * FROM DATAZO.dimension_tipo_reclamo
 
 	PRINT 'hecho_reclamo migrado'
 END
