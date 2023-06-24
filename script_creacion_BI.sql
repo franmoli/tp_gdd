@@ -386,13 +386,11 @@ ALTER TABLE DATAZO.hecho_operador
 	CONSTRAINT fk_hecho_operador_persona FOREIGN KEY (id_persona) REFERENCES DATAZO.hecho_persona(id_persona)
 GO
 
-CREATE TABLE DATAZO.hecho_usuario(id_usuario INT NOT NULL, id_persona INT, dia_registro INT, tiempo_registro INT)
+CREATE TABLE DATAZO.hecho_usuario(id_usuario INT NOT NULL, id_persona INT)
 
 ALTER TABLE DATAZO.hecho_usuario
 	ADD CONSTRAINT pk_hecho_usuario PRIMARY KEY (id_usuario),
-	CONSTRAINT fk_hecho_usuario_persona FOREIGN KEY (id_persona) REFERENCES DATAZO.hecho_persona(id_persona),
-	CONSTRAINT fk_hecho_usuario_dia FOREIGN KEY (dia_registro) REFERENCES DATAZO.dimension_dia(id_dia),
-	CONSTRAINT fk_hecho_usuario_tiempo FOREIGN KEY (tiempo_registro) REFERENCES DATAZO.dimension_tiempo(id_tiempo)
+	CONSTRAINT fk_hecho_usuario_persona FOREIGN KEY (id_persona) REFERENCES DATAZO.hecho_persona(id_persona)
 GO
 
 CREATE TABLE DATAZO.hecho_repartidor(id_repartidor INT NOT NULL, id_persona INT, tipo_movilidad INT, localidad_activa INT)
