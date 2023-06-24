@@ -3,27 +3,41 @@
 /*Día de la semana y franja horaria con mayor cantidad de pedidos según la
 localidad y categoría del local, para cada mes de cada año.*/
 
---CREATE VIEW DATAZO.dia_y_horario_con_mas_pedidos
---AS 
---SELECT *
---FROM hecho_pedido_productos AS p JOIN dimension_dia AS d ON p.id_dia = d.id_dia
---GO
+CREATE VIEW DATAZO.dia_y_horario_con_mas_pedidos
+AS 
+SELECT dpl.localidad as localidad_local, 
+dctl.categoria as categoria_local, 
+dt.mes as mes, dt.anio as año,
+ MAX(d.descripcion) as dia_de_mayor_pedidos, 
+ MAX(rh.rangoHorario) as rango_horario_de_mayor_pedidos
+FROM DATAZO.hecho_pedido_productos AS p 
+JOIN DATAZO.hecho_envio AS e ON e.id_envio = p.id_pedido
+JOIN DATAZO.dimension_dia AS d ON e.dia_pedido = d.id_dia
+JOIN DATAZO.dimension_provincia_localidad as dpl 
+ON dpl.id_provincia_localidad = p.id_prov_localidad
+JOIN DATAZO.dimension_rango_horario as rh ON rh.id_rango_horario = e.id_rango_horario_entrega
+JOIN DATAZO.dimension_local_ as l ON l.id_local = p.id_local
+LEFT JOIN DATAZO.dimension_categoria_tipo_local as dctl ON 
+dctl.id_categoria_tipo_local = p.id_categoria_tipo
+JOIN DATAZO.dimension_tiempo as dt ON dt.id_tiempo = e.tiempo_entrega
+GROUP BY dpl.localidad, dctl.categoria, dt.mes, dt.anio
+GO
 
 /*Monto total no cobrado por cada local en función de los pedidos
 cancelados según el día de la semana y la franja horaria (cuentan como
 pedidos cancelados tanto los que cancela el usuario como el local).*/
 
-CREATE VIEW DATAZO.total_no_cobrado_por_local (local_, Dia,franja_horaria, total) --solo agarre pedidos producto
+CREATE VIEW DATAZO.total_no_cobrado_por_local --solo agarre pedidos producto
 AS
 SELECT l.nombre, d.descripcion, rh.rangoHorario, sum(pp.total_pedido) as 'Total No Cobrado'
 FROM DATAZO.hecho_envio e join DATAZO.hecho_pedido_productos pp on pp.id_envio = e.id_envio
-join DATAZO.dimension_dia d on d.id_dia = e.dia_pedido
-join DATAZO.dimension_rango_horario rh on rh.rangoHorario = e.id_rango_horario_pedido
-join DATAZO.dimension_local_ l on l.id_local = pp.id_local
+JOIN DATAZO.dimension_dia d on d.id_dia = e.dia_pedido
+JOIN DATAZO.dimension_rango_horario rh on rh.id_rango_horario = e.id_rango_horario_pedido
+JOIN DATAZO.dimension_local_ l on l.id_local = pp.id_local
 where e.id_estado = '1' 
 group by l.nombre, d.descripcion, rh.rangoHorario
-order by 1 
 GO
+
 
 
 /*Valor promedio mensual que tienen los envíos de pedidos en cada
@@ -63,13 +77,15 @@ GO
 /*Monto total de los cupones utilizados por mes en función del rango etario
 de los usuarios.*/
 
-CREATE VIEW DATAZO.total_cupones_utilizados_por_mes_por_edad (MontoTotal,RangoEtario)
+CREATE VIEW DATAZO.total_cupones_utilizados_por_mes_por_edad
 AS
-SELECT sum(monto), rango_etario
-FROM hecho_cupon_de_descuento AS c JOIN hecho_usuario AS u ON c.id_usuario = u.id_usuario 
-                                   JOIN hecho_persona AS p ON p.id_persona = u.id_persona 
-                                   JOIN dimension_rango_etario AS r ON r.id_rango = p.id_rango
-GROUP BY rango_etario
+SELECT r.rango_etario as rango_etario, dt.mes as mes, sum(c.monto) as monto_total
+FROM DATAZO.hecho_cupon_de_descuento AS c 
+JOIN DATAZO.hecho_usuario AS u ON c.id_usuario = u.id_usuario 
+JOIN DATAZO.hecho_persona AS p ON p.id_persona = u.id_persona 
+JOIN DATAZO.dimension_rango_etario AS r ON r.id_rango = p.id_rango
+JOIN DATAZO.dimension_tiempo as dt ON dt.id_tiempo = c.tiempo_alta
+GROUP BY r.rango_etario, dt.mes
 GO
 
 --*no se como tomar la fecha en el que el cupon se uso, solo hay fecha de alta y de vencimiento
