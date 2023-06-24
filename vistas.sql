@@ -121,7 +121,7 @@ FROM DATAZO.hecho_envio e join DATAZO.dimension_tiempo t on t.id_tiempo = e.tiem
 join DATAZO.hecho_repartidor r on r.id_repartidor = e.id_repartidor
 join DATAZO.hecho_persona p on p.id_persona = r.id_persona
 join DATAZO.dimension_rango_etario re on re.id_rango = p.id_rango
-join DATAZO.dimension_provincia_localidad pl on pl.id_provincia_localidad = e.dir_origen
+join DATAZO.dimension_provincia_localidad pl on pl.id_provincia_localidad = e.prov_localidad
 group by t.mes, re.rango_etario, pl.localidad
 GO
 
