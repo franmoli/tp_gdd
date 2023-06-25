@@ -14,11 +14,11 @@ FROM DATAZO.hecho_pedido_productos AS p
 JOIN DATAZO.hecho_envio AS e ON e.id_envio = p.id_pedido
 JOIN DATAZO.dimension_dia AS d ON e.dia_pedido = d.id_dia
 JOIN DATAZO.dimension_provincia_localidad as dpl 
-ON dpl.id_provincia_localidad = p.id_prov_localidad
+ON dpl.id_provincia_localidad = e.prov_localidad
 JOIN DATAZO.dimension_rango_horario as rh ON rh.id_rango_horario = e.id_rango_horario_entrega
 JOIN DATAZO.dimension_local_ as l ON l.id_local = p.id_local
 LEFT JOIN DATAZO.dimension_categoria_tipo_local as dctl ON 
-dctl.id_categoria_tipo_local = p.id_categoria_tipo
+dctl.id_categoria_tipo_local = e.prov_localidad
 JOIN DATAZO.dimension_tiempo as dt ON dt.id_tiempo = e.tiempo_entrega
 GROUP BY dpl.localidad, dctl.categoria, dt.mes, dt.anio
 GO
@@ -63,17 +63,20 @@ comparación con los minutos de tiempo estimados.
 Este indicador debe tener en cuenta todos los envíos, es decir, sumar tanto
 los envíos de pedidos como los de mensajería.*/
 
-CREATE VIEW DATAZO.desvio_promedio_de_entrega (Promedio, Movilidad, Dia, FranjaHoraria)
-AS  --lo que esta adentro del average esta mal, lo tengo que repensar. el problema esta en que tenes datetime y decimal
--- SELECT AVG(HOUR(fecha_entrega - fecha_pedido)*60 + MINUTE(fecha_entrega - fecha_pedido) - tiempo_estimado_entrega), tipo_movilidad, descripcion, rangoHorario
--- FROM hecho_envio AS e JOIN hecho_repartidor AS r ON e.id_repartidor = r.id_repartidor 
---                       JOIN dimension_tipo_movilidad AS tm ON tm.id_tipo_movilidad = r.tipo_movilidad 
---                       JOIN dimension_dia AS d ON d.id_dia = e.? --hecho_envio no tiene id_dia asi que no se
---                       JOIN dimension_rango_horario AS rh ON rh.id_rango_horario = e.id_rango_horario_entrega
--- GROUP BY 2,3,4
 
-SELECT * FROM DATAZO.repartidor
-
+CREATE VIEW DATAZO.desvio_promedio_de_entrega (desvioPromedio, Movilidad, Dia, FranjaHoraria)
+AS  
+select tmp.desvio, tmp.descripcion, dia.descripcion, rango_h.rangoHorario  from (
+        SELECT tm.descripcion, env.dia_entrega, env.id_rango_horario_entrega,
+                AVG( ABS( ABS( DATEDIFF(MINUTE, env.fecha_pedido, env.fecha_entrega)) - env.tiempo_estimado_entrega)) desvio
+        FROM DATAZO.hecho_repartidor rep
+        JOIN DATAZO.dimension_tipo_movilidad tm ON tm.id_tipo_movilidad = rep.tipo_movilidad
+        JOIN DATAZO.hecho_envio env ON env.id_repartidor = rep.id_repartidor 
+        GROUP BY tm.descripcion, env.dia_entrega, env.id_rango_horario_entrega
+        ) tmp
+JOIN DATAZO.dimension_dia dia ON dia.id_dia = tmp.dia_entrega
+JOIN DATAZO.dimension_rango_horario rango_h ON rango_h.id_rango_horario = tmp.id_rango_horario_entrega
+    
 GO
 
 
