@@ -10,7 +10,6 @@ IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.produ
 GO
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.cupon_por_reclamo') AND type in (N'U'))
 	DELETE FROM DATAZO.cupon_por_reclamo
-	PRINT 'cupon por reclamo deleteado'
 GO
 
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.reclamo') AND type in (N'U'))
@@ -108,7 +107,6 @@ IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.produ
 GO
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.cupon_por_reclamo') AND type in (N'U'))
 	DROP TABLE DATAZO.cupon_por_reclamo
-	PRINT 'cupon por reclamo dropeado'
 GO
 
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.reclamo') AND type in (N'U'))
@@ -121,7 +119,6 @@ IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.envio
 	DROP TABLE DATAZO.envio_de_mensajeria
 GO
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.envio') AND type in (N'U'))
-	PRINT 'DELETE ENVIO';
 	DROP TABLE DATAZO.envio
 GO
 
@@ -154,7 +151,6 @@ IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.tipo_
 	DROP TABLE DATAZO.tipo_movilidad
 GO
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.localidad') AND type in (N'U'))
-	PRINT 'Drop localidades'
 	DROP TABLE DATAZO.localidad
 GO
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.operador') AND type in (N'U'))
