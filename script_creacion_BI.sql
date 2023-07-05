@@ -5,16 +5,8 @@ IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.hecho
 	DELETE FROM DATAZO.hecho_envio_de_mensajeria
 GO
 
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.hecho_cupon_x_reclamo') AND type in (N'U'))
-	DELETE FROM DATAZO.hecho_cupon_x_reclamo
-GO
-
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.hecho_reclamo') AND type in (N'U'))
 	DELETE FROM DATAZO.hecho_reclamo
-GO
-
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.hecho_cupon_x_pedido') AND type in (N'U'))
-	DELETE FROM DATAZO.hecho_cupon_x_pedido
 GO
 
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.hecho_pedido_productos') AND type in (N'U'))
@@ -23,26 +15,6 @@ GO
 
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.hecho_envio') AND type in (N'U'))
 	DELETE FROM DATAZO.hecho_envio
-GO
-
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.hecho_cupon_de_descuento') AND type in (N'U'))
-	DELETE FROM DATAZO.hecho_cupon_de_descuento
-GO
-
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.hecho_usuario') AND type in (N'U'))
-	DELETE FROM DATAZO.hecho_usuario
-GO
-
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.hecho_repartidor') AND type in (N'U'))
-	DELETE FROM DATAZO.hecho_repartidor
-GO
-
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.hecho_operador') AND type in (N'U'))
-	DELETE FROM DATAZO.hecho_operador
-GO
-
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.hecho_persona') AND type in (N'U'))
-	DELETE FROM DATAZO.hecho_persona
 GO
 
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.dimension_tiempo') AND type in (N'U'))
@@ -108,16 +80,8 @@ IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.hecho
 	DROP TABLE DATAZO.hecho_envio_de_mensajeria
 GO
 
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.hecho_cupon_x_reclamo') AND type in (N'U'))
-	DROP TABLE DATAZO.hecho_cupon_x_reclamo
-GO
-
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.hecho_reclamo') AND type in (N'U'))
 	DROP TABLE DATAZO.hecho_reclamo
-GO
-
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.hecho_cupon_x_pedido') AND type in (N'U'))
-	DROP TABLE DATAZO.hecho_cupon_x_pedido
 GO
 
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.hecho_pedido_productos') AND type in (N'U'))
@@ -126,26 +90,6 @@ GO
 
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.hecho_envio') AND type in (N'U'))
 	DROP TABLE DATAZO.hecho_envio
-GO
-
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.hecho_cupon_de_descuento') AND type in (N'U'))
-	DROP TABLE DATAZO.hecho_cupon_de_descuento
-GO
-
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.hecho_usuario') AND type in (N'U'))
-	DROP TABLE DATAZO.hecho_usuario
-GO
-
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.hecho_repartidor') AND type in (N'U'))
-	DROP TABLE DATAZO.hecho_repartidor
-GO
-
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.hecho_operador') AND type in (N'U'))
-	DROP TABLE DATAZO.hecho_operador
-GO
-
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.hecho_persona') AND type in (N'U'))
-	DROP TABLE DATAZO.hecho_persona
 GO
 
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.dimension_tiempo') AND type in (N'U'))
@@ -242,18 +186,6 @@ GO
 IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_dim_provincia_localidad')
 	DROP PROCEDURE DATAZO.migrar_dim_provincia_localidad
 GO
-IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_hecho_repartidor')
-	DROP PROCEDURE DATAZO.migrar_hecho_repartidor
-GO
-IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_hecho_persona')
-	DROP PROCEDURE DATAZO.migrar_hecho_persona
-GO
-IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_hecho_usuario')
-	DROP PROCEDURE DATAZO.migrar_hecho_usuario
-GO
-IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_hecho_operador')
-	DROP PROCEDURE DATAZO.migrar_hecho_operador
-GO
 IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_hecho_envio')
 	DROP PROCEDURE DATAZO.migrar_hecho_envio
 GO
@@ -263,15 +195,6 @@ IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_hecho_envio_d
 	DROP PROCEDURE DATAZO.migrar_hecho_envio_de_mensajeria
 IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_hecho_reclamo')
 	DROP PROCEDURE DATAZO.migrar_hecho_reclamo
-GO
-IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_cupon_descuento')
-	DROP PROCEDURE DATAZO.migrar_cupon_descuento
-GO
-IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_cuponxpedido')
-	DROP PROCEDURE DATAZO.migrar_cuponxpedido
-GO
-IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_cuponxreclamo')
-	DROP PROCEDURE DATAZO.migrar_cuponxreclamo
 GO
 
 --DROP FUNCTIONS 
@@ -284,7 +207,50 @@ GO
 IF EXISTS(SELECT [name] FROM sys.objects WHERE [name] = 'calcular_edad')
 	DROP FUNCTION DATAZO.calcular_edad
 GO	
-	 
+
+--DROP VISTAS
+IF EXISTS(SELECT [name] FROM sys.views WHERE [name] = 'dia_y_horario_con_mas_pedidos')
+	DROP VIEW DATAZO.dia_y_horario_con_mas_pedidos
+GO
+
+IF EXISTS (SELECT [name] FROM sys.views WHERE [name] = 'total_no_cobrado_por_local')
+	DROP VIEW DATAZO.total_no_cobrado_por_local
+
+IF EXISTS ( SELECT [name] FROM sys.views WHERE [name] = 'promedio_mensual_envios')
+	DROP VIEW DATAZO.promedio_mensual_envios
+GO
+
+IF EXISTS ( SELECT [name] FROM sys.views WHERE [name] = 'desvio_promedio_de_entrega')
+	DROP VIEW DATAZO.desvio_promedio_de_entrega
+GO
+
+IF EXISTS ( SELECT [name] FROM sys.views WHERE [name] = 'total_cupones_utilizados_por_mes_por_edad')
+	DROP VIEW DATAZO.total_cupones_utilizados_por_mes_por_edad
+GO
+
+IF EXISTS ( SELECT [name] FROM sys.views WHERE [name] = 'promedio_calificacion_mensual')
+	DROP VIEW DATAZO.promedio_calificacion_mensual
+GO
+
+IF EXISTS ( SELECT [name] FROM sys.views WHERE [name] = 'porcentaje_entregas_rango_etario')
+	DROP VIEW DATAZO.porcentaje_entregas_rango_etario
+GO
+
+IF EXISTS ( SELECT [name] FROM sys.views WHERE [name] = 'promedio_mensual_valor_asegurado')
+	DROP VIEW DATAZO.promedio_mensual_valor_asegurado
+GO
+
+IF EXISTS ( SELECT [name] FROM sys.views WHERE [name] = 'reclamos_mensuales_por_local')
+	DROP VIEW DATAZO.reclamos_mensuales_por_local
+GO
+
+IF EXISTS ( SELECT [name] FROM sys.views WHERE [name] = 'tiempo_prom_resol_reclamo')
+	DROP VIEW DATAZO.tiempo_prom_resol_reclamo
+GO
+
+IF EXISTS ( SELECT [name] FROM sys.views WHERE [name] = 'monto_mensual_cupones_por_reclamos')
+	DROP VIEW DATAZO.monto_mensual_cupones_por_reclamos
+GO
 
 
 
@@ -372,36 +338,6 @@ GO
 
 --Create de hechos
 
-CREATE TABLE DATAZO.hecho_persona(id_persona INT NOT NULL , id_rango int)
-
-ALTER TABLE DATAZO.hecho_persona
-	ADD CONSTRAINT pk_hecho_persona PRIMARY KEY (id_persona),
-	CONSTRAINT fk_hecho_persona_dia FOREIGN KEY (id_rango) REFERENCES DATAZO.dimension_rango_etario(id_rango)
-GO
-
-CREATE TABLE DATAZO.hecho_operador(id_operador INT NOT NULL, id_persona INT)
-
-ALTER TABLE DATAZO.hecho_operador
-	ADD CONSTRAINT pk_hecho_operador PRIMARY KEY (id_operador),
-	CONSTRAINT fk_hecho_operador_persona FOREIGN KEY (id_persona) REFERENCES DATAZO.hecho_persona(id_persona)
-GO
-
-CREATE TABLE DATAZO.hecho_usuario(id_usuario INT NOT NULL, id_persona INT)
-
-ALTER TABLE DATAZO.hecho_usuario
-	ADD CONSTRAINT pk_hecho_usuario PRIMARY KEY (id_usuario),
-	CONSTRAINT fk_hecho_usuario_persona FOREIGN KEY (id_persona) REFERENCES DATAZO.hecho_persona(id_persona)
-GO
-
-CREATE TABLE DATAZO.hecho_repartidor(id_repartidor INT NOT NULL, id_persona INT, tipo_movilidad INT, localidad_activa INT)
-
-ALTER TABLE DATAZO.hecho_repartidor
-	ADD CONSTRAINT pk_hecho_repartidor PRIMARY KEY (id_repartidor),
-	CONSTRAINT fk_hecho_repartidor_persona FOREIGN KEY (id_persona) REFERENCES DATAZO.hecho_persona(id_persona),
-	CONSTRAINT fk_hecho_repartidor_tipo_movilidad FOREIGN KEY (tipo_movilidad) REFERENCES DATAZO.dimension_tipo_movilidad (id_tipo_movilidad),
-	CONSTRAINT fk_hecho_repartidor_localidad FOREIGN KEY (localidad_activa) REFERENCES DATAZO.dimension_provincia_localidad (id_provincia_localidad)
-GO
-
 CREATE TABLE DATAZO.hecho_envio(id_envio INT NOT NULL, id_usuario INT, id_repartidor INT, id_estado INT, id_medioPago INT, precio_envio DECIMAL(18,2),
 					fecha_pedido DATETIME, dia_pedido INT, tiempo_pedido INT, id_rango_horario_pedido INT, fecha_entrega DATETIME,
 					dia_entrega INT, tiempo_entrega INT, id_rango_horario_entrega INT, tiempo_estimado_entrega INT, calificacion DECIMAL(18,0), prov_localidad INT)
@@ -456,33 +392,6 @@ ALTER TABLE DATAZO.hecho_reclamo
 	CONSTRAINT fk_hecho_reclamo_dia_solucion FOREIGN KEY (dia_solucion) REFERENCES DATAZO.dimension_dia(id_dia),
 	CONSTRAINT fk_hecho_reclamo_tiempo_solucion FOREIGN KEY (tiempo_solucion) REFERENCES DATAZO.dimension_tiempo(id_tiempo),
 	CONSTRAINT fk_hecho_reclamo_estado FOREIGN KEY (id_estado) REFERENCES DATAZO.dimension_estado_reclamo(id_estado)
-GO
-
-CREATE TABLE DATAZO.hecho_cupon_de_descuento(id_cupon INT NOT NULL, nro DECIMAL(18,2) NOT NULL, id_usuario INT NOT NULL, 
-					monto DECIMAL(18,2), dia_alta INT, tiempo_alta INT, dia_vencimiento INT, tiempo_vencimiento INT)
-
-ALTER TABLE datazo.hecho_cupon_de_descuento
-	ADD CONSTRAINT pk_hecho_cupon_descuento PRIMARY KEY (id_cupon),
-	CONSTRAINT fk_hecho_cupon_usuario FOREIGN KEY (id_usuario) REFERENCES DATAZO.hecho_usuario (id_usuario),
-	CONSTRAINT fk_hecho_cupon_dia_alta FOREIGN KEY (dia_alta) REFERENCES DATAZO.dimension_dia(id_dia),
-	CONSTRAINT fk_hecho_cupon_tiempo_alta FOREIGN KEY (tiempo_alta) REFERENCES DATAZO.dimension_tiempo(id_tiempo),
-	CONSTRAINT fk_hecho_cupon_dia_vencimiento FOREIGN KEY (dia_vencimiento) REFERENCES DATAZO.dimension_dia(id_dia),
-	CONSTRAINT fk_hecho_cupon_tiempo_vencimiento FOREIGN KEY (tiempo_vencimiento) REFERENCES DATAZO.dimension_tiempo(id_tiempo)
-GO
-
-CREATE TABLE DATAZO.hecho_cupon_x_pedido(id_cupon INT NOT NULL, nro_cupon INT, id_pedido INT)
-
-ALTER TABLE datazo.hecho_cupon_x_pedido
-	ADD CONSTRAINT pk_hecho_cupon_pedido PRIMARY KEY (id_cupon),
-	CONSTRAINT fk_hecho_cupon_pedido FOREIGN KEY (id_pedido) REFERENCES DATAZO.hecho_pedido_productos (id_pedido),
-	CONSTRAINT fk_hecho_cupon_pedido_id_cup FOREIGN KEY (id_cupon) REFERENCES DATAZO.hecho_cupon_de_descuento (id_cupon)
-GO
-
-CREATE TABLE DATAZO.hecho_cupon_x_reclamo(id_cupon INT NOT NULL, nro_cupon decimal(18,2) NOT NULL, nro_reclamo decimal(18,0))
-
-ALTER TABLE datazo.hecho_cupon_x_reclamo
-	ADD CONSTRAINT pk_hecho_cupon_reclamo PRIMARY KEY (id_cupon),
-	CONSTRAINT fk_hecho_cupon_reclamo FOREIGN KEY (nro_reclamo) REFERENCES DATAZO.hecho_reclamo (nro_reclamo)
 GO
 
 
@@ -728,67 +637,6 @@ BEGIN
 END
 GO
 
-
-
-CREATE PROCEDURE DATAZO.migrar_hecho_persona
-AS
-BEGIN
-	
-	INSERT INTO DATAZO.hecho_persona(id_persona, id_rango) 
-		select id_persona, id_rango
-		from DATAZO.persona 
-		join DATAZO.dimension_rango_etario on rango_etario = DATAZO.convertir_a_rango_etario(DATAZO.calcular_edad(year(fecha_nac)))
-		PRINT 'hecho_persona migrada'
-	
-END
-GO
-
-
-CREATE PROCEDURE DATAZO.migrar_hecho_operador
-AS
-BEGIN
-	
-	INSERT INTO DATAZO.hecho_operador(id_operador, id_persona ) 
-		select o.id_operador, p.id_persona
-		from DATAZO.operador o
-		join DATAZO.hecho_persona p on o.id_persona = p.id_persona
-		PRINT 'hecho_operador migrado'
-	
-END
-GO
-
-
-CREATE PROCEDURE DATAZO.migrar_hecho_usuario
-AS
-BEGIN
-	
-	INSERT INTO DATAZO.hecho_usuario(id_usuario, id_persona) 
-		select u.id_usuario, p.id_persona
-		from DATAZO.usuario u
-		join DATAZO.hecho_persona p on u.id_persona = p.id_persona
-		PRINT 'hecho_usuario migrado'
-	
-END
-GO
-
-
-CREATE PROCEDURE DATAZO.migrar_hecho_repartidor
-AS
-BEGIN
-	INSERT INTO DATAZO.hecho_repartidor (id_repartidor, id_persona, tipo_movilidad, localidad_activa)
-		SELECT r.id_repartidor, pe.id_persona, dtm.id_tipo_movilidad, dpl.id_provincia_localidad
-		FROM DATAZO.repartidor as r
-		JOIN DATAZO.hecho_persona as pe ON pe.id_persona = r.id_persona 
-		JOIN DATAZO.tipo_movilidad as tm ON id_tipo_movilidad = tipo_movilidad
-		JOIN DATAZO.localidad as l ON id_localidad = localidad_activa
-		JOIN DATAZO.provincia as p ON p.id_provincia = l.id_provincia
-		JOIN DATAZO.dimension_tipo_movilidad as dtm ON dtm.descripcion = tm.descripcion_movilidad
-		JOIN DATAZO.dimension_provincia_localidad as dpl ON
-		provincia = p.nombre_provincia AND localidad = l.nombre_localidad
-		PRINT 'hecho_repartidor migrado'
-END
-GO
-
 CREATE PROCEDURE DATAZO.migrar_hecho_envio
 AS
 
@@ -898,45 +746,6 @@ BEGIN
 END
 GO
 
-CREATE PROCEDURE DATAZO.migrar_cupon_descuento
-AS
-BEGIN
-	INSERT INTO DATAZO.hecho_cupon_de_descuento (id_cupon, nro, id_usuario, monto, dia_alta, tiempo_alta, dia_vencimiento, tiempo_vencimiento)
-	SELECT cup.id_cupon, cup.nro, CUP.id_usuario, cup.monto, DATEPART(WEEKDAY, cup.fecha_alta), tm.id_tiempo, DATEPART(WEEKDAY, cup.fecha_vencimiento), tm2.id_tiempo
-	FROM DATAZO.cupon_descuento cup
-	JOIN DATAZO.dimension_tiempo tm ON tm.anio = DATEPART(YEAR, cup.fecha_alta) AND tm.mes = DATEPART(MONTH, cup.fecha_alta)
-	JOIN DATAZO.dimension_tiempo tm2 ON tm2.anio = DATEPART(YEAR, cup.fecha_vencimiento) AND tm2.mes = DATEPART(MONTH, cup.fecha_vencimiento)
-	
-
-	PRINT 'hecho_cupon_descuento migrado'
-END
-GO
-
-CREATE PROCEDURE DATAZO.migrar_cuponxpedido
-AS
-BEGIN
-	INSERT INTO DATAZO.hecho_cupon_x_pedido (id_cupon, nro_cupon, id_pedido)
-	SELECT cup.id_cupon, cup.nro_cupon, cup.id_pedido
-	FROM DATAZO.cupon_por_pedido cup
-
-	PRINT 'hecho_cupon_x_pedido migrado'
-END
-GO
-
-
-CREATE PROCEDURE DATAZO.migrar_cuponxreclamo
-AS
-BEGIN
-	INSERT INTO DATAZO.hecho_cupon_x_reclamo (id_cupon, nro_cupon, nro_reclamo)
-	SELECT cup.id_cupon, cup.nro_cupon, cup.nro_reclamo
-	FROM DATAZO.cupon_por_reclamo cup
-
-	-- select distinct nro_reclamo from DATAZO.hecho_reclamo
-
-	PRINT 'hecho_cupon_x_reclamo migrado'
-END
-GO
-
 
 BEGIN TRANSACTION
  BEGIN TRY
@@ -953,18 +762,11 @@ BEGIN TRANSACTION
 	EXECUTE DATAZO.migrar_dim_tipo_medio_pago
 	EXECUTE DATAZO.migrar_dim_estado_mensajeria_pedido
 	EXECUTE DATAZO.migrar_dim_provincia_localidad
-	EXECUTE DATAZO.migrar_hecho_persona
-	EXECUTE DATAZO.migrar_hecho_usuario
-	EXECUTE DATAZO.migrar_hecho_operador		
-	EXECUTE DATAZO.migrar_hecho_repartidor
 	EXECUTE DATAZO.migrar_hecho_envio
 	EXECUTE DATAZO.migrar_hecho_pedido_productos
 	EXECUTE DATAZO.migrar_hecho_envio_de_mensajeria
-	EXECUTE DATAZO.migrar_cupon_descuento
-	EXECUTE DATAZO.migrar_cuponxpedido
 	EXECUTE DATAZO.migrar_dim_tipo_reclamo
 	EXECUTE DATAZO.migrar_hecho_reclamo
-	EXECUTE DATAZO.migrar_cuponxreclamo
 END TRY
 BEGIN CATCH
     ROLLBACK TRANSACTION;
