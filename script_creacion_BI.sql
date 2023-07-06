@@ -650,40 +650,31 @@ CREATE PROCEDURE DATAZO.migrar_hecho_envio
 AS
 
 BEGIN
-	INSERT INTO DATAZO.hecho_envio (id_envio, id_usuario, id_repartidor, id_estado, id_medioPago,
-	precio_envio, fecha_pedido, dia_pedido, tiempo_pedido, id_rango_horario_pedido, fecha_entrega,
-	dia_entrega, tiempo_entrega, id_rango_horario_entrega, tiempo_estimado_entrega, calificacion, prov_localidad)
-		SELECT e.id_envio, u.id_usuario, r.id_repartidor,
-			dest.id_estado, dmp.id_tipo_medio_pago, e.precio_envio,
-			e.fecha_pedido, ddp.id_dia, dtp.id_tiempo,
-			drhp.id_rango_horario,
-			e.fecha_entrega, dde.id_dia, dte.id_tiempo,
-			drhe.id_rango_horario,
-			e.tiempo_estimado_entrega, e.calificacion, prov_loc.id_provincia_localidad
+
+	INSERT INTO DATAZO.hecho_envio (id_tiempo, id_dia, id_estado, id_medioPago,
+	id_rango_horario_entrega, rango_etario_repartidor, id_tipo_movilidad, prov_localidad,
+	porcentaje_de_envios, desvio)
+		SELECT dt.id_tiempo, dd.id_dia, de.id_estado, dtmp.id_tipo_medio_pago,
+		drh.id_rango_horario, dre.id_rango_etario, dtm.id_tipo_movilidad,
+		dpl.id_provincia_localidad
 		FROM DATAZO.envio as e
-		JOIN DATAZO.hecho_usuario as u ON u.id_usuario = e.id_usuario
-		JOIN DATAZO.hecho_repartidor as r ON r.id_repartidor = e.id_repartidor
-		JOIN DATAZO.estado as est ON est.id_estado = e.id_estado
-		JOIN DATAZO.dimension_estado_mensajeria_pedido as dest ON dest.descripcion = est.descripcion
-		JOIN DATAZO.medio_de_pago as mp ON mp.id_medioPago = e.id_medioPago
-		JOIN DATAZO.tipo_medio_pago as tmp ON tmp.id_tipo_medio_pago = mp.id_tipo_medio_pago
-		JOIN DATAZO.dimension_tipo_medio_pago as dmp ON tmp.descripcion = dmp.descripcion
-		JOIN DATAZO.dimension_dia as ddp ON ddp.id_dia = DATEPART(WEEKDAY, e.fecha_pedido)
-		JOIN DATAZO.dimension_tiempo as dtp ON dtp.anio = YEAR(e.fecha_pedido) AND
-												dtp.mes = MONTH(fecha_pedido)
-		JOIN DATAZO.dimension_dia as dde ON dde.id_dia = DATEPART(WEEKDAY, e.fecha_entrega)
-		JOIN DATAZO.dimension_tiempo as dte ON dte.anio = YEAR(e.fecha_entrega) AND
-												dte.mes = MONTH(fecha_entrega)
-		JOIN DATAZO.dimension_rango_horario as drhp ON drhp.rangoHorario = DATAZO.convertir_a_rango_horario( e.fecha_pedido)
-		JOIN DATAZO.dimension_rango_horario as drhe ON drhe.rangoHorario = DATAZO.convertir_a_rango_horario( e.fecha_entrega)
-		JOIN DATAZO.direccion dir ON dir.id_direccion = e.dir_origen 
-		JOIN DATAZO.localidad loc ON loc.id_localidad = dir.localidad
-		JOIN DATAZO.provincia prov ON prov.id_provincia = loc.id_provincia
-		JOIN DATAZO.dimension_provincia_localidad prov_loc ON prov_loc.localidad = loc.nombre_localidad AND prov_loc.provincia = prov.nombre_provincia
-		
-
-
-
+		JOIN DATAZO.dimension_tiempo as dt ON dt.anio = DATEPART(YEAR, e.fecha_entrega) 
+		AND dt.mes = DATEPART(MONTH, e.fecha_pedido)
+		JOIN DATAZO.dimension_dia as dd ON dd.descripcion = DATENAME(WEEKDAY, e.fecha_entrega)
+		JOIN DATAZO.estado as est ON est.id_estado = e.estado
+		JOIN DATAZO.dimension_estado as de ON de.descripcion = est.descripcion
+		JOIN DATAZO.tipo_medio_pago as tmp ON tmp.id_tipo_medio_pago = e.medio_pago
+		JOIN DATAZO.dimension_tipo_medio_pago as dtmp ON dtmp.descripcion = tmp.descripcion
+		JOIN dimension_rango_horario as drh ON drh.rango_horario = convertir_a_rango_horario(e.fecha_entrega)
+		JOIN DATAZO.repartidor as r ON r.id_repartidor = e.id_repartidor
+		JOIN DATAZO.persona as p ON p.id_persona = r.id_persona
+		JOIN DATAZO.dimension_rango_etario as dre ON dre.rango_etario = convertir_a_rango_etario(calcular_edad(p.fecha_nac))
+		JOIN DATAZO.tipo_movilidad as tm ON tm.id_tipo_movilidad = r.tipo_movilidad
+		JOIN DATAZO.dimension_tipo_movilidad as dtm ON dtm.tipo_movilidad = tm.descripcion_movilidad
+		JOIN DATAZO.localidad as loc ON loc.id_localidad = e.id_localidad
+		JOIN DATAZO.provincia as pro ON pro.id_provincia = loc.id_provincia
+		JOIN DATAZO.dimension_provincia_localidad AS dpl ON dpl.provincia = pro.nombre_provincia AND
+		dpl.localidad = loc.nombre_localidad
 		PRINT 'hecho_evento migrado'
 END
 GO
