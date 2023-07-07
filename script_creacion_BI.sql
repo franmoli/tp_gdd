@@ -329,8 +329,7 @@ ALTER TABLE DATAZO.dimension_estado_mensajeria_pedido
 	ADD CONSTRAINT pk_dimension_estado_mensajeria_pedido PRIMARY KEY (id_estado)
 GO
 
-CREATE TABLE DATAZO.dimension_provincia_localidad(id_provincia_localidad INT NOT NULL IDENTITY(1,1), provincia VARCHAR(255),
-localidad VARCHAR (255))
+CREATE TABLE DATAZO.dimension_provincia_localidad(id_provincia_localidad INT NOT NULL IDENTITY(1,1), provincia VARCHAR(255),localidad VARCHAR (255))
 
 ALTER TABLE DATAZO.dimension_provincia_localidad
 	ADD CONSTRAINT pk_dimension_provincia_localidad PRIMARY KEY (id_provincia_localidad)
@@ -338,29 +337,32 @@ GO
 
 --Create de hechos
 
-CREATE TABLE DATAZO.hecho_envio(id_envio INT NOT NULL IDENTITY (1,1), id_tiempo INT, id_dia INT, 
-					id_estado INT, id_medioPago INT, id_rango_horario_entrega INT,
-					rango_etario_repartidor INT, id_tipo_movilidad INT, prov_localidad INT,
-					porcentaje_de_envios DECIMAL(18,2), desvio SMALLDATETIME, )
+CREATE TABLE DATAZO.hecho_envio(id_envio INT NOT NULL IDENTITY (1,1), id_tiempo INT,
+					rango_etario_repartidor INT, id_estado INT, id_medioPago INT,
+					id_rango_horario_entrega INT, prov_localidad INT,
+					id_dia INT, porcentaje_de_envios DECIMAL(18,2),
+					desvio SMALLDATETIME,
+					id_tipo_movilidad INT
+					)
 
 ALTER TABLE DATAZO.hecho_envio
 	ADD CONSTRAINT pk_hecho_envio PRIMARY KEY (id_envio),
+	CONSTRAINT fk_hecho_envio_tiempo FOREIGN KEY (id_tiempo) REFERENCES DATAZO.dimension_tiempo(id_tiempo),
+	CONSTRAINT fk_hecho_envio_rango_etario FOREIGN KEY (rango_etario_repartidor) REFERENCES DATAZO.dimension_rango_etario(id_rango),
 	CONSTRAINT fk_hecho_envio_estado FOREIGN KEY (id_estado) REFERENCES DATAZO.dimension_estado_mensajeria_pedido(id_estado),
 	CONSTRAINT fk_hecho_envio_medioPago FOREIGN KEY (id_medioPago) REFERENCES DATAZO.dimension_tipo_medio_pago (id_tipo_medio_pago),
-	CONSTRAINT fk_hecho_envio_prov_localidad FOREIGN KEY (prov_localidad) REFERENCES DATAZO.dimension_provincia_localidad (id_provincia_localidad),
 	CONSTRAINT fk_hecho_envio_rango_horario_entrega FOREIGN KEY (id_rango_horario_entrega) REFERENCES DATAZO.dimension_rango_horario(id_rango_horario),
-	CONSTRAINT fk_hecho_envio_tiempo FOREIGN KEY (id_tiempo) REFERENCES DATAZO.dimension_tiempo(id_tiempo),
+	CONSTRAINT fk_hecho_envio_prov_localidad FOREIGN KEY (prov_localidad) REFERENCES DATAZO.dimension_provincia_localidad (id_provincia_localidad),
 	CONSTRAINT fk_hecho_envio_dia FOREIGN KEY (id_dia) REFERENCES DATAZO.dimension_dia(id_dia),
-	CONSTRAINT fk_hecho_envio_tipo_movilidad FOREIGN KEY (id_tipo_movilidad) REFERENCES DATAZO.dimension_tipo_movilidad(id_tipo_movilidad),
-	CONSTRAINT fk_hecho_envio_rango_etario FOREIGN KEY (rango_etario_repartidor) REFERENCES DATAZO.dimension_rango_etario(id_rango)
+	CONSTRAINT fk_hecho_envio_tipo_movilidad FOREIGN KEY (id_tipo_movilidad) REFERENCES DATAZO.dimension_tipo_movilidad(id_tipo_movilidad)
 GO
 
 
 CREATE TABLE DATAZO.hecho_pedido_productos(id_pedido INT NOT NULL IDENTITY(1,1), id_dia INT,  id_local INT, id_categoria_tipo INT,
-									id_prov_localidad INT, id_tiempo INT, id_rango_horario INT, 
-									id_rango_etario_usr INT, id_estado INT,
-									total_envio_pedidos DECIMAL(18,2), total_pedidos DECIMAL(18,2),
-									cantidad_pedidos INT, total_cupones DECIMAL(18,2), calificacion_local DECIMAL(18,2)
+									id_prov_localidad INT, id_rango_horario INT, id_tiempo INT, 
+									id_rango_etario_usr INT, id_estado INT,cantidad_pedidos INT,
+									total_cupones DECIMAL(18,2), total_envio_pedidos DECIMAL(18,2), total_pedidos DECIMAL(18,2),
+									calificacion_local DECIMAL(18,2)
 									)
 ALTER TABLE DATAZO.hecho_pedido_productos
 	ADD CONSTRAINT pk_hecho_pedido PRIMARY KEY (id_pedido),
@@ -381,9 +383,8 @@ CREATE TABLE DATAZO.hecho_envio_de_mensajeria(id_envio_mensajeria INT NOT NULL I
 
 ALTER TABLE DATAZO.hecho_envio_de_mensajeria
 	ADD CONSTRAINT pk_hecho_envio_de_mensajeria PRIMARY KEY (id_envio_mensajeria),
-	CONSTRAINT fk_hecho_envio_envio FOREIGN KEY (id_envio) REFERENCES DATAZO.hecho_envio(id_envio),
-	CONSTRAINT fk_hecho_envio_tipo_paquete FOREIGN KEY (tipo_paquete) REFERENCES DATAZO.dimension_tipo_paquete(id_tipo),
-	CONSTRAINT fk_hecho_envio_dia FOREIGN KEY (id_dia) REFERENCES DATAZO.dimension_dia(id_dia)
+	CONSTRAINT fk_hecho_envio_tipo_paquete FOREIGN KEY (id_tipo_paquete) REFERENCES DATAZO.dimension_tipo_paquete(id_tipo),
+	CONSTRAINT fk_hecho_envio_tiempo FOREIGN KEY (id_tiempo) REFERENCES DATAZO.dimension_tiempo(id_tiempo)
 GO
 
 CREATE TABLE DATAZO.hecho_reclamo(id_reclamo INT NOT NULL IDENTITY(1,1), id_local INT,
@@ -648,7 +649,6 @@ GO
 
 CREATE PROCEDURE DATAZO.migrar_hecho_envio
 AS
-
 BEGIN
 
 	INSERT INTO DATAZO.hecho_envio (id_tiempo, id_dia, id_estado, id_medioPago,
@@ -755,48 +755,48 @@ END
 GO
 
 
-BEGIN TRANSACTION
- BEGIN TRY
- 	-- SELECT 1
-	EXECUTE DATAZO.migrar_dim_tiempo
-	EXECUTE DATAZO.migrar_dim_local
-	EXECUTE DATAZO.migrar_dim_categoria_tipo_local
-	EXECUTE DATAZO.migrar_dim_rango_horario
-	EXECUTE DATAZO.migrar_dim_rango_etario
-	EXECUTE DATAZO.migrar_dim_estado_reclamo
-	EXECUTE DATAZO.migrar_dim_tipo_movilidad
-	EXECUTE DATAZO.migrar_dim_dia
-	EXECUTE DATAZO.migrar_dim_tipo_paquete
-	EXECUTE DATAZO.migrar_dim_tipo_medio_pago
-	EXECUTE DATAZO.migrar_dim_estado_mensajeria_pedido
-	EXECUTE DATAZO.migrar_dim_provincia_localidad
-	EXECUTE DATAZO.migrar_hecho_envio
-	EXECUTE DATAZO.migrar_hecho_pedido_productos
-	EXECUTE DATAZO.migrar_hecho_envio_de_mensajeria
-	EXECUTE DATAZO.migrar_dim_tipo_reclamo
-	EXECUTE DATAZO.migrar_hecho_reclamo
-END TRY
-BEGIN CATCH
-    ROLLBACK TRANSACTION;
-	THROW 50001, 'Error al migrar las tablas, verifique que las nuevas tablas se encuentren vac�as o bien ejecute un DROP de todas las nuevas tablas y vuelva a intentarlo.',1;
-END CATCH
+-- BEGIN TRANSACTION
+--  BEGIN TRY
+--  	SELECT 1
+-- 	-- EXECUTE DATAZO.migrar_dim_tiempo
+-- 	-- EXECUTE DATAZO.migrar_dim_local
+-- 	-- EXECUTE DATAZO.migrar_dim_categoria_tipo_local
+-- 	-- EXECUTE DATAZO.migrar_dim_rango_horario
+-- 	-- EXECUTE DATAZO.migrar_dim_rango_etario
+-- 	-- EXECUTE DATAZO.migrar_dim_estado_reclamo
+-- 	-- EXECUTE DATAZO.migrar_dim_tipo_movilidad
+-- 	-- EXECUTE DATAZO.migrar_dim_dia
+-- 	-- EXECUTE DATAZO.migrar_dim_tipo_paquete
+-- 	-- EXECUTE DATAZO.migrar_dim_tipo_medio_pago
+-- 	-- EXECUTE DATAZO.migrar_dim_estado_mensajeria_pedido
+-- 	-- EXECUTE DATAZO.migrar_dim_provincia_localidad
+-- 	-- EXECUTE DATAZO.migrar_hecho_envio
+-- 	-- EXECUTE DATAZO.migrar_hecho_pedido_productos
+-- 	-- EXECUTE DATAZO.migrar_hecho_envio_de_mensajeria
+-- 	-- EXECUTE DATAZO.migrar_dim_tipo_reclamo
+-- 	-- EXECUTE DATAZO.migrar_hecho_reclamo
+-- END TRY
+-- BEGIN CATCH
+--     ROLLBACK TRANSACTION;
+-- 	THROW 50001, 'Error al migrar las tablas, verifique que las nuevas tablas se encuentren vac�as o bien ejecute un DROP de todas las nuevas tablas y vuelva a intentarlo.',1;
+-- END CATCH
 
---    IF (EXISTS (SELECT 1 FROM DATAZO.envio)
---    AND EXISTS (SELECT 1 FROM DATAZO.usuario)
---    )
-	IF(1 = 1)
+-- --    IF (EXISTS (SELECT 1 FROM DATAZO.envio)
+-- --    AND EXISTS (SELECT 1 FROM DATAZO.usuario)
+-- --    )
+-- 	IF(1 = 1)
    
-   BEGIN
-	PRINT 'Tablas migradas correctamente.';
-	COMMIT TRANSACTION;
-   END
-	 ELSE
-   BEGIN
-    ROLLBACK TRANSACTION;
-	THROW 50002, 'Hubo un error al migrar una o mas tablas. Todos los cambios fueron deshechos, ninguna tabla fue cargada en la base.',1;
-   END
+--    BEGIN
+-- 	PRINT 'Tablas migradas correctamente.';
+-- 	COMMIT TRANSACTION;
+--    END
+-- 	 ELSE
+--    BEGIN
+--     ROLLBACK TRANSACTION;
+-- 	THROW 50002, 'Hubo un error al migrar una o mas tablas. Todos los cambios fueron deshechos, ninguna tabla fue cargada en la base.',1;
+--    END
    
-GO
+-- GO
 
 --Vistas
 
