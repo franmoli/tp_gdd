@@ -1053,16 +1053,12 @@ El porcentaje se calcula en función del total general de pedidos y envíos
 mensuales entregados.*/
 
 
--- CREATE VIEW DATAZO.porcentaje_entregas_rango_etario (mes, rango_etario, localidad, porcentaje)
--- AS
--- SELECT t.mes, re.rango_etario, pl.localidad,(SUM(CASE WHEN e.id_estado = 2 THEN 1 ELSE 0 END) / CAST(COUNT(*) AS FLOAT)) * 100 AS 'Porcentaje Entregados'
--- FROM DATAZO.hecho_envio e join DATAZO.dimension_tiempo t on t.id_tiempo = e.tiempo_pedido
--- join DATAZO.hecho_repartidor r on r.id_repartidor = e.id_repartidor
--- join DATAZO.hecho_persona p on p.id_persona = r.id_persona
--- join DATAZO.dimension_rango_etario re on re.id_rango = p.id_rango
--- join DATAZO.dimension_provincia_localidad pl on pl.id_provincia_localidad = e.prov_localidad
--- group by t.mes, re.rango_etario, pl.localidad
--- GO
+CREATE VIEW DATAZO.porcentaje_entregas_rango_etario (rango_etario, localidad, porcentaje_de_envios)
+AS
+	SELECT dre.rango_etario, dlp.localidad, porcentaje_envios from DATAZO.hecho_envio as he
+	JOIN DATAZO.dimension_rango_etario as dre ON dre.id_rango = he.rango_etario_repartidor
+	JOIN DATAZO.dimension_provincia_localidad as dlp ON dlp.id_provincia_localidad = he.prov_localidad
+GO
 
 
 
@@ -1070,29 +1066,27 @@ mensuales entregados.*/
 los paquetes enviados a través del servicio de mensajería en función del
 tipo de paquete.*/
 
--- CREATE VIEW DATAZO.promedio_mensual_valor_asegurado (mes, tipo_paquete , promedio)
--- AS
--- SELECT t.mes, tp.tipo, avg(em.valor_asegurado) as 'Promedio valores asegurados'
--- FROM  DATAZO.hecho_envio_de_mensajeria em join DATAZO.dimension_tipo_paquete tp on tp.id_tipo = em.tipo_paquete
--- join DATAZO.hecho_envio e on e.id_envio = em.id_envio
--- join DATAZO.dimension_tiempo t on t.id_tiempo = e.tiempo_pedido
--- group by t.mes, tp.tipo 
--- go
+CREATE VIEW DATAZO.promedio_mensual_valor_asegurado (mes, tipo_paquete , promedio)
+AS
+	SELECT t.mes, tp.tipo, promedio_valor_asegurado
+	FROM  DATAZO.hecho_envio_de_mensajeria em 
+	JOIN DATAZO.dimension_tipo_paquete tp on tp.id_tipo = em.tipo_paquete
+	JOIN DATAZO.dimension_tiempo t on t.id_tiempo = em.id_tiempo
+go
 
   
 /*Cantidad de reclamos mensuales recibidos por cada local en función del
 día de la semana y rango horario.*/
 
--- CREATE VIEW DATAZO.reclamos_mensuales_por_local (mes, nombre_local,cant_reclamos, dia, rango_horario)
--- AS
--- SELECT t.mes,l.nombre, count(r.nro_reclamo) as 'Cantidad de Reclamos', d.descripcion, rh.rangoHorario 
--- FROM  DATAZO.dimension_local_ l join DATAZO.hecho_pedido_productos p on l.id_local = p.id_local
--- join DATAZO.hecho_reclamo r on r.id_pedido = p.id_pedido
--- join DATAZO.dimension_dia d on d.id_dia = r.dia_inicio
--- join DATAZO.dimension_tiempo t on t.id_tiempo = r.tiempo_inicio
--- join DATAZO.dimension_rango_horario rh on rh.rangoHorario = DATAZO.convertir_a_rango_horario(r.horario_inicio)  
--- group by t.mes,l.nombre, d.descripcion, rh.rangoHorario 
--- go
+CREATE VIEW DATAZO.reclamos_mensuales_por_local (mes, dia, rango_horario, nombre_local, cant_reclamos)
+AS
+	SELECT t.mes, l.nombre, d.id_dia, rh.rangoHorario, r.total_reclamos
+	FROM  DATAZO.hecho_reclamo as r
+	JOIN DATAZO.dimension_local_ as l ON l.id_local = r.id_local
+	JOIN DATAZO.dimension_dia d on d.id_dia = r.id_dia
+	JOIN DATAZO.dimension_tiempo t on t.id_tiempo = r.id_tiempo
+	JOIN DATAZO.dimension_rango_horario rh on rh.id_rango_horario = r.rango_horario
+go
 
   
 /*Tiempo promedio de resolución de reclamos mensual según cada tipo de
@@ -1101,22 +1095,19 @@ El tiempo de resolución debe calcularse en minutos y representa la
 diferencia entre la fecha/hora en que se realizó el reclamo y la fecha/hora
 que se resolvió.*/
 
--- CREATE VIEW DATAZO.tiempo_prom_resol_reclamo (tiempo, tipo_paquete , promedio)
--- AS
--- SELECT tr.descripcion, re.rango_etario, avg(DATEDIFF(MINUTE, r.horario_inicio, r.horario_solucion)) as 'Tiempo Promedio Resolucion'
--- FROM  DATAZO.hecho_reclamo r join DATAZO.dimension_tipo_reclamo tr on tr.id_tipo = r.tipo_reclamo
--- join DATAZO.hecho_operador o on o.id_operador = r.id_operador
--- join DATAZO.hecho_persona p on p.id_persona = o.id_persona
--- join DATAZO.dimension_rango_etario re on re.id_rango = p.id_rango
--- group by tr.descripcion, re.rango_etario
--- go
+CREATE VIEW DATAZO.tiempo_prom_resol_reclamo (tipo_reclamo, rango_etario_operado, tiempo_promedio_resolucion)
+AS
+	SELECT tr.descripcion, re.rango_etario, r.prom_resolucion_por_RE
+	FROM DATAZO.hecho_reclamo r 
+	join DATAZO.dimension_tipo_reclamo tr on tr.id_tipo = r.tipo_reclamo
+	join DATAZO.dimension_rango_etario re on re.id_rango = p.rango_etario_operador
+go
   
 /*Monto mensual generado en cupones a partir de reclamos.*/
 
--- CREATE VIEW DATAZO.monto_mensual_cupones_por_reclamos (Monto, Mes)
--- AS
--- SELECT SUM(monto) as 'Monsto Mensual Generado Por Cupones', t.mes
--- FROM DATAZO.hecho_cupon_x_reclamo AS cxr JOIN DATAZO.hecho_cupon_de_descuento AS c ON c.id_cupon = cxr.id_cupon
--- join DATAZO.dimension_tiempo t on t.id_tiempo = c.tiempo_alta 
--- GROUP BY t.mes
--- GO
+CREATE VIEW DATAZO.monto_mensual_cupones_por_reclamos (mes, monto)
+AS
+SELECT r.monto_mensual_cupones, t.mes
+	FROM DATAZO.hecho_reclamo AS r 
+	join DATAZO.dimension_tiempo t on t.id_tiempo = r.id_tiempo
+GO
