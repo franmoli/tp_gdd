@@ -647,40 +647,93 @@ GO
 -- END
 -- GO
 
--- CREATE PROCEDURE DATAZO.migrar_hecho_envio
--- AS
--- BEGIN
+CREATE FUNCTION DATAZO.calcular_procentaje_de_envios(@mes int,
+	@rango_etario_repartidor varchar(10), @provincia varchar(255), @localidad varchar(255))
+	RETURNS float
+	AS
+	BEGIN
+		DECLARE @envios_parciales INT
+		DECLARE @porcentaje_envios FLOAT
 
--- 	INSERT INTO DATAZO.hecho_envio (id_tiempo, id_dia, id_estado, id_medioPago,
--- 	id_rango_horario_entrega, rango_etario_repartidor, id_tipo_movilidad, prov_localidad,
--- 	porcentaje_de_envios, desvio)
--- 		SELECT dt.id_tiempo, dd.id_dia, de.id_estado, dtmp.id_tipo_medio_pago,
--- 		drh.id_rango_horario, dre.id_rango_etario, dtm.id_tipo_movilidad,
--- 		dpl.id_provincia_localidad
--- 		FROM DATAZO.envio as e
--- 		JOIN DATAZO.dimension_tiempo as dt ON dt.anio = DATEPART(YEAR, e.fecha_entrega) 
--- 		AND dt.mes = DATEPART(MONTH, e.fecha_pedido)
--- 		JOIN DATAZO.dimension_dia as dd ON dd.descripcion = DATENAME(WEEKDAY, e.fecha_entrega)
--- 		JOIN DATAZO.estado as est ON est.id_estado = e.estado
--- 		JOIN DATAZO.dimension_estado as de ON de.descripcion = est.descripcion
--- 		JOIN DATAZO.tipo_medio_pago as tmp ON tmp.id_tipo_medio_pago = e.medio_pago
--- 		JOIN DATAZO.dimension_tipo_medio_pago as dtmp ON dtmp.descripcion = tmp.descripcion
--- 		JOIN dimension_rango_horario as drh ON drh.rango_horario = 
--- 			convertir_a_rango_horario(e.fecha_entrega)
--- 		JOIN DATAZO.repartidor as r ON r.id_repartidor = e.id_repartidor
--- 		JOIN DATAZO.persona as p ON p.id_persona = r.id_persona
--- 		JOIN DATAZO.dimension_rango_etario as dre ON dre.rango_etario = 
--- 			convertir_a_rango_etario(calcular_edad(p.fecha_nac))
--- 		JOIN DATAZO.tipo_movilidad as tm ON tm.id_tipo_movilidad = r.tipo_movilidad
--- 		JOIN DATAZO.dimension_tipo_movilidad as dtm ON dtm.tipo_movilidad = 
--- 			tm.descripcion_movilidad
--- 		JOIN DATAZO.localidad as loc ON loc.id_localidad = e.id_localidad
--- 		JOIN DATAZO.provincia as pro ON pro.id_provincia = loc.id_provincia
--- 		JOIN DATAZO.dimension_provincia_localidad AS dpl ON 
--- 			dpl.provincia = pro.nombre_provincia AND dpl.localidad = loc.nombre_localidad
--- 		PRINT 'hecho_evento migrado'
--- END
--- GO
+			SELECT @envios_parciales = COUNT(*) FROM DATAZO.envio
+			JOIN DATAZO.repartidor ON envio.id_repartidor = repartidor.id_repartidor
+			JOIN DATAZO.persona ON repartidor.id_persona = persona.id_persona AND
+			DATAZO.convertir_a_rango_etario(
+				DATAZO.calcular_edad(YEAR(persona.fecha_nac)))
+			 = @rango_etario_repartidor
+			JOIN direccion ON envio.dir_destino = direccion.id_direccion
+			JOIN localidad ON localidad.id_localidad = direccion.localidad AND
+				localidad.nombre_localidad = @localidad
+			JOIN provincia ON localidad.id_provincia = provincia.id_provincia AND
+				provincia.nombre_provincia = @provincia
+			WHERE MONTH(envio.fecha_entrega) = @mes
+
+			SELECT @porcentaje_envios = @envios_parciales / COUNT(*) 
+			FROM DATAZO.envio
+			WHERE MONTH(envio.fecha_entrega) = @mes
+
+		RETURN @porcentaje_envios
+	END
+	GO
+	
+CREATE FUNCTION DATAZO.calcular_desvio (@tipo_movilidad VARCHAR(255), @dia INT,
+@rango_horario VARCHAR(255))
+RETURNS FLOAT
+AS
+BEGIN
+	DECLARE @desvio FLOAT
+
+	SELECT @desvio = AVG(DATEDIFF(MINUTE, e.fecha_pedido, e.fecha_entrega) -
+	e.tiempo_estimado_entrega) FROM DATAZO.envio as e
+	JOIN DATAZO.repartidor as r ON e.id_repartidor = r.id_repartidor
+	JOIN DATAZO.tipo_movilidad ON r.tipo_movilidad = tipo_movilidad.id_tipo_movilidad
+	WHERE DATAZO.convertir_a_rango_horario(e.fecha_entrega) = @rango_horario AND
+	DATEPART(WEEKDAY, e.fecha_entrega) = @dia
+
+	RETURN @desvio
+END
+GO
+
+
+CREATE PROCEDURE DATAZO.migrar_hecho_envio
+AS
+BEGIN
+
+	INSERT INTO DATAZO.hecho_envio (id_tiempo, id_dia, id_estado, id_medioPago,
+	id_rango_horario_entrega, rango_etario_repartidor, id_tipo_movilidad, prov_localidad,
+	porcentaje_de_envios, desvio)
+		SELECT DISTINCT dt.id_tiempo, dd.id_dia, de.id_estado, dtmp.id_tipo_medio_pago,
+		drh.id_rango_horario, dre.id_rango, dtm.id_tipo_movilidad,
+		dpl.id_provincia_localidad, 
+		DATAZO.calcular_procentaje_de_envios(dt.mes, dre.rango_etario, 
+		dpl.provincia, dpl.localidad),
+		DATAZO.calcular_desvio(tm.descripcion_movilidad, dd.id_dia, drh.rangoHorario)
+		FROM DATAZO.envio as e
+		JOIN DATAZO.dimension_tiempo as dt ON dt.anio = DATEPART(YEAR, e.fecha_entrega) 
+		AND dt.mes = DATEPART(MONTH, e.fecha_pedido)
+		JOIN DATAZO.dimension_dia as dd ON dd.id_dia = 
+			DATENAME(WEEKDAY, e.fecha_entrega)
+		JOIN DATAZO.estado as est ON est.id_estado = e.id_estado
+		JOIN DATAZO.dimension_estado as de ON de.descripcion = est.descripcion
+		JOIN DATAZO.tipo_medio_pago as tmp ON tmp.id_tipo_medio_pago = e.id_medioPago
+		JOIN DATAZO.dimension_tipo_medio_pago as dtmp ON dtmp.descripcion = tmp.descripcion
+		JOIN dimension_rango_horario as drh ON drh.rangoHorario = 
+			DATAZO.convertir_a_rango_horario(e.fecha_entrega)
+		JOIN DATAZO.repartidor as r ON r.id_repartidor = e.id_repartidor
+		JOIN DATAZO.persona as p ON p.id_persona = r.id_persona
+		JOIN DATAZO.dimension_rango_etario as dre ON dre.rango_etario = 
+			DATAZO.convertir_a_rango_etario(DATAZO.calcular_edad(p.fecha_nac))
+		JOIN DATAZO.tipo_movilidad as tm ON tm.id_tipo_movilidad = r.tipo_movilidad
+		JOIN DATAZO.dimension_tipo_movilidad as dtm ON dtm.descripcion = 
+			tm.descripcion_movilidad
+		JOIN direccion as direc ON direc.id_direccion = e.dir_origen
+		JOIN DATAZO.localidad as loc ON loc.id_localidad = direc.localidad
+		JOIN DATAZO.provincia as pro ON pro.id_provincia = loc.id_provincia
+		JOIN DATAZO.dimension_provincia_localidad AS dpl ON 
+			dpl.provincia = pro.nombre_provincia AND dpl.localidad = loc.nombre_localidad
+		PRINT 'hecho_evento migrado'
+END
+GO
 
 -- CREATE PROCEDURE DATAZO.migrar_hecho_pedido_productos
 -- AS
