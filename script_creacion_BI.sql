@@ -191,8 +191,10 @@ IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_hecho_envio')
 GO
 IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_hecho_pedido_productos')
 	DROP PROCEDURE DATAZO.migrar_hecho_pedido_productos
+GO
 IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_hecho_envio_de_mensajeria')
 	DROP PROCEDURE DATAZO.migrar_hecho_envio_de_mensajeria
+GO
 IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_hecho_reclamo')
 	DROP PROCEDURE DATAZO.migrar_hecho_reclamo
 GO
@@ -452,14 +454,21 @@ GO
 CREATE PROCEDURE DATAZO.migrar_dim_categoria_tipo_local
 AS
 BEGIN
+-- TODO: INVENTAR CATEGORIAS DE LOCALES, LO PIDE EN LOS MAILS
 	INSERT INTO DATAZO.dimension_categoria_tipo_local (tipo, categoria)
-	SELECT  DISTINCT tl.descripcion, c.descripcion
+	SELECT  DISTINCT tl.descripcion, (
+									CASE
+										WHEN c.descripcion is NULL THEN 'No definida'
+										WHEN c.descripcion is not NULL THEN c.descripcion
+										END
+									)
 	from DATAZO.tipo_local tl
 	LEFT JOIN DATAZO.categoria c ON c.id_tipo = tl.id_tipo
 
 	PRINT 'dim_categoria_tipo_local migrada'
 END
 GO
+
 
 CREATE FUNCTION DATAZO.convertir_a_rango_horario (@horario DATETIME)
 RETURNS VARCHAR(13)
@@ -522,130 +531,130 @@ BEGIN
 END
 GO
 
--- CREATE PROCEDURE DATAZO.migrar_dim_rango_horario
--- AS
--- BEGIN
--- 	INSERT INTO DATAZO.dimension_rango_horario values ('00:00 - 02:00'),('02:00 - 04:00'),
--- 	('04:00 - 06:00'), ('06:00 - 08:00'), ('08:00 - 10:00'), ('10:00 - 12:00'),
--- 	('12:00 - 14:00'), ('14:00 - 16:00'), ('16:00 - 18:00'), ('18:00 - 20:00'),
--- 	('20:00 - 22:00'), ('22:00 - 00:00')
--- 	PRINT 'dim_rango_horario migrada'
--- END
--- GO
+CREATE PROCEDURE DATAZO.migrar_dim_rango_horario
+AS
+BEGIN
+	INSERT INTO DATAZO.dimension_rango_horario values ('00:00 - 02:00'),('02:00 - 04:00'),
+	('04:00 - 06:00'), ('06:00 - 08:00'), ('08:00 - 10:00'), ('10:00 - 12:00'),
+	('12:00 - 14:00'), ('14:00 - 16:00'), ('16:00 - 18:00'), ('18:00 - 20:00'),
+	('20:00 - 22:00'), ('22:00 - 00:00')
+	PRINT 'dim_rango_horario migrada'
+END
+GO
 
 
--- CREATE PROCEDURE DATAZO.migrar_dim_estado_reclamo
--- AS
--- BEGIN
--- 	INSERT INTO DATAZO.dimension_estado_reclamo (descripcion )
--- 	SELECT  DISTINCT estado
--- 	from DATAZO.reclamo
--- 	where estado  IS NOT NULL 
+CREATE PROCEDURE DATAZO.migrar_dim_estado_reclamo
+AS
+BEGIN
+	INSERT INTO DATAZO.dimension_estado_reclamo (descripcion )
+	SELECT  DISTINCT estado
+	from DATAZO.reclamo
+	where estado  IS NOT NULL 
 
--- 	PRINT 'dim_estado_reclamo_migrada'
--- END
--- GO
+	PRINT 'dim_estado_reclamo_migrada'
+END
+GO
 
--- CREATE PROCEDURE DATAZO.migrar_dim_tipo_reclamo
--- AS
--- BEGIN
--- 	INSERT INTO DATAZO.dimension_tipo_reclamo (descripcion)
--- 	SELECT  DISTINCT descripcion
--- 	from DATAZO.tipo_reclamo
+CREATE PROCEDURE DATAZO.migrar_dim_tipo_reclamo
+AS
+BEGIN
+	INSERT INTO DATAZO.dimension_tipo_reclamo (descripcion)
+	SELECT  DISTINCT descripcion
+	from DATAZO.tipo_reclamo
 
--- 	PRINT 'dim_tipo_reclamo_migrada'
--- END
--- GO
--- CREATE PROCEDURE DATAZO.migrar_dim_rango_etario
--- AS
--- BEGIN
--- 	INSERT INTO DATAZO.dimension_rango_etario values ('<25'),('25 - 35'),
--- 	('35 - 55'), ('>55')
--- 	PRINT 'dim_rango_etario migrada'
--- END
--- GO
-
-
-
-
--- CREATE PROCEDURE DATAZO.migrar_dim_tipo_movilidad
--- AS
--- BEGIN
--- 	--dimension_tipo_movilidad
--- 	INSERT INTO DATAZO.dimension_tipo_movilidad (descripcion )
--- 	SELECT  DISTINCT descripcion_movilidad
--- 	from DATAZO.tipo_movilidad
--- 	where descripcion_movilidad  IS NOT NULL 
--- 	PRINT 'dim_tipo_movilidad migrada'
--- END
--- GO
-
--- CREATE PROCEDURE DATAZO.migrar_dim_dia
--- AS 
--- BEGIN 
--- 	--dimension_dia
--- 	INSERT INTO DATAZO.dimension_dia (id_dia, descripcion )
--- 	SELECT (
--- 		CASE
--- 			WHEN descripcion = 'Domingo' THEN 1
--- 			WHEN descripcion = 'Lunes' THEN 2
--- 			WHEN descripcion = 'Martes' THEN 3
--- 			WHEN descripcion = 'Miercoles' THEN 4
--- 			WHEN descripcion = 'Jueves' THEN 5
--- 			WHEN descripcion = 'Viernes' THEN 6
--- 			WHEN descripcion = 'Sabado' THEN 7
--- 		END
--- 	), left(dia.descripcion, 1) from DATAZO.dia
-
--- 	PRINT 'dim_dia migrada'
--- END 
--- GO
-
--- CREATE PROCEDURE DATAZO.migrar_dim_tipo_paquete
--- AS
--- BEGIN
--- 	--dimension_tipo_paquete
--- 	INSERT INTO DATAZO.dimension_tipo_paquete (tipo)
--- 	SELECT  DISTINCT tipo
--- 	from DATAZO.tipo_paquete
--- 	PRINT 'dim_tipo_paquete_migrada'
--- END
--- GO
-
--- CREATE PROCEDURE DATAZO.migrar_dim_tipo_medio_pago
--- AS
--- BEGIN
--- 	--dimension_tipo_medio_pago
--- 	INSERT INTO DATAZO.dimension_tipo_medio_pago (descripcion )
--- 	SELECT  DISTINCT descripcion
--- 	from DATAZO.tipo_medio_pago
--- 	PRINT 'dim_tipo_medio_pago migrada'
--- END
--- GO
-
--- CREATE PROCEDURE DATAZO.migrar_dim_estado_mensajeria_pedido
--- AS
--- BEGIN
--- 	--dimension_estado_pedido
--- 	INSERT INTO DATAZO.dimension_estado_mensajeria_pedido (descripcion )
--- 	SELECT  DISTINCT descripcion
--- 	from DATAZO.estado 
--- 	PRINT 'dim_estado_pedido migrada'
--- END
--- GO
+	PRINT 'dim_tipo_reclamo_migrada'
+END
+GO
+CREATE PROCEDURE DATAZO.migrar_dim_rango_etario
+AS
+BEGIN
+	INSERT INTO DATAZO.dimension_rango_etario values ('<25'),('25 - 35'),
+	('35 - 55'), ('>55')
+	PRINT 'dim_rango_etario migrada'
+END
+GO
 
 
 
--- CREATE PROCEDURE DATAZO.migrar_dim_provincia_localidad
--- AS
--- BEGIN
--- 	--dimension_provincia_localidad
--- 	INSERT INTO DATAZO.dimension_provincia_localidad (provincia , localidad )
--- 	SELECT DISTINCT PROV.nombre_provincia, LOC.nombre_localidad FROM DATAZO.provincia PROV 
--- 	JOIN DATAZO.localidad LOC ON LOC.id_provincia = PROV.id_provincia
--- 	PRINT 'dim_provincia_localidad migrada'
--- END
--- GO
+
+CREATE PROCEDURE DATAZO.migrar_dim_tipo_movilidad
+AS
+BEGIN
+	--dimension_tipo_movilidad
+	INSERT INTO DATAZO.dimension_tipo_movilidad (descripcion )
+	SELECT  DISTINCT descripcion_movilidad
+	from DATAZO.tipo_movilidad
+	where descripcion_movilidad  IS NOT NULL 
+	PRINT 'dim_tipo_movilidad migrada'
+END
+GO
+
+CREATE PROCEDURE DATAZO.migrar_dim_dia
+AS 
+BEGIN 
+	--dimension_dia
+	INSERT INTO DATAZO.dimension_dia (id_dia, descripcion )
+	SELECT (
+		CASE
+			WHEN descripcion = 'Domingo' THEN 1
+			WHEN descripcion = 'Lunes' THEN 2
+			WHEN descripcion = 'Martes' THEN 3
+			WHEN descripcion = 'Miercoles' THEN 4
+			WHEN descripcion = 'Jueves' THEN 5
+			WHEN descripcion = 'Viernes' THEN 6
+			WHEN descripcion = 'Sabado' THEN 7
+		END
+	), left(dia.descripcion, 1) from DATAZO.dia
+
+	PRINT 'dim_dia migrada'
+END 
+GO
+
+CREATE PROCEDURE DATAZO.migrar_dim_tipo_paquete
+AS
+BEGIN
+	--dimension_tipo_paquete
+	INSERT INTO DATAZO.dimension_tipo_paquete (tipo)
+	SELECT  DISTINCT tipo
+	from DATAZO.tipo_paquete
+	PRINT 'dim_tipo_paquete_migrada'
+END
+GO
+
+CREATE PROCEDURE DATAZO.migrar_dim_tipo_medio_pago
+AS
+BEGIN
+	--dimension_tipo_medio_pago
+	INSERT INTO DATAZO.dimension_tipo_medio_pago (descripcion )
+	SELECT  DISTINCT descripcion
+	from DATAZO.tipo_medio_pago
+	PRINT 'dim_tipo_medio_pago migrada'
+END
+GO
+
+CREATE PROCEDURE DATAZO.migrar_dim_estado_mensajeria_pedido
+AS
+BEGIN
+	--dimension_estado_pedido
+	INSERT INTO DATAZO.dimension_estado_mensajeria_pedido (descripcion )
+	SELECT  DISTINCT descripcion
+	from DATAZO.estado 
+	PRINT 'dim_estado_pedido migrada'
+END
+GO
+
+
+
+CREATE PROCEDURE DATAZO.migrar_dim_provincia_localidad
+AS
+BEGIN
+	--dimension_provincia_localidad
+	INSERT INTO DATAZO.dimension_provincia_localidad (provincia , localidad )
+	SELECT DISTINCT PROV.nombre_provincia, LOC.nombre_localidad FROM DATAZO.provincia PROV 
+	JOIN DATAZO.localidad LOC ON LOC.id_provincia = PROV.id_provincia
+	PRINT 'dim_provincia_localidad migrada'
+END
+GO
 
 -- CREATE PROCEDURE DATAZO.migrar_hecho_envio
 -- AS
@@ -682,32 +691,104 @@ GO
 -- END
 -- GO
 
--- CREATE PROCEDURE DATAZO.migrar_hecho_pedido_productos
--- AS
--- BEGIN
+CREATE PROCEDURE DATAZO.migrar_hecho_pedido_productos
+AS
+BEGIN
 
--- 	INSERT INTO DATAZO.hecho_pedido_productos (id_pedido, id_envio, id_local,
--- 	id_categoria_tipo, id_prov_localidad, tarifa_servicio, total_pedido)
--- 		SELECT p.id_pedido, e.id_envio, dl.id_local, 
--- 		dc.id_categoria_tipo_local, dpl.id_provincia_localidad, 
--- 		p.tarifa_servicio, p.total_pedido
--- 		FROM DATAZO.pedido_productos as p
--- 		JOIN DATAZO.hecho_envio as e ON e.id_envio = p.id_envio
--- 		JOIN DATAZO.local_ as l ON l.id_local = p.id_local
--- 		LEFT JOIN DATAZO.categoria as c ON c.id_categoria = l.categoria
--- 		JOIN DATAZO.tipo_local as tl ON tl.id_tipo = l.tipo
--- 		JOIN DATAZO.dimension_local_ as dl ON dl.id_local = p.id_local
--- 		LEFT JOIN DATAZO.dimension_categoria_tipo_local as dc ON dc.categoria = c.descripcion
--- 		AND dc.tipo = tl.descripcion 
--- 		JOIN DATAZO.direccion as d ON d.id_direccion = l.id_direccion
--- 		JOIN DATAZO.localidad as loc ON d.localidad = loc.id_localidad
--- 		JOIN DATAZO.provincia as pro ON pro.id_provincia = loc.id_provincia
--- 		JOIN DATAZO.dimension_provincia_localidad as dpl ON dpl.localidad = loc.nombre_localidad AND
--- 		dpl.provincia = pro.nombre_provincia
--- 		PRINT 'hecho_pedido_productos migrado'
+-- Día de la semana y franja horaria con mayor cantidad de pedidos según la
+-- localidad y categoría del local, para cada mes de cada año.
 
--- END
--- GO
+-- Monto total no cobrado por cada local en función de los pedidos
+-- cancelados según el día de la semana y la franja horaria (cuentan como
+-- pedidos cancelados tanto los que cancela el usuario como el local).
+
+-- Valor promedio mensual que tienen los envíos de pedidos en cada
+-- localida
+
+
+-- ● Monto total de los cupones utilizados por mes en función del rango etario
+-- de los usuarios.
+
+
+-- ● Promedio de calificación mensual por local
+
+	INSERT INTO DATAZO.hecho_pedido_productos ( 
+	id_dia, id_local,
+	id_rango_horario,
+	id_categoria_tipo,
+	id_prov_localidad,
+	id_tiempo,
+	id_rango_etario_usr, 
+	id_estado, 
+	cantidad_pedidos,
+	total_cupones, 
+	total_envio_pedidos, 
+	total_pedidos, 
+	calificacion_local)
+-- para tal franja horaria de tal dia de la semana, todos los pedidos y cosas que hubieron en ese mes de ese año
+			-- dia de la semana del mes de un anio
+	select DATEPART(WEEKDAY, e.fecha_pedido) id_dia,
+	-- se va a agrupar por rango horario todo / rango horario de un dia de la semana de un mes de un año
+	rh.id_rango_horario rango_horario,
+	-- categoria de cada local individual
+	ctl.id_categoria_tipo_local categoria_tipo,
+	-- provincia y localidad de cada local individual 
+	prov_loc.id_provincia_localidad provincia_localidad,
+	-- anio y mes de los pedidos de tal franja horaria
+	tm.id_tiempo anio_mes,
+	-- rango etario de todos los que compraron ese dia de la semana y en ese rango horario en tal mes y año
+	re.id_rango rango_etario,
+	-- estado de todos los pedidos en tal franja horaria tal dia de la semana / mes / año
+	dim_est.id_estado estado,
+	-- cantidad de todos los pedidos cancelados o entregados que pasaron en tal franja horaria / dia de la semana / mes / año
+	1 cantidad_pedidos,
+	-- suma de todos los cupones que se usaron en tal franja horaria / dia de la semana / mes / año
+	1 total_cupones,
+	-- creo que no sirve
+	1 total_envio_de_pedidos,
+	--  monto total de los pedidos en tal franja horaria / dia de la semana / mes / año
+	1 total_pedidos,
+	-- calificacion promedio del local tal franja horaria / dia de la semana / mes / año
+	1 calificacion_local
+	from DATAZO.pedido_productos ped
+	join DATAZO.envio e on ped.id_envio = e.id_envio
+	JOIN DATAZO.dimension_rango_horario rh on rh.rangoHorario = DATAZO.convertir_a_rango_horario(e.fecha_pedido)
+	join datazo.local_ l on ped.id_local = l.id_local
+	JOIN datazo.tipo_local tl on l.tipo = tl.id_tipo
+	join datazo.dimension_categoria_tipo_local ctl on tl.descripcion = ctl.tipo 
+	join datazo.direccion dir on dir.id_direccion = l.id_direccion
+	join datazo.localidad loc on loc.id_localidad = dir.localidad
+	join datazo.provincia prov on loc.id_provincia = prov.id_provincia
+	join datazo.dimension_provincia_localidad prov_loc on prov_loc.localidad = loc.nombre_localidad and prov_loc.provincia = prov.nombre_provincia
+	join datazo.dimension_tiempo tm on tm.anio = DATEPART(YEAR, e.fecha_pedido) and tm.mes = DATEPART(MONTH, e.fecha_pedido)
+	join datazo.usuario usr on usr.id_usuario = e.id_usuario
+	join datazo.persona pers on pers.id_persona = usr.id_persona
+	join datazo.dimension_rango_etario re on re.rango_etario = datazo.convertir_a_rango_etario(datazo.calcular_edad(DATEPART(YEAR, pers.fecha_nac)))
+	join datazo.estado est on est.id_estado = e.id_estado
+	join datazo.dimension_estado_mensajeria_pedido dim_est on dim_est.descripcion = est.descripcion
+	GROUP by rh.id_rango_horario, DATEPART(WEEKDAY, e.fecha_pedido), tm.id_tiempo, re.id_rango, dim_est.id_estado, ctl.id_categoria_tipo_local, prov_loc.id_provincia_localidad
+
+select * from datazo.dimension_categoria_tipo_local
+		-- SELECT p.id_pedido, e.id_envio, dl.id_local, 
+		-- dc.id_categoria_tipo_local, dpl.id_provincia_localidad, 
+		-- p.tarifa_servicio, p.total_pedido
+		-- FROM DATAZO.pedido_productos as p
+		-- JOIN DATAZO.hecho_envio as e ON e.id_envio = p.id_envio
+		-- JOIN DATAZO.local_ as l ON l.id_local = p.id_local
+		-- LEFT JOIN DATAZO.categoria as c ON c.id_categoria = l.categoria
+		-- JOIN DATAZO.tipo_local as tl ON tl.id_tipo = l.tipo
+		-- JOIN DATAZO.dimension_local_ as dl ON dl.id_local = p.id_local
+		-- LEFT JOIN DATAZO.dimension_categoria_tipo_local as dc ON dc.categoria = c.descripcion
+		-- AND dc.tipo = tl.descripcion 
+		-- JOIN DATAZO.direccion as d ON d.id_direccion = l.id_direccion
+		-- JOIN DATAZO.localidad as loc ON d.localidad = loc.id_localidad
+		-- JOIN DATAZO.provincia as pro ON pro.id_provincia = loc.id_provincia
+		-- JOIN DATAZO.dimension_provincia_localidad as dpl ON dpl.localidad = loc.nombre_localidad AND
+		-- dpl.provincia = pro.nombre_provincia
+		-- PRINT 'hecho_pedido_productos migrado'
+
+END
+GO
 
 -- CREATE PROCEDURE DATAZO.migrar_hecho_envio_de_mensajeria
 -- AS
@@ -755,48 +836,48 @@ GO
 -- GO
 
 
--- BEGIN TRANSACTION
---  BEGIN TRY
---  	SELECT 1
--- 	-- EXECUTE DATAZO.migrar_dim_tiempo
--- 	-- EXECUTE DATAZO.migrar_dim_local
--- 	-- EXECUTE DATAZO.migrar_dim_categoria_tipo_local
--- 	-- EXECUTE DATAZO.migrar_dim_rango_horario
--- 	-- EXECUTE DATAZO.migrar_dim_rango_etario
--- 	-- EXECUTE DATAZO.migrar_dim_estado_reclamo
--- 	-- EXECUTE DATAZO.migrar_dim_tipo_movilidad
--- 	-- EXECUTE DATAZO.migrar_dim_dia
--- 	-- EXECUTE DATAZO.migrar_dim_tipo_paquete
--- 	-- EXECUTE DATAZO.migrar_dim_tipo_medio_pago
--- 	-- EXECUTE DATAZO.migrar_dim_estado_mensajeria_pedido
--- 	-- EXECUTE DATAZO.migrar_dim_provincia_localidad
--- 	-- EXECUTE DATAZO.migrar_hecho_envio
--- 	-- EXECUTE DATAZO.migrar_hecho_pedido_productos
--- 	-- EXECUTE DATAZO.migrar_hecho_envio_de_mensajeria
--- 	-- EXECUTE DATAZO.migrar_dim_tipo_reclamo
--- 	-- EXECUTE DATAZO.migrar_hecho_reclamo
--- END TRY
--- BEGIN CATCH
---     ROLLBACK TRANSACTION;
--- 	THROW 50001, 'Error al migrar las tablas, verifique que las nuevas tablas se encuentren vac�as o bien ejecute un DROP de todas las nuevas tablas y vuelva a intentarlo.',1;
--- END CATCH
+BEGIN TRANSACTION
+ BEGIN TRY
+ 	-- SELECT 1
+	EXECUTE DATAZO.migrar_dim_tiempo
+	EXECUTE DATAZO.migrar_dim_local
+	EXECUTE DATAZO.migrar_dim_categoria_tipo_local
+	EXECUTE DATAZO.migrar_dim_rango_horario
+	EXECUTE DATAZO.migrar_dim_rango_etario
+	EXECUTE DATAZO.migrar_dim_estado_reclamo
+	EXECUTE DATAZO.migrar_dim_tipo_movilidad
+	EXECUTE DATAZO.migrar_dim_dia
+	EXECUTE DATAZO.migrar_dim_tipo_paquete
+	EXECUTE DATAZO.migrar_dim_tipo_medio_pago
+	EXECUTE DATAZO.migrar_dim_estado_mensajeria_pedido
+	EXECUTE DATAZO.migrar_dim_provincia_localidad
+-- 	EXECUTE DATAZO.migrar_hecho_envio
+-- 	EXECUTE DATAZO.migrar_hecho_pedido_productos
+-- 	EXECUTE DATAZO.migrar_hecho_envio_de_mensajeria
+-- 	EXECUTE DATAZO.migrar_dim_tipo_reclamo
+-- 	EXECUTE DATAZO.migrar_hecho_reclamo
+END TRY
+BEGIN CATCH
+    ROLLBACK TRANSACTION;
+	THROW 50001, 'Error al migrar las tablas, verifique que las nuevas tablas se encuentren vac�as o bien ejecute un DROP de todas las nuevas tablas y vuelva a intentarlo.',1;
+END CATCH
 
--- --    IF (EXISTS (SELECT 1 FROM DATAZO.envio)
--- --    AND EXISTS (SELECT 1 FROM DATAZO.usuario)
--- --    )
--- 	IF(1 = 1)
+--    IF (EXISTS (SELECT 1 FROM DATAZO.envio)
+--    AND EXISTS (SELECT 1 FROM DATAZO.usuario)
+--    )
+	IF(1 = 1)
    
---    BEGIN
--- 	PRINT 'Tablas migradas correctamente.';
--- 	COMMIT TRANSACTION;
---    END
--- 	 ELSE
---    BEGIN
---     ROLLBACK TRANSACTION;
--- 	THROW 50002, 'Hubo un error al migrar una o mas tablas. Todos los cambios fueron deshechos, ninguna tabla fue cargada en la base.',1;
---    END
+   BEGIN
+	PRINT 'Tablas migradas correctamente.';
+	COMMIT TRANSACTION;
+   END
+	 ELSE
+   BEGIN
+    ROLLBACK TRANSACTION;
+	THROW 50002, 'Hubo un error al migrar una o mas tablas. Todos los cambios fueron deshechos, ninguna tabla fue cargada en la base.',1;
+   END
    
--- GO
+GO
 
 --Vistas
 
