@@ -209,7 +209,26 @@ GO
 IF EXISTS(SELECT [name] FROM sys.objects WHERE [name] = 'calcular_edad')
 	DROP FUNCTION DATAZO.calcular_edad
 GO	
+IF EXISTS(SELECT [name] FROM sys.objects WHERE [name] = 'calcular_procentaje_de_envios')
+	DROP FUNCTION DATAZO.calcular_procentaje_de_envios
+GO	
+IF EXISTS(SELECT [name] FROM sys.objects WHERE [name] = 'calcular_desvio')
+	DROP FUNCTION DATAZO.calcular_desvio
+GO	
+IF EXISTS(SELECT [name] FROM sys.objects WHERE [name] = 'calcular_promedio_VA')
+	DROP FUNCTION DATAZO.calcular_promedio_VA
+GO	
+IF EXISTS(SELECT [name] FROM sys.objects WHERE [name] = 'prom_resolucion_por_RE')
+	DROP FUNCTION DATAZO.prom_resolucion_por_RE
+GO
+IF EXISTS(SELECT [name] FROM sys.objects WHERE [name] = 'cantidad_reclamos')
+	DROP FUNCTION DATAZO.cantidad_reclamos
+GO
+IF EXISTS(SELECT [name] FROM sys.objects WHERE [name] = 'monto_mensual_cupones_reclamos')
+	DROP FUNCTION DATAZO.monto_mensual_cupones_reclamos
+GO
 
+	
 --DROP VISTAS
 IF EXISTS(SELECT [name] FROM sys.views WHERE [name] = 'dia_y_horario_con_mas_pedidos')
 	DROP VIEW DATAZO.dia_y_horario_con_mas_pedidos
@@ -723,7 +742,7 @@ BEGIN
 		JOIN DATAZO.dimension_dia as dd ON dd.id_dia = 
 			DATENAME(WEEKDAY, e.fecha_entrega)
 		JOIN DATAZO.estado as est ON est.id_estado = e.id_estado
-		JOIN DATAZO.dimension_estado as de ON de.descripcion = est.descripcion
+		JOIN DATAZO.dimension_estado_mensajeria_pedido as de ON de.descripcion = est.descripcion
 		JOIN DATAZO.tipo_medio_pago as tmp ON tmp.id_tipo_medio_pago = e.id_medioPago
 		JOIN DATAZO.dimension_tipo_medio_pago as dtmp ON dtmp.descripcion = tmp.descripcion
 		JOIN dimension_rango_horario as drh ON drh.rangoHorario = 
@@ -731,7 +750,7 @@ BEGIN
 		JOIN DATAZO.repartidor as r ON r.id_repartidor = e.id_repartidor
 		JOIN DATAZO.persona as p ON p.id_persona = r.id_persona
 		JOIN DATAZO.dimension_rango_etario as dre ON dre.rango_etario = 
-			DATAZO.convertir_a_rango_etario(DATAZO.calcular_edad(p.fecha_nac))
+			DATAZO.convertir_a_rango_etario(DATAZO.calcular_edad(year(p.fecha_nac)))
 		JOIN DATAZO.tipo_movilidad as tm ON tm.id_tipo_movilidad = r.tipo_movilidad
 		JOIN DATAZO.dimension_tipo_movilidad as dtm ON dtm.descripcion = 
 			tm.descripcion_movilidad
@@ -844,16 +863,18 @@ END
 GO
 
 
+
 CREATE FUNCTION DATAZO.calcular_promedio_VA(@anio INT, @mes INT, @tipo_paquete VARCHAR(50))
 RETURNS DECIMAL(18,2)
 AS
 BEGIN
 	DECLARE @promedio_VA DECIMAL(18,2)
-
-	SELECT AVG(valor_asegurado) FROM envio
+	set @promedio_VA =(
+	SELECT AVG(em.valor_asegurado) FROM envio
+	join DATAZO.envio_de_mensajeria em on em.id_envio = envio.id_envio
 	JOIN DATAZO.tipo_paquete as tp ON tp.tipo = @tipo_paquete
 	WHERE DATEPART(YEAR, envio.fecha_entrega) = @anio AND
-		DATEPART(MONTH, envio.fecha_entrega) = @mes
+		DATEPART(MONTH, envio.fecha_entrega) = @mes)
 	RETURN @promedio_VA
 
 END
@@ -870,30 +891,29 @@ BEGIN
 		DATAZO.calcular_promedio_VA(dt.anio, dt.mes, tp.tipo)
 		FROM DATAZO.envio_de_mensajeria as e
 		JOIN DATAZO.envio as env ON env.id_envio = e.id_envio
-		JOIN DATAZO.dimension_tipo as dt ON dt.mes = DATEPART(MONTH, env.fecha_entrega) AND
+		JOIN DATAZO.dimension_tiempo as dt ON dt.mes = DATEPART(MONTH, env.fecha_entrega) AND
 		dt.anio = DATEPART(YEAR,env.fecha_entrega)
 		JOIN DATAZO.tipo_paquete as tp ON tp.id_tipo = e.tipo_paquete
-		JOIN DATAZO.dimension_tipo_paquete as dtp ON htp.tipo = tp.tipo
+		JOIN DATAZO.dimension_tipo_paquete as dtp ON dtp.tipo = tp.tipo
 		PRINT 'hecho_envio_mensajeria migrado'
 END
 GO
 
---agregar drop de las funciones
 create function DATAZO.prom_resolucion_por_RE(@anio int, @mes int, @rangoE int)
 returns int
 begin
 	declare @promedio int
-	set @promedio = (select AVG(DATEDIFF(MINUTE,r.fecha, r.fecha_solucion))
+	set @promedio = (select AVG(DATEDIFF(MINUTE, r.fecha, r.fecha_solucion))
 					from DATAZO.reclamo r 
-					join DATAZO.dimension_tiempo dt on dt.anio = DATEPART(YEAR, r.fecha) AND dt.mes = DATEPART(MONTH, r.fecha)
+					--join DATAZO.dimension_tiempo dt on dt.anio = DATEPART(YEAR, r.fecha) AND dt.mes = DATEPART(MONTH, r.fecha) group by dt.id_tiempo, dre.id_rango
 					JOIN DATAZO.operador as o ON o.id_operador = r.id_operador
 					JOIN DATAZO.persona as per ON per.id_persona = o.id_persona
-					JOIN DATAZO.dimension_rango_etario as dre ON dre.rango_etario = 
-						 DATAZO.convertir_a_rango_etario(DATAZO.calcular_edad(per.fecha_nac))
-					where dt.anio = @anio and dt.mes = dt.mes and dre.id_rango = @rangoE
-					group by dt.id_tiempo, dre.id_rango)
+					JOIN DATAZO.dimension_rango_etario as dre ON dre.rango_etario = DATAZO.convertir_a_rango_etario(DATAZO.calcular_edad(year(per.fecha_nac)))
+					where DATEPART(YEAR, r.fecha)  = @anio and DATEPART(MONTH, r.fecha) = @mes and dre.id_rango = @rangoE
+					)
 	return @promedio
 end
+go
 
 create function DATAZO.monto_mensual_cupones_reclamos(@anio int, @mes int, @rangoE int)
 returns decimal(18,2)
@@ -905,7 +925,7 @@ begin
 					JOIN DATAZO.usuario as u ON u.id_usuario = r.id_usuario
 					JOIN DATAZO.persona as per ON per.id_persona = u.id_persona
 					JOIN DATAZO.dimension_rango_etario as dre ON dre.rango_etario = 
-						 DATAZO.convertir_a_rango_etario(DATAZO.calcular_edad(per.fecha_nac))
+						 DATAZO.convertir_a_rango_etario(DATAZO.calcular_edad(year(per.fecha_nac)))
 					join DATAZO.cupon_por_reclamo cr on cr.nro_reclamo = r.nro_reclamo
 					join DATAZO.cupon_descuento cd on cd.id_cupon = cr.id_cupon
 					where dt.anio = @anio and dt.mes = dt.mes and dre.id_rango = @rangoE
@@ -913,7 +933,7 @@ begin
 			
 	return @monto				
 end
-
+go
 
 create function DATAZO.cantidad_reclamos(@anio int, @mes int, @local int, @dia int,@rh int)
 returns int
@@ -932,6 +952,7 @@ begin
 			
 	return @cantidad				
 end
+go
 
 CREATE PROCEDURE DATAZO.migrar_hecho_reclamo
 AS
@@ -957,7 +978,7 @@ INSERT INTO DATAZO.hecho_reclamo (id_local, tipo_reclamo, id_dia, id_tiempo,
 	JOIN DATAZO.operador as o ON o.id_operador = r.id_operador
 	JOIN DATAZO.persona as per ON per.id_persona = o.id_persona
 	JOIN DATAZO.dimension_rango_etario as dre ON dre.rango_etario = 
-		DATAZO.convertir_a_rango_etario(DATAZO.calcular_edad(per.fecha_nac))
+		DATAZO.convertir_a_rango_etario(DATAZO.calcular_edad(year(per.fecha_nac)))
 	
 
 	PRINT 'hecho_reclamo migrado'
