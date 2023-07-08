@@ -762,22 +762,40 @@ GO
 -- END
 -- GO
 
--- CREATE PROCEDURE DATAZO.migrar_hecho_envio_de_mensajeria
--- AS
--- BEGIN
 
--- 	INSERT INTO DATAZO.hecho_envio_de_mensajeria (id_tiempo,
--- 	id_tipo_paquete, prom_valor_asegurado, precio_seguro)
--- 		SELECT dt.id_tiempo, dtp.id_tipo
--- 		FROM DATAZO.envio_de_mensajeria as e
--- 		JOIN DATAZO.envio as env ON env.id_envio = e.id_envio
--- 		JOIN DATAZO.dimension_tipo as dt ON dt.mes = DATEPART(MONTH, env.fecha_entrega) AND
--- 		dt.anio = DATEPART(YEAR,env.fecha_entrega)
--- 		JOIN DATAZO.tipo_paquete as tp ON tp.id_tipo = e.tipo_paquete
--- 		JOIN DATAZO.dimension_tipo_paquete as dtp ON htp.tipo = tp.tipo
--- 		PRINT 'hecho_envio_mensajeria migrado'
--- END
--- GO
+CREATE FUNCTION DATAZO.calcular_promedio_VA(@anio INT, @mes INT, @tipo_paquete VARCHAR(50))
+RETURNS DECIMAL(18,2)
+AS
+BEGIN
+	DECLARE @promedio_VA DECIMAL(18,2)
+
+	SELECT AVG(valor_asegurado) FROM envio
+	JOIN DATAZO.tipo_paquete as tp ON tp.tipo = @tipo_paquete
+	WHERE DATEPART(YEAR, envio.fecha_entrega) = @anio AND
+		DATEPART(MONTH, envio.fecha_entrega) = @mes
+	RETURN @promedio_VA
+
+END
+GO
+
+
+CREATE PROCEDURE DATAZO.migrar_hecho_envio_de_mensajeria
+AS
+BEGIN
+
+	INSERT INTO DATAZO.hecho_envio_de_mensajeria (id_tiempo,
+	id_tipo_paquete, prom_valor_asegurado)
+		SELECT DISTINCT dt.id_tiempo, dtp.id_tipo,
+		DATAZO.calcular_promedio_VA(dt.anio, dt.mes, tp.tipo)
+		FROM DATAZO.envio_de_mensajeria as e
+		JOIN DATAZO.envio as env ON env.id_envio = e.id_envio
+		JOIN DATAZO.dimension_tipo as dt ON dt.mes = DATEPART(MONTH, env.fecha_entrega) AND
+		dt.anio = DATEPART(YEAR,env.fecha_entrega)
+		JOIN DATAZO.tipo_paquete as tp ON tp.id_tipo = e.tipo_paquete
+		JOIN DATAZO.dimension_tipo_paquete as dtp ON htp.tipo = tp.tipo
+		PRINT 'hecho_envio_mensajeria migrado'
+END
+GO
 
 --agregar drop de las funciones
 create function DATAZO.prom_resolucion_por_RE(@anio int, @mes int, @rangoE int)
@@ -942,58 +960,53 @@ GO
 /*Día de la semana y franja horaria con mayor cantidad de pedidos según la
 localidad y categoría del local, para cada mes de cada año.*/
 
--- CREATE VIEW DATAZO.dia_y_horario_con_mas_pedidos
+/*Falta obtener el maximo de cantidad de pedidos*/
 
--- AS 
--- SELECT dpl.localidad as localidad_local, 
--- dctl.categoria as categoria_local, 
--- dt.mes as mes, dt.anio as año,
---  MAX(d.descripcion) as dia_de_mayor_pedidos, 
---  MAX(rh.rangoHorario) as rango_horario_de_mayor_pedidos
--- FROM DATAZO.hecho_pedido_productos AS p 
--- JOIN DATAZO.hecho_envio AS e ON e.id_envio = p.id_pedido
--- JOIN DATAZO.dimension_dia AS d ON e.dia_pedido = d.id_dia
--- JOIN DATAZO.dimension_provincia_localidad as dpl 
--- ON dpl.id_provincia_localidad = e.prov_localidad
--- JOIN DATAZO.dimension_rango_horario as rh ON rh.id_rango_horario = e.id_rango_horario_entrega
--- JOIN DATAZO.dimension_local_ as l ON l.id_local = p.id_local
--- LEFT JOIN DATAZO.dimension_categoria_tipo_local as dctl ON 
--- dctl.id_categoria_tipo_local = e.prov_localidad
--- JOIN DATAZO.dimension_tiempo as dt ON dt.id_tiempo = e.tiempo_entrega
--- GROUP BY dpl.localidad, dctl.categoria, dt.mes, dt.anio
--- GO
+CREATE VIEW DATAZO.dia_y_horario_con_mas_pedidos (dia, franja_horaria, localidad, categoria_local,
+mes, anio)
+AS 
+	SELECT dd.dia_pedido, drh.rango_horario, dpl.localidad, dctl.categoria, 
+	dm.mes, dm.anio
+	FROM DATAZO.hecho_pedido_productos as hpp
+	JOIN DATAZO.dimension_categoria_tipo_local as dctl ON 
+		dctl.id_dimension_categoria_tipo_local = hpp.id_categoria_tipo
+	JOIN DATAZO.dimension_tiempo as dm ON dm.id_tiempo = hpp.id_tiempo
+	JOIN DATAZO.dimension_rango_horario as drh ON 
+		drh.id_rango_horario = hpp.id_rango_horario
+	JOIN DATAZO.dimension_provincia_localidad as dpl ON
+		dpl.id_provincia_localidad = hpp.id_provincia_localidad
+	JOIN DATAZO.dimension_dia as dd ON dd.id_dia = hpp.id_dia
+GO
 
 /*Monto total no cobrado por cada local en función de los pedidos
 cancelados según el día de la semana y la franja horaria (cuentan como
 pedidos cancelados tanto los que cancela el usuario como el local).*/
 
--- CREATE VIEW DATAZO.total_no_cobrado_por_local --solo agarre pedidos producto
--- AS
--- SELECT l.nombre, d.descripcion, rh.rangoHorario, sum(pp.total_pedido) as 'Total No Cobrado'
--- FROM DATAZO.hecho_envio e join DATAZO.hecho_pedido_productos pp on pp.id_envio = e.id_envio
--- JOIN DATAZO.dimension_dia d on d.id_dia = e.dia_pedido
--- JOIN DATAZO.dimension_rango_horario rh on rh.id_rango_horario = e.id_rango_horario_pedido
--- JOIN DATAZO.dimension_local_ l on l.id_local = pp.id_local
--- where e.id_estado = '1' 
--- group by l.nombre, d.descripcion, rh.rangoHorario
--- GO
+CREATE VIEW DATAZO.total_no_cobrado_por_local  (dia, franja_horaria, localidad, total_pedidos)
+AS
+	SELECT hpp.dia_pedido, frh.rango_horario,
+	hpp.total_pedidos
+	FROM DATAZO.hecho_pedido_productos as hpp
+	JOIN DATAZO.dimension_rango_horario as drh ON drh.id_rango = hpp.id_rango_horario
+	JOIN DATAZO.dimension_estado_mensajeria_pedido as demp ON
+		de.id_estado = hpp.estado_mensajeria_pedido
+	WHERE demp.descripcion = 'Estado Mensajeria Cancelado'
+GO
 
 
 
 /*Valor promedio mensual que tienen los envíos de pedidos en cada
 localidad.*/
 
--- CREATE VIEW DATAZO.promedio_mensual_envios (localidad, provincia, promedio)
--- AS
+/*revisar*/
 
+CREATE VIEW DATAZO.promedio_mensual_envios
+AS
 
---     SELECT PROV_LOC.localidad, PROV_LOC.provincia, AVG(E.precio_envio)
---     FROM DATAZO.dimension_provincia_localidad PROV_LOC
---     JOIN DATAZO.hecho_envio E ON E.prov_localidad = PROV_LOC.id_provincia_localidad
---     JOIN DATAZO.hecho_pedido_productos P ON P.id_envio = E.id_envio
---     GROUP BY PROV_LOC.localidad,PROV_LOC.provincia
+    SELECT dt.mes, hpp.prom_localidad FROM DATAZO.hecho_pedido_productos as hpp
+	JOIN DATAZO.dimension_tiempo as dt ON dt.id_tiempo = hecho_pedido_productos.id_tiempo
 
--- GO
+GO
 
 /*Desvío promedio en tiempo de entrega según el tipo de movilidad, el día
 de la semana y la franja horaria.
@@ -1004,46 +1017,33 @@ Este indicador debe tener en cuenta todos los envíos, es decir, sumar tanto
 los envíos de pedidos como los de mensajería.*/
 
 
--- CREATE VIEW DATAZO.desvio_promedio_de_entrega (desvioPromedio, Movilidad, Dia, FranjaHoraria)
--- AS  
--- select tmp.desvio, tmp.descripcion, dia.descripcion, rango_h.rangoHorario  from (
---         SELECT tm.descripcion, env.dia_entrega, env.id_rango_horario_entrega,
---                 AVG( ABS( ABS( DATEDIFF(MINUTE, env.fecha_pedido, env.fecha_entrega)) - env.tiempo_estimado_entrega)) desvio
---         FROM DATAZO.hecho_repartidor rep
---         JOIN DATAZO.dimension_tipo_movilidad tm ON tm.id_tipo_movilidad = rep.tipo_movilidad
---         JOIN DATAZO.hecho_envio env ON env.id_repartidor = rep.id_repartidor 
---         GROUP BY tm.descripcion, env.dia_entrega, env.id_rango_horario_entrega
---         ) tmp
--- JOIN DATAZO.dimension_dia dia ON dia.id_dia = tmp.dia_entrega
--- JOIN DATAZO.dimension_rango_horario rango_h ON rango_h.id_rango_horario = tmp.id_rango_horario_entrega
-    
--- GO
+CREATE VIEW DATAZO.desvio_promedio_de_entrega (tipo_movilidad, dia, franja_horaria, desvio)
+AS  
+	SELECT dtm.descripcion, dd.id_dia, drh.rango_horario, he.desvio FROM DATAZO.hecho_envio as he
+	JOIN DATAZO.dimension_tipo_movilidad as dtm ON dtm.id_tipo_movilidad = he.id_tipo_movilidad
+	JOIN DATAZO.dimension_dia as dd ON dd.id_dia = he.id_dia
+	JOiN DATAZO.dimension_rango_horario as drh ON 
+		drg.id_rango_horario = he.id_rango_horario_entrega
+GO
 
 
 /*Monto total de los cupones utilizados por mes en función del rango etario
 de los usuarios.*/
 
--- CREATE VIEW DATAZO.total_cupones_utilizados_por_mes_por_edad
--- AS
--- SELECT r.rango_etario as rango_etario, dt.mes as mes, sum(c.monto) as monto_total
--- FROM DATAZO.hecho_cupon_de_descuento AS c 
--- JOIN DATAZO.hecho_usuario AS u ON c.id_usuario = u.id_usuario 
--- JOIN DATAZO.hecho_persona AS p ON p.id_persona = u.id_persona 
--- JOIN DATAZO.dimension_rango_etario AS r ON r.id_rango = p.id_rango
--- JOIN DATAZO.dimension_tiempo as dt ON dt.id_tiempo = c.tiempo_alta
--- GROUP BY r.rango_etario, dt.mes
--- GO
+CREATE VIEW DATAZO.total_cupones_utilizados_por_mes_por_edad (mes, rango_etario, total_cupones)
+AS
+	SELECT dt.mes, dre.rango_etario, total_cupones FROM DATAZO.hecho_pedido_productos
+	JOIN dimension_tiempo as dt ON dt.id_tiempo = hecho_pedido_productos.id_tiempo
+	JOIN dimension_rango_etario as dre ON dre.id_rango = hecho_pedido_productos.id_rango_etario_user
+GO
 
 /*Promedio de calificación mensual por local.*/
 
--- CREATE VIEW DATAZO.promedio_calificacion_mensual (mes, CalificacionPromedio, NombreLocal)
--- AS
--- SELECT  t.mes, AVG(e.calificacion) as 'Calificacion Promedio', l.nombre
--- FROM DATAZO.hecho_pedido_productos AS p JOIN DATAZO.dimension_local_ AS l ON l.id_local = p.id_local 
--- JOIN DATAZO.hecho_envio AS e ON e.id_envio = p.id_envio
--- join DATAZO.dimension_tiempo t on t.id_tiempo = e.tiempo_pedido
--- GROUP BY t.mes, l.nombre
--- GO
+CREATE VIEW DATAZO.promedio_calificacion_mensual (local_, prom_calificacion)
+AS
+	SELECT dl.descripcion, calificacion_local FROM DATAZO.hecho_pedido_productos
+	JOIN DATAZO.dimension_local_ as dl ON dl.id_local = hecho_pedido_productos.id_local
+GO
 
 /*Porcentaje de pedidos y mensajería entregados mensualmente según el
 rango etario de los repartidores y la localidad.
