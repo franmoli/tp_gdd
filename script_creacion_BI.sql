@@ -905,9 +905,9 @@ CREATE PROCEDURE DATAZO.migrar_hecho_envio_de_mensajeria
 AS
 BEGIN
 
--- Promedio mensual del valor asegurado (valor declarado por el usuario) de
--- los paquetes enviados a través del servicio de mensajería en función del
--- tipo de paquete
+	-- Promedio mensual del valor asegurado (valor declarado por el usuario) de
+	-- los paquetes enviados a través del servicio de mensajería en función del
+	-- tipo de paquete
 
 		-- SELECT DISTINCT dt.id_tiempo, dtp.id_tipo,
 		-- DATAZO.calcular_promedio_VA(dt.anio, dt.mes, tp.tipo)
@@ -993,31 +993,77 @@ GO
 CREATE PROCEDURE DATAZO.migrar_hecho_reclamo
 AS
 BEGIN
-INSERT INTO DATAZO.hecho_reclamo (id_local, tipo_reclamo, id_dia, id_tiempo,
+	-- 	Cantidad de reclamos mensuales recibidos por cada local en función del
+	-- día de la semana y rango horario.
+	-- ● Tiempo promedio de resolución de reclamos mensual según cada tipo de
+	-- reclamo y rango etario de los operadores.
+	-- El tiempo de resolución debe calcularse en minutos y representa la
+	-- diferencia entre la fecha/hora en que se realizó el reclamo y la fecha/hora
+	-- que se resolvió.
+	-- ● Monto mensual generado en cupones a partir de reclamos.
+
+	INSERT INTO DATAZO.hecho_reclamo (id_local, tipo_reclamo, id_dia, id_tiempo,
 	id_estado, id_rango_horario, id_rango_etario_op, 
 	prom_resolucion_por_RE, monto_mensual_cupones, cantidad_reclamos)
-	SELECT dl.id_local, dtr.id_tipo, dd.id_dia, dt.id_tiempo, der.id_estado, drh.id_rango_horario, dre.id_rango, 
-		   AVG(DATEDIFF(MINUTE, r.fecha, r.fecha_solucion)),  SUM(cd.monto),
-		   count(r.nro_reclamo)
-	FROM DATAZO.reclamo as r
-	JOIN DATAZO.pedido_productos as p ON p.id_pedido = r.id_pedido
-	join DATAZO.cupon_por_reclamo cr on cr.nro_reclamo = r.nro_reclamo
-	join DATAZO.cupon_descuento cd on cd.id_cupon = cr.id_cupon
+	select
+		-- agrupa por todo esto 
+		dl.id_local id_local,
+		dtr.id_tipo tipo_reclamo,
+			-- dia en que se recibio el reclamo
+		DATEPART(WEEKDAY, rec.fecha) id_dia,
+			-- año y mes en que se recibio el reclamo
+		dtmr.id_tiempo id_tiempo,
+		der.id_estado id_estado_reclamo,
+			-- rango horario en que se recibio el reclamo
+		drh.id_rango_horario id_rango_horario,
+		re.id_rango id_rango_etario_op,
+
+		-- datos calculados
+		AVG(DATEDIFF(MINUTE, rec.fecha, rec.fecha_solucion)) tiempo_resolucion_promedio,
+		SUM(cd.monto) monto_cupones,
+		count(rec.nro_reclamo) cantidad_reclamos
+	from datazo.reclamo rec
+	JOIN DATAZO.pedido_productos as p ON p.id_pedido = rec.id_pedido
 	JOIN DATAZO.local_ as l ON l.id_local = p.id_local
 	JOIN DATAZO.dimension_local_ as dl ON dl.nombre = l.nombre
-	JOIN DATAZO.tipo_reclamo as tr ON tr.id_tipo = r.tipo_reclamo
+	JOIN DATAZO.tipo_reclamo as tr ON tr.id_tipo = rec.tipo_reclamo
 	JOIN DATAZO.dimension_tipo_reclamo as dtr ON dtr.descripcion = tr.descripcion
-	JOIN DATAZO.dimension_dia as dd ON dd.id_dia = DATEPART(WEEKDAY, r.fecha)
-	JOIN DATAZO.dimension_tiempo as dt ON dt.anio = DATEPART(YEAR, r.fecha) AND
-	dt.mes = DATEPART(MONTH, r.fecha)
-	JOIN DATAZO.dimension_estado_reclamo AS der ON der.descripcion = r.estado
-	JOIN DATAZO.dimension_rango_horario as drh ON 
-	drh.rangoHorario = DATAZO.convertir_a_rango_horario(r.fecha)
-	JOIN DATAZO.operador as o ON o.id_operador = r.id_operador
+	join datazo.dimension_tiempo dtmr on dtmr.anio = DATEPART(YEAR, rec.fecha) and dtmr.mes = DATEPART(MONTH, rec.fecha)
+	join datazo.dimension_tiempo dtms on dtms.anio = DATEPART(YEAR, rec.fecha_solucion) and dtms.mes = DATEPART(MONTH, rec.fecha_solucion)
+	JOIN DATAZO.dimension_estado_reclamo AS der ON der.descripcion = rec.estado
+	JOIN DATAZO.dimension_rango_horario drh on drh.rangoHorario = DATAZO.convertir_a_rango_horario(rec.fecha)
+	JOIN DATAZO.operador as o ON o.id_operador = rec.id_operador
 	JOIN DATAZO.persona as per ON per.id_persona = o.id_persona
-	JOIN DATAZO.dimension_rango_etario as dre ON dre.rango_etario = 
-		DATAZO.convertir_a_rango_etario(DATAZO.calcular_edad(year(per.fecha_nac)))
-	group by dl.id_local, dtr.id_tipo, dd.id_dia, dt.id_tiempo, der.id_estado, drh.id_rango_horario, dre.id_rango
+	join datazo.dimension_rango_etario re on re.rango_etario = datazo.convertir_a_rango_etario(datazo.calcular_edad(DATEPART(YEAR, per.fecha_nac)))
+	join DATAZO.cupon_por_reclamo cr on cr.nro_reclamo = rec.nro_reclamo
+	join DATAZO.cupon_descuento cd on cd.id_cupon = cr.id_cupon
+	group by dl.id_local, dtr.id_tipo, DATEPART(WEEKDAY, rec.fecha), dtmr.id_tiempo, der.id_estado, drh.id_rango_horario, re.id_rango
+
+
+
+
+	-- SELECT dl.id_local, dtr.id_tipo, dd.id_dia, dt.id_tiempo, der.id_estado, drh.id_rango_horario, dre.id_rango, 
+	-- 	   AVG(DATEDIFF(MINUTE, r.fecha, r.fecha_solucion)),  SUM(cd.monto),
+	-- 	   count(r.nro_reclamo)
+	-- FROM DATAZO.reclamo as r
+	-- JOIN DATAZO.pedido_productos as p ON p.id_pedido = r.id_pedido
+	-- join DATAZO.cupon_por_reclamo cr on cr.nro_reclamo = r.nro_reclamo
+	-- join DATAZO.cupon_descuento cd on cd.id_cupon = cr.id_cupon
+	-- JOIN DATAZO.local_ as l ON l.id_local = p.id_local
+	-- JOIN DATAZO.dimension_local_ as dl ON dl.nombre = l.nombre
+	-- JOIN DATAZO.tipo_reclamo as tr ON tr.id_tipo = r.tipo_reclamo
+	-- JOIN DATAZO.dimension_tipo_reclamo as dtr ON dtr.descripcion = tr.descripcion
+	-- JOIN DATAZO.dimension_dia as dd ON dd.id_dia = DATEPART(WEEKDAY, r.fecha)
+	-- JOIN DATAZO.dimension_tiempo as dt ON dt.anio = DATEPART(YEAR, r.fecha) AND
+	-- dt.mes = DATEPART(MONTH, r.fecha)
+	-- JOIN DATAZO.dimension_estado_reclamo AS der ON der.descripcion = r.estado
+	-- JOIN DATAZO.dimension_rango_horario as drh ON 
+	-- drh.rangoHorario = DATAZO.convertir_a_rango_horario(r.fecha)
+	-- JOIN DATAZO.operador as o ON o.id_operador = r.id_operador
+	-- JOIN DATAZO.persona as per ON per.id_persona = o.id_persona
+	-- JOIN DATAZO.dimension_rango_etario as dre ON dre.rango_etario = 
+	-- 	DATAZO.convertir_a_rango_etario(DATAZO.calcular_edad(year(per.fecha_nac)))
+	-- group by dl.id_local, dtr.id_tipo, dd.id_dia, dt.id_tiempo, der.id_estado, drh.id_rango_horario, dre.id_rango
 
 	PRINT 'hecho_reclamo migrado'
 END
@@ -1071,7 +1117,7 @@ BEGIN TRANSACTION
 	EXECUTE DATAZO.migrar_hecho_envio
 	EXECUTE DATAZO.migrar_hecho_envio_de_mensajeria
 	EXECUTE DATAZO.migrar_dim_tipo_reclamo
--- 	EXECUTE DATAZO.migrar_hecho_reclamo
+	EXECUTE DATAZO.migrar_hecho_reclamo
 END TRY
 BEGIN CATCH
     ROLLBACK TRANSACTION;
