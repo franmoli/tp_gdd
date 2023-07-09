@@ -405,6 +405,13 @@ ALTER TABLE DATAZO.categoria
 	ADD CONSTRAINT pk_categoria PRIMARY KEY (id_categoria, id_tipo)
 GO
 
+--Inserto 3 categorias distintas arbitrarias, ya que si no quedarian en NULL, como pidieron en el grupo de mails
+INSERT INTO DATAZO.categoria (id_categoria, id_tipo, descripcion)
+VALUES (1, 1, 'Restaurante Familiar'),
+(2, 2, 'Supermercado'),
+(3,2,'Despensa')
+
+	
 --Envio
 ALTER TABLE DATAZO.envio 
 	ADD CONSTRAINT pk_envio PRIMARY KEY (id_envio), 
