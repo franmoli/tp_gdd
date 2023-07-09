@@ -377,7 +377,7 @@ CREATE TABLE DATAZO.direccion (id_direccion INT IDENTITY(1,1) NOT NULL, direccio
 CREATE TABLE DATAZO.medio_de_pago (id_medioPago INT IDENTITY(1,1), id_usuario INT, id_tipo_medio_pago INT, nro_tarjeta NVARCHAR(50), marca_tarjeta NVARCHAR(100));
 CREATE TABLE DATAZO.cupon_descuento ( id_cupon INT IDENTITY(1,1) NOT NULL, nro DECIMAL(18,0) NOT NULL, id_usuario INT NOT NULL, monto DECIMAL(18,2), fecha_alta DATETIME, fecha_vencimiento DATETIME, tipo NVARCHAR(50));
 CREATE TABLE DATAZO.categoria (id_categoria INT IDENTITY(1,1) NOT NULL, id_tipo INT NOT NULL, descripcion VARCHAR(255));
-CREATE TABLE DATAZO.envio (id_envio INT IDENTITY(1,1), id_usuario INT, id_repartidor INT, id_estado INT, id_medioPago INT, precio_envio DECIMAL(18,2), propina DECIMAL(18,2), observaciones NVARCHAR(255),
+CREATE TABLE DATAZO.envio (id_envio INT IDENTITY(1,1), id_usuario INT, id_repartidor INT, id_tipo_movilidad INT NULL, id_estado INT, id_medioPago INT, precio_envio DECIMAL(18,2), propina DECIMAL(18,2), observaciones NVARCHAR(255),
 					fecha_pedido DATETIME, fecha_entrega DATETIME, tiempo_estimado_entrega DECIMAL(18,2), calificacion DECIMAL(18,0), dir_origen INT, dir_destino INT);
 CREATE TABLE DATAZO.local_ (id_local INT IDENTITY(1,1), id_direccion INT, nombre NVARCHAR(100), descripcion NVARCHAR(255), tipo INT, categoria INT);
 	
@@ -412,7 +412,7 @@ ALTER TABLE DATAZO.envio
 	CONSTRAINT fk_envio_repartidor FOREIGN KEY (id_repartidor) REFERENCES DATAZO.repartidor(id_repartidor),
 	CONSTRAINT fk_envio_estado FOREIGN KEY (id_estado) REFERENCES DATAZO.estado(id_estado),
 	CONSTRAINT fk_envio_medio_pago FOREIGN KEY (id_medioPago) REFERENCES DATAZO.medio_de_pago(id_medioPago),
-	-- CONSTRAINT fk_envio_dir_origen FOREIGN KEY (dir_origen) REFERENCES direccion(id_direccion),
+	CONSTRAINT fk_envio_tipo_movilidad FOREIGN KEY (id_tipo_movilidad) REFERENCES DATAZO.tipo_movilidad(id_tipo_movilidad),
 	CONSTRAINT fk_envio_dir_destino FOREIGN KEY (dir_destino) REFERENCES DATAZO.direccion(id_direccion)
 GO
 
@@ -887,7 +887,7 @@ BEGIN
 		MASTR.ENVIO_MENSAJERIA_PROPINA propina, MASTR.ENVIO_MENSAJERIA_OBSERV observacion, MASTR.ENVIO_MENSAJERIA_FECHA fecha_envio, MASTR.ENVIO_MENSAJERIA_FECHA_ENTREGA fecha_entrega,
 		MASTR.ENVIO_MENSAJERIA_TIEMPO_ESTIMADO t_estimado, MASTR.ENVIO_MENSAJERIA_CALIFICACION calificacion, DIR_O.id_direccion dir_origen, DIR_D.id_direccion dir_destino,
 		MASTR.ENVIO_MENSAJERIA_KM km, TP.id_tipo tipo_paquete, MASTR.ENVIO_MENSAJERIA_VALOR_ASEGURADO asegurado, MASTR.ENVIO_MENSAJERIA_PRECIO_SEGURO precio_seguro,
-		MASTR.ENVIO_MENSAJERIA_TOTAL total_env_msj
+		MASTR.ENVIO_MENSAJERIA_TOTAL total_env_msj, TM.id_tipo_movilidad tipo_movilidad
 	INTO DATAZO.[#temporal_envios_msj] 
 	FROM gd_esquema.Maestra MASTR 
 	JOIN DATAZO.persona P_USR ON P_USR.DNI = MASTR.USUARIO_DNI
@@ -901,13 +901,16 @@ BEGIN
 	JOIN DATAZO.direccion DIR_O ON DIR_O.direccion = MASTR.ENVIO_MENSAJERIA_DIR_ORIG AND DIR_O.localidad = LOC.id_localidad
 	JOIN DATAZO.direccion DIR_D ON DIR_D.direccion = MASTR.ENVIO_MENSAJERIA_DIR_DEST AND DIR_D.localidad = LOC.id_localidad
 	JOIN DATAZO.tipo_paquete TP ON TP.tipo = MASTR.PAQUETE_TIPO
+	JOIN DATAZO.tipo_movilidad TM ON TM.descripcion_movilidad = MASTR.REPARTIDOR_TIPO_MOVILIDAD
 	WHERE MASTR.ENVIO_MENSAJERIA_NRO IS NOT NULL
 	
-
+-- (37147
 	/*ENVIO (MSJ)*/
 	INSERT INTO DATAZO.envio(id_usuario, id_repartidor, id_estado, id_medioPago, precio_envio, propina, observaciones,
-										fecha_pedido, fecha_entrega, tiempo_estimado_entrega, calificacion, dir_origen, dir_destino)
-	SELECT tmp.[user], tmp.repartidor, tmp.estado, tmp.medioPago, tmp.precioEnvio, tmp.propina, tmp.observacion, tmp.fecha_envio, tmp.fecha_entrega, tmp.t_estimado, tmp.calificacion, tmp.dir_origen, tmp.dir_destino  FROM DATAZO.[#temporal_envios_msj] tmp
+										fecha_pedido, fecha_entrega, tiempo_estimado_entrega, calificacion, dir_origen, dir_destino, id_tipo_movilidad)
+	SELECT tmp.[user], tmp.repartidor, tmp.estado, tmp.medioPago, tmp.precioEnvio, tmp.propina, tmp.observacion, tmp.fecha_envio, 
+	tmp.fecha_entrega, tmp.t_estimado, tmp.calificacion, tmp.dir_origen, tmp.dir_destino, tmp.tipo_movilidad 
+	FROM DATAZO.[#temporal_envios_msj] tmp
 
 	/*ENVIO DE MENSAJERIA*/
 	INSERT INTO DATAZO.envio_de_mensajeria (id_envio_mensajeria, id_envio, km, tipo_paquete, valor_asegurado, precio_seguro, total_envio_mensajeria) 
@@ -951,7 +954,8 @@ BEGIN
 		MASTR.PEDIDO_TIEMPO_ESTIMADO_ENTREGA t_estimado, MASTR.PEDIDO_CALIFICACION calificacion, LOC.id_direccion direccion_orig, DIR.id_direccion direccion_dest,
 		MASTR.PEDIDO_NRO pedido_nro, LOC.id_local localId, MASTR.PEDIDO_TARIFA_SERVICIO tarifa, 
 		(MASTR.PEDIDO_TOTAL_PRODUCTOS + MASTR.PEDIDO_PRECIO_ENVIO + MASTR.PEDIDO_PROPINA + MASTR.PEDIDO_TARIFA_SERVICIO - MASTR.PEDIDO_TOTAL_CUPONES ) totalPedido,
-		MASTR.PEDIDO_TOTAL_CUPONES cupones
+		MASTR.PEDIDO_TOTAL_CUPONES cupones,
+		TM.id_tipo_movilidad tipo_movilidad
 	INTO DATAZO.[#temporal_pedido_productos] 
 	FROM gd_esquema.Maestra MASTR 
 	-- usuario
@@ -969,14 +973,15 @@ BEGIN
 	JOIN DATAZO.provincia PROV ON PROV.nombre_provincia = MASTR.DIRECCION_USUARIO_PROVINCIA
 	JOIN DATAZO.localidad LOCALI ON LOCALI.nombre_localidad = MASTR.DIRECCION_USUARIO_LOCALIDAD AND PROV.id_provincia = LOCALI.id_provincia
 	JOIN DATAZO.direccion DIR ON DIR.direccion = MASTR.DIRECCION_USUARIO_DIRECCION AND DIR.localidad = LOCALI.id_localidad
+	JOIN DATAZO.tipo_movilidad TM ON TM.descripcion_movilidad = MASTR.REPARTIDOR_TIPO_MOVILIDAD
 	WHERE MASTR.PEDIDO_NRO IS NOT NULL;
 
-
+-- (61257
 	-- insert de envio
 	INSERT INTO DATAZO.envio(id_usuario, id_repartidor, id_estado, id_medioPago, precio_envio, propina, observaciones,
-										fecha_pedido, fecha_entrega, tiempo_estimado_entrega, calificacion, dir_origen, dir_destino)
+										fecha_pedido, fecha_entrega, tiempo_estimado_entrega, calificacion, dir_origen, dir_destino, id_tipo_movilidad)
 	SELECT DISTINCT TMP.[user], TMP.repartidor, TMP.estado, TMP.medioPago, TMP.precioEnvio, TMP.propina, TMP.observacion, TMP.fecha_pedido,
-			TMP.fecha_entrega, TMP.t_estimado, TMP.calificacion, TMP.direccion_orig, TMP.direccion_dest
+			TMP.fecha_entrega, TMP.t_estimado, TMP.calificacion, TMP.direccion_orig, TMP.direccion_dest, TMP.tipo_movilidad
 	FROM DATAZO.[#temporal_pedido_productos] TMP;
 
 	-- insert de pedido producto
@@ -1105,7 +1110,7 @@ BEGIN
 	FROM DATAZO.#temporalCuponesDesc TMP
 	JOIN DATAZO.cupon_descuento CD ON CD.nro = TMP.CUPON_RECLAMO_NRO AND CD.id_usuario = TMP.id_usuario
 	ORDER BY CUPON_RECLAMO_NRO
-
+	
 
 	DROP TABLE DATAZO.#temporalCuponesDesc
 
