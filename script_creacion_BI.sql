@@ -965,7 +965,7 @@ AS
 	join datazo.BI_dimension_provincia_localidad loc on loc.id_provincia_localidad = ped.id_prov_localidad
 	join datazo.BI_dimension_local_ local_ on local_.id_local = ped.id_local
 	where est.descripcion = 'Estado Mensajeria Cancelado'
-	group by dia.descripcion, rh.rangoHorario, loc.localidad, local_.nombre
+	group by dia.descripcion, dia.id_dia, rh.rangoHorario, loc.localidad, local_.nombre
 	
 
 GO
@@ -1008,7 +1008,7 @@ AS
 	join datazo.BI_dimension_tipo_movilidad tm on tm.id_tipo_movilidad = fact.id_tipo_movilidad
 	join datazo.BI_dimension_dia dia on dia.id_dia = fact.id_dia
 	join datazo.BI_dimension_rango_horario h on h.id_rango_horario = fact.id_rango_horario_entrega
-	group by tm.descripcion, dia.descripcion, h.rangoHorario
+	group by tm.descripcion, dia.descripcion, dia.id_dia, h.rangoHorario
 
 
 GO
