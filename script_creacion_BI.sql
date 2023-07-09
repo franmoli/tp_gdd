@@ -945,7 +945,7 @@ AS
 	join datazo.BI_dimension_provincia_localidad prov_loc on prov_loc.id_provincia_localidad = fact.id_prov_localidad
 	join datazo.BI_dimension_categoria_tipo_local cat_tipo on  cat_tipo.id_categoria_tipo_local = fact.id_categoria_tipo
 	join datazo.BI_dimension_tiempo tiempo on tiempo.id_tiempo = fact.id_tiempo
-	group by dia.descripcion, rh.rangoHorario, prov_loc.localidad, cat_tipo.categoria, tiempo.mes, tiempo.anio
+	group by dia.descripcion,dia.id_dia, rh.rangoHorario, prov_loc.localidad, cat_tipo.categoria, tiempo.mes, tiempo.anio
 	) aux
 	where row_num = 1
 GO
