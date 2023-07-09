@@ -1,72 +1,72 @@
 
 
 /* DELETE FROM TABLES */
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.hecho_envio_de_mensajeria') AND type in (N'U'))
-	DELETE FROM DATAZO.hecho_envio_de_mensajeria
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.BI_hecho_envio_de_mensajeria') AND type in (N'U'))
+	DELETE FROM DATAZO.BI_hecho_envio_de_mensajeria
 GO
 
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.hecho_reclamo') AND type in (N'U'))
-	DELETE FROM DATAZO.hecho_reclamo
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.BI_hecho_reclamo') AND type in (N'U'))
+	DELETE FROM DATAZO.BI_hecho_reclamo
 GO
 
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.hecho_pedido_productos') AND type in (N'U'))
-	DELETE FROM DATAZO.hecho_pedido_productos
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.BI_hecho_pedido_productos') AND type in (N'U'))
+	DELETE FROM DATAZO.BI_hecho_pedido_productos
 GO
 
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.hecho_envio') AND type in (N'U'))
-	DELETE FROM DATAZO.hecho_envio
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.BI_hecho_envio') AND type in (N'U'))
+	DELETE FROM DATAZO.BI_hecho_envio
 GO
 
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.dimension_tiempo') AND type in (N'U'))
-	DELETE FROM DATAZO.dimension_tiempo
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.BI_dimension_tiempo') AND type in (N'U'))
+	DELETE FROM DATAZO.BI_dimension_tiempo
 GO
 
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.dimension_local_') AND type in (N'U'))
-	DELETE FROM DATAZO.dimension_local_
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.BI_dimension_local_') AND type in (N'U'))
+	DELETE FROM DATAZO.BI_dimension_local_
 GO
 
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.dimension_categoria_tipo_local') AND type in (N'U'))
-	DELETE FROM DATAZO.dimension_categoria_tipo_local
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.BI_dimension_categoria_tipo_local') AND type in (N'U'))
+	DELETE FROM DATAZO.BI_dimension_categoria_tipo_local
 GO
 
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.dimension_rango_horario') AND type in (N'U'))
-	DELETE FROM DATAZO.dimension_rango_horario
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.BI_dimension_rango_horario') AND type in (N'U'))
+	DELETE FROM DATAZO.BI_dimension_rango_horario
 GO
 
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.dimension_estado_reclamo') AND type in (N'U'))
-	DELETE FROM DATAZO.dimension_estado_reclamo
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.BI_dimension_estado_reclamo') AND type in (N'U'))
+	DELETE FROM DATAZO.BI_dimension_estado_reclamo
 GO
 
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.dimension_tipo_reclamo') AND type in (N'U'))
-	DELETE FROM DATAZO.dimension_tipo_reclamo
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.BI_dimension_tipo_reclamo') AND type in (N'U'))
+	DELETE FROM DATAZO.BI_dimension_tipo_reclamo
 GO
 
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.dimension_rango_etario') AND type in (N'U'))
-	DELETE FROM DATAZO.dimension_rango_etario
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.BI_dimension_rango_etario') AND type in (N'U'))
+	DELETE FROM DATAZO.BI_dimension_rango_etario
 GO
 
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.dimension_tipo_movilidad') AND type in (N'U'))
-	DELETE FROM DATAZO.dimension_tipo_movilidad
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.BI_dimension_tipo_movilidad') AND type in (N'U'))
+	DELETE FROM DATAZO.BI_dimension_tipo_movilidad
 GO
 
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.dimension_dia') AND type in (N'U'))
-	DELETE FROM DATAZO.dimension_dia
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.BI_dimension_dia') AND type in (N'U'))
+	DELETE FROM DATAZO.BI_dimension_dia
 GO
 
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.dimension_tipo_paquete') AND type in (N'U'))
-	DELETE FROM DATAZO.dimension_tipo_paquete
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.BI_dimension_tipo_paquete') AND type in (N'U'))
+	DELETE FROM DATAZO.BI_dimension_tipo_paquete
 GO
 
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.dimension_tipo_medio_pago') AND type in (N'U'))
-	DELETE FROM DATAZO.dimension_tipo_medio_pago
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.BI_dimension_tipo_medio_pago') AND type in (N'U'))
+	DELETE FROM DATAZO.BI_dimension_tipo_medio_pago
 GO
 
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.dimension_provincia_localidad') AND type in (N'U'))
-	DELETE FROM DATAZO.dimension_provincia_localidad
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.BI_dimension_provincia_localidad') AND type in (N'U'))
+	DELETE FROM DATAZO.BI_dimension_provincia_localidad
 GO
 
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.dimension_estado_mensajeria_pedido') AND type in (N'U'))
-	DELETE FROM DATAZO.dimension_estado_mensajeria_pedido
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.BI_dimension_estado_mensajeria_pedido') AND type in (N'U'))
+	DELETE FROM DATAZO.BI_dimension_estado_mensajeria_pedido
 GO
 
 
@@ -76,71 +76,71 @@ GO
 
 
 -- DROPS
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.hecho_envio_de_mensajeria') AND type in (N'U'))
-	DROP TABLE DATAZO.hecho_envio_de_mensajeria
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.BI_hecho_envio_de_mensajeria') AND type in (N'U'))
+	DROP TABLE DATAZO.BI_hecho_envio_de_mensajeria
 GO
 
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.hecho_reclamo') AND type in (N'U'))
-	DROP TABLE DATAZO.hecho_reclamo
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.BI_hecho_reclamo') AND type in (N'U'))
+	DROP TABLE DATAZO.BI_hecho_reclamo
 GO
 
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.hecho_pedido_productos') AND type in (N'U'))
-	DROP TABLE DATAZO.hecho_pedido_productos
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.BI_hecho_pedido_productos') AND type in (N'U'))
+	DROP TABLE DATAZO.BI_hecho_pedido_productos
 GO
 
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.hecho_envio') AND type in (N'U'))
-	DROP TABLE DATAZO.hecho_envio
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.BI_hecho_envio') AND type in (N'U'))
+	DROP TABLE DATAZO.BI_hecho_envio
 GO
 
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.dimension_tiempo') AND type in (N'U'))
-	DROP TABLE DATAZO.dimension_tiempo
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.BI_dimension_tiempo') AND type in (N'U'))
+	DROP TABLE DATAZO.BI_dimension_tiempo
 GO
 
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.dimension_local_') AND type in (N'U'))
-	DROP TABLE DATAZO.dimension_local_
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.BI_dimension_local_') AND type in (N'U'))
+	DROP TABLE DATAZO.BI_dimension_local_
 GO
 
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.dimension_categoria_tipo_local') AND type in (N'U'))
-	DROP TABLE DATAZO.dimension_categoria_tipo_local
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.BI_dimension_categoria_tipo_local') AND type in (N'U'))
+	DROP TABLE DATAZO.BI_dimension_categoria_tipo_local
 GO
 
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.dimension_rango_horario') AND type in (N'U'))
-	DROP TABLE DATAZO.dimension_rango_horario
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.BI_dimension_rango_horario') AND type in (N'U'))
+	DROP TABLE DATAZO.BI_dimension_rango_horario
 GO
 
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.dimension_estado_reclamo') AND type in (N'U'))
-	DROP TABLE DATAZO.dimension_estado_reclamo
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.BI_dimension_estado_reclamo') AND type in (N'U'))
+	DROP TABLE DATAZO.BI_dimension_estado_reclamo
 GO
 
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.dimension_tipo_reclamo') AND type in (N'U'))
-	DROP TABLE DATAZO.dimension_tipo_reclamo
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.BI_dimension_tipo_reclamo') AND type in (N'U'))
+	DROP TABLE DATAZO.BI_dimension_tipo_reclamo
 GO
 
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.dimension_rango_etario') AND type in (N'U'))
-	DROP TABLE DATAZO.dimension_rango_etario
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.BI_dimension_rango_etario') AND type in (N'U'))
+	DROP TABLE DATAZO.BI_dimension_rango_etario
 GO
 
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.dimension_tipo_movilidad') AND type in (N'U'))
-	DROP TABLE DATAZO.dimension_tipo_movilidad
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.BI_dimension_tipo_movilidad') AND type in (N'U'))
+	DROP TABLE DATAZO.BI_dimension_tipo_movilidad
 GO
 
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.dimension_dia') AND type in (N'U'))
-	DROP TABLE DATAZO.dimension_dia
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.BI_dimension_dia') AND type in (N'U'))
+	DROP TABLE DATAZO.BI_dimension_dia
 GO
 
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.dimension_tipo_paquete') AND type in (N'U'))
-	DROP TABLE DATAZO.dimension_tipo_paquete
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.BI_dimension_tipo_paquete') AND type in (N'U'))
+	DROP TABLE DATAZO.BI_dimension_tipo_paquete
 GO
 
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.dimension_estado_mensajeria_pedido') AND type in (N'U'))
-	DROP TABLE DATAZO.dimension_estado_mensajeria_pedido
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.BI_dimension_estado_mensajeria_pedido') AND type in (N'U'))
+	DROP TABLE DATAZO.BI_dimension_estado_mensajeria_pedido
 
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.dimension_tipo_medio_pago') AND type in (N'U'))
-	DROP TABLE DATAZO.dimension_tipo_medio_pago
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.BI_dimension_tipo_medio_pago') AND type in (N'U'))
+	DROP TABLE DATAZO.BI_dimension_tipo_medio_pago
 GO
 
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.dimension_provincia_localidad') AND type in (N'U'))
-	DROP TABLE DATAZO.dimension_provincia_localidad
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'DATAZO.BI_dimension_provincia_localidad') AND type in (N'U'))
+	DROP TABLE DATAZO.BI_dimension_provincia_localidad
 GO
 	
 IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_dim_tiempo')
@@ -182,17 +182,17 @@ GO
 IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_dim_provincia_localidad')
 	DROP PROCEDURE DATAZO.migrar_dim_provincia_localidad
 GO
-IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_hecho_envio')
-	DROP PROCEDURE DATAZO.migrar_hecho_envio
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_BI_hecho_envio')
+	DROP PROCEDURE DATAZO.migrar_BI_hecho_envio
 GO
-IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_hecho_pedido_productos')
-	DROP PROCEDURE DATAZO.migrar_hecho_pedido_productos
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_BI_hecho_pedido_productos')
+	DROP PROCEDURE DATAZO.migrar_BI_hecho_pedido_productos
 GO
-IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_hecho_envio_de_mensajeria')
-	DROP PROCEDURE DATAZO.migrar_hecho_envio_de_mensajeria
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_BI_hecho_envio_de_mensajeria')
+	DROP PROCEDURE DATAZO.migrar_BI_hecho_envio_de_mensajeria
 GO
-IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_hecho_reclamo')
-	DROP PROCEDURE DATAZO.migrar_hecho_reclamo
+IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_BI_hecho_reclamo')
+	DROP PROCEDURE DATAZO.migrar_BI_hecho_reclamo
 GO
 
 --DROP FUNCTIONS 
@@ -272,89 +272,89 @@ GO
 
 
 -- CREATE TABLES
-CREATE TABLE DATAZO.dimension_tiempo(id_tiempo INT NOT NULL IDENTITY(1,1), anio INT, mes INT)
+CREATE TABLE DATAZO.BI_dimension_tiempo(id_tiempo INT NOT NULL IDENTITY(1,1), anio INT, mes INT)
 
-ALTER TABLE DATAZO.dimension_tiempo
-	ADD CONSTRAINT pk_dimension_tiempo PRIMARY KEY (id_tiempo)
+ALTER TABLE DATAZO.BI_dimension_tiempo
+	ADD CONSTRAINT pk_BI_dimension_tiempo PRIMARY KEY (id_tiempo)
 GO
 
-CREATE TABLE DATAZO.dimension_local_(id_local INT NOT NULL IDENTITY(1,1), nombre varchar(50))
+CREATE TABLE DATAZO.BI_dimension_local_(id_local INT NOT NULL IDENTITY(1,1), nombre varchar(50))
 
-ALTER TABLE DATAZO.dimension_local_
+ALTER TABLE DATAZO.BI_dimension_local_
 	ADD CONSTRAINT pk_dimension_local PRIMARY KEY (id_local)
 GO
 
-CREATE TABLE DATAZO.dimension_categoria_tipo_local(id_categoria_tipo_local INT NOT NULL IDENTITY(1,1), 
+CREATE TABLE DATAZO.BI_dimension_categoria_tipo_local(id_categoria_tipo_local INT NOT NULL IDENTITY(1,1), 
 categoria varchar(255), tipo varchar(255))
 
-ALTER TABLE DATAZO.dimension_categoria_tipo_local
-	ADD CONSTRAINT pk_dimension_categoria_tipo_local PRIMARY KEY (id_categoria_tipo_local)
+ALTER TABLE DATAZO.BI_dimension_categoria_tipo_local
+	ADD CONSTRAINT pk_BI_dimension_categoria_tipo_local PRIMARY KEY (id_categoria_tipo_local)
 GO
 
-CREATE TABLE DATAZO.dimension_rango_horario(id_rango_horario INT NOT NULL IDENTITY(1,1), rangoHorario NVARCHAR(13))
+CREATE TABLE DATAZO.BI_dimension_rango_horario(id_rango_horario INT NOT NULL IDENTITY(1,1), rangoHorario NVARCHAR(13))
 
-ALTER TABLE DATAZO.dimension_rango_horario
-	ADD CONSTRAINT pk_dimension_rango_horario PRIMARY KEY (id_rango_horario)
+ALTER TABLE DATAZO.BI_dimension_rango_horario
+	ADD CONSTRAINT pk_BI_dimension_rango_horario PRIMARY KEY (id_rango_horario)
 GO
 
-CREATE TABLE DATAZO.dimension_estado_reclamo(id_estado INT NOT NULL IDENTITY(1,1), descripcion VARCHAR(255))
+CREATE TABLE DATAZO.BI_dimension_estado_reclamo(id_estado INT NOT NULL IDENTITY(1,1), descripcion VARCHAR(255))
 
-ALTER TABLE DATAZO.dimension_estado_reclamo
-	ADD CONSTRAINT pk_dimension_estado_reclamo PRIMARY KEY (id_estado)
+ALTER TABLE DATAZO.BI_dimension_estado_reclamo
+	ADD CONSTRAINT pk_BI_dimension_estado_reclamo PRIMARY KEY (id_estado)
 GO
 
-CREATE TABLE DATAZO.dimension_tipo_reclamo(id_tipo INT NOT NULL IDENTITY(1,1), descripcion VARCHAR(255))
+CREATE TABLE DATAZO.BI_dimension_tipo_reclamo(id_tipo INT NOT NULL IDENTITY(1,1), descripcion VARCHAR(255))
 
-ALTER TABLE DATAZO.dimension_tipo_reclamo
-	ADD CONSTRAINT pk_dimension_tipo_reclamo PRIMARY KEY (id_tipo)
+ALTER TABLE DATAZO.BI_dimension_tipo_reclamo
+	ADD CONSTRAINT pk_BI_dimension_tipo_reclamo PRIMARY KEY (id_tipo)
 GO
 
-CREATE TABLE DATAZO.dimension_rango_etario(id_rango INT NOT NULL IDENTITY(1,1), rango_etario VARCHAR(7))
+CREATE TABLE DATAZO.BI_dimension_rango_etario(id_rango INT NOT NULL IDENTITY(1,1), rango_etario VARCHAR(7))
 
-ALTER TABLE DATAZO.dimension_rango_etario
-	ADD CONSTRAINT pk_dimension_rango_etario PRIMARY KEY (id_rango)
+ALTER TABLE DATAZO.BI_dimension_rango_etario
+	ADD CONSTRAINT pk_BI_dimension_rango_etario PRIMARY KEY (id_rango)
 GO
 
-CREATE TABLE DATAZO.dimension_tipo_movilidad(id_tipo_movilidad INT NOT NULL IDENTITY(1,1), descripcion VARCHAR(255))
+CREATE TABLE DATAZO.BI_dimension_tipo_movilidad(id_tipo_movilidad INT NOT NULL IDENTITY(1,1), descripcion VARCHAR(255))
 
-ALTER TABLE DATAZO.dimension_tipo_movilidad
-	ADD CONSTRAINT pk_dimension_tipo_movilidad PRIMARY KEY (id_tipo_movilidad)
+ALTER TABLE DATAZO.BI_dimension_tipo_movilidad
+	ADD CONSTRAINT pk_BI_dimension_tipo_movilidad PRIMARY KEY (id_tipo_movilidad)
 GO
 
-CREATE TABLE DATAZO.dimension_dia(id_dia INT NOT NULL, descripcion CHAR)
+CREATE TABLE DATAZO.BI_dimension_dia(id_dia INT NOT NULL, descripcion CHAR)
 
-ALTER TABLE DATAZO.dimension_dia
-	ADD CONSTRAINT pk_dimension_dia PRIMARY KEY (id_dia)
+ALTER TABLE DATAZO.BI_dimension_dia
+	ADD CONSTRAINT pk_BI_dimension_dia PRIMARY KEY (id_dia)
 GO
 
-CREATE TABLE DATAZO.dimension_tipo_paquete(id_tipo INT NOT NULL IDENTITY(1,1), tipo VARCHAR(255))
+CREATE TABLE DATAZO.BI_dimension_tipo_paquete(id_tipo INT NOT NULL IDENTITY(1,1), tipo VARCHAR(255))
 
-ALTER TABLE DATAZO.dimension_tipo_paquete
-	ADD CONSTRAINT pk_dimension_tipo_paquete PRIMARY KEY (id_tipo)
+ALTER TABLE DATAZO.BI_dimension_tipo_paquete
+	ADD CONSTRAINT pk_BI_dimension_tipo_paquete PRIMARY KEY (id_tipo)
 GO
 
 
-CREATE TABLE DATAZO.dimension_tipo_medio_pago(id_tipo_medio_pago INT NOT NULL IDENTITY(1,1), descripcion VARCHAR(255))
+CREATE TABLE DATAZO.BI_dimension_tipo_medio_pago(id_tipo_medio_pago INT NOT NULL IDENTITY(1,1), descripcion VARCHAR(255))
 
-ALTER TABLE DATAZO.dimension_tipo_medio_pago
-	ADD CONSTRAINT pk_dimension_tipo_medio_pago PRIMARY KEY (id_tipo_medio_pago)
+ALTER TABLE DATAZO.BI_dimension_tipo_medio_pago
+	ADD CONSTRAINT pk_BI_dimension_tipo_medio_pago PRIMARY KEY (id_tipo_medio_pago)
 GO
 
-CREATE TABLE DATAZO.dimension_estado_mensajeria_pedido(id_estado INT NOT NULL IDENTITY(1,1), descripcion VARCHAR(255))
+CREATE TABLE DATAZO.BI_dimension_estado_mensajeria_pedido(id_estado INT NOT NULL IDENTITY(1,1), descripcion VARCHAR(255))
 
-ALTER TABLE DATAZO.dimension_estado_mensajeria_pedido
-	ADD CONSTRAINT pk_dimension_estado_mensajeria_pedido PRIMARY KEY (id_estado)
+ALTER TABLE DATAZO.BI_dimension_estado_mensajeria_pedido
+	ADD CONSTRAINT pk_BI_dimension_estado_mensajeria_pedido PRIMARY KEY (id_estado)
 GO
 
-CREATE TABLE DATAZO.dimension_provincia_localidad(id_provincia_localidad INT NOT NULL IDENTITY(1,1), provincia VARCHAR(255),localidad VARCHAR (255))
+CREATE TABLE DATAZO.BI_dimension_provincia_localidad(id_provincia_localidad INT NOT NULL IDENTITY(1,1), provincia VARCHAR(255),localidad VARCHAR (255))
 
-ALTER TABLE DATAZO.dimension_provincia_localidad
-	ADD CONSTRAINT pk_dimension_provincia_localidad PRIMARY KEY (id_provincia_localidad)
+ALTER TABLE DATAZO.BI_dimension_provincia_localidad
+	ADD CONSTRAINT pk_BI_dimension_provincia_localidad PRIMARY KEY (id_provincia_localidad)
 GO
 
 --Create de hechos
 
-CREATE TABLE DATAZO.hecho_envio(id_envio INT NOT NULL IDENTITY (1,1), mes INT,
+CREATE TABLE DATAZO.BI_hecho_envio(id_envio INT NOT NULL IDENTITY (1,1), mes INT,
 					rango_etario_repartidor INT,
 					id_rango_horario_entrega INT, prov_localidad INT,
 					id_dia INT, cantidad_entregados INT,
@@ -362,59 +362,59 @@ CREATE TABLE DATAZO.hecho_envio(id_envio INT NOT NULL IDENTITY (1,1), mes INT,
 					id_tipo_movilidad INT
 					)
 
-ALTER TABLE DATAZO.hecho_envio
-	ADD CONSTRAINT pk_hecho_envio PRIMARY KEY (id_envio),
-	CONSTRAINT fk_hecho_envio_rango_etario FOREIGN KEY (rango_etario_repartidor) REFERENCES DATAZO.dimension_rango_etario(id_rango),
-	CONSTRAINT fk_hecho_envio_rango_horario_entrega FOREIGN KEY (id_rango_horario_entrega) REFERENCES DATAZO.dimension_rango_horario(id_rango_horario),
-	CONSTRAINT fk_hecho_envio_prov_localidad FOREIGN KEY (prov_localidad) REFERENCES DATAZO.dimension_provincia_localidad (id_provincia_localidad),
-	CONSTRAINT fk_hecho_envio_dia FOREIGN KEY (id_dia) REFERENCES DATAZO.dimension_dia(id_dia),
-	CONSTRAINT fk_hecho_envio_tipo_movilidad FOREIGN KEY (id_tipo_movilidad) REFERENCES DATAZO.dimension_tipo_movilidad(id_tipo_movilidad)
+ALTER TABLE DATAZO.BI_hecho_envio
+	ADD CONSTRAINT pk_BI_hecho_envio PRIMARY KEY (id_envio),
+	CONSTRAINT fk_BI_hecho_envio_rango_etario FOREIGN KEY (rango_etario_repartidor) REFERENCES DATAZO.BI_dimension_rango_etario(id_rango),
+	CONSTRAINT fk_BI_hecho_envio_rango_horario_entrega FOREIGN KEY (id_rango_horario_entrega) REFERENCES DATAZO.BI_dimension_rango_horario(id_rango_horario),
+	CONSTRAINT fk_BI_hecho_envio_prov_localidad FOREIGN KEY (prov_localidad) REFERENCES DATAZO.BI_dimension_provincia_localidad (id_provincia_localidad),
+	CONSTRAINT fk_BI_hecho_envio_dia FOREIGN KEY (id_dia) REFERENCES DATAZO.BI_dimension_dia(id_dia),
+	CONSTRAINT fk_BI_hecho_envio_tipo_movilidad FOREIGN KEY (id_tipo_movilidad) REFERENCES DATAZO.BI_dimension_tipo_movilidad(id_tipo_movilidad)
 GO
 
 
-CREATE TABLE DATAZO.hecho_pedido_productos(id_pedido INT NOT NULL IDENTITY(1,1), id_dia INT,  id_local INT, id_categoria_tipo INT,
+CREATE TABLE DATAZO.BI_hecho_pedido_productos(id_pedido INT NOT NULL IDENTITY(1,1), id_dia INT,  id_local INT, id_categoria_tipo INT,
 									id_prov_localidad INT, id_rango_horario INT, id_tiempo INT, 
 									id_rango_etario_usr INT, id_estado INT,cantidad_pedidos INT,
 									total_cupones DECIMAL(18,2), total_envio_pedidos DECIMAL(18,2), total_pedidos DECIMAL(18,2),
 									calificacion_local DECIMAL(18,2)
 									)
-ALTER TABLE DATAZO.hecho_pedido_productos
+ALTER TABLE DATAZO.BI_hecho_pedido_productos
 	ADD CONSTRAINT pk_hecho_pedido PRIMARY KEY (id_pedido),
-	CONSTRAINT fk_hecho_pedido_dia FOREIGN KEY (id_dia) REFERENCES DATAZO.dimension_dia(id_dia),
-	CONSTRAINT fk_hecho_pedido_local FOREIGN KEY (id_local) REFERENCES DATAZO.dimension_local_(id_local),
-	CONSTRAINT fk_hecho_pedido_categoria FOREIGN KEY (id_categoria_tipo) REFERENCES DATAZO.dimension_categoria_tipo_local,
-	CONSTRAINT fk_hecho_pedido_prov_loc FOREIGN KEY (id_prov_localidad) REFERENCES DATAZO.dimension_provincia_localidad,
-	CONSTRAINT fk_hecho_pedido_tiempo FOREIGN KEY (id_tiempo) REFERENCES DATAZO.dimension_tiempo(id_tiempo),
-	CONSTRAINT fk_hecho_pedido_rango_horario FOREIGN KEY (id_rango_horario) REFERENCES DATAZO.dimension_rango_horario(id_rango_horario),
-	CONSTRAINT fk_hecho_pedido_rango_etario_usr FOREIGN KEY (id_rango_etario_usr) REFERENCES DATAZO.dimension_rango_etario(id_rango),
-	CONSTRAINT fk_hecho_pedido_estado FOREIGN KEY (id_estado) REFERENCES DATAZO.dimension_estado_mensajeria_pedido(id_estado)
+	CONSTRAINT fk_hecho_pedido_dia FOREIGN KEY (id_dia) REFERENCES DATAZO.BI_dimension_dia(id_dia),
+	CONSTRAINT fk_hecho_pedido_local FOREIGN KEY (id_local) REFERENCES DATAZO.BI_dimension_local_(id_local),
+	CONSTRAINT fk_hecho_pedido_categoria FOREIGN KEY (id_categoria_tipo) REFERENCES DATAZO.BI_dimension_categoria_tipo_local,
+	CONSTRAINT fk_hecho_pedido_prov_loc FOREIGN KEY (id_prov_localidad) REFERENCES DATAZO.BI_dimension_provincia_localidad,
+	CONSTRAINT fk_hecho_pedido_tiempo FOREIGN KEY (id_tiempo) REFERENCES DATAZO.BI_dimension_tiempo(id_tiempo),
+	CONSTRAINT fk_hecho_pedido_rango_horario FOREIGN KEY (id_rango_horario) REFERENCES DATAZO.BI_dimension_rango_horario(id_rango_horario),
+	CONSTRAINT fk_hecho_pedido_rango_etario_usr FOREIGN KEY (id_rango_etario_usr) REFERENCES DATAZO.BI_dimension_rango_etario(id_rango),
+	CONSTRAINT fk_hecho_pedido_estado FOREIGN KEY (id_estado) REFERENCES DATAZO.BI_dimension_estado_mensajeria_pedido(id_estado)
 GO
 
-CREATE TABLE DATAZO.hecho_envio_de_mensajeria(id_envio_mensajeria INT NOT NULL IDENTITY(1,1), 
+CREATE TABLE DATAZO.BI_hecho_envio_de_mensajeria(id_envio_mensajeria INT NOT NULL IDENTITY(1,1), 
 									id_tiempo INT, id_tipo_paquete INT, 
 									prom_valor_asegurado decimal(18,2))
 
-ALTER TABLE DATAZO.hecho_envio_de_mensajeria
-	ADD CONSTRAINT pk_hecho_envio_de_mensajeria PRIMARY KEY (id_envio_mensajeria),
-	CONSTRAINT fk_hecho_envio_tipo_paquete FOREIGN KEY (id_tipo_paquete) REFERENCES DATAZO.dimension_tipo_paquete(id_tipo),
-	CONSTRAINT fk_hecho_envio_de_mens_tiempo FOREIGN KEY (id_tiempo) REFERENCES DATAZO.dimension_tiempo(id_tiempo)
+ALTER TABLE DATAZO.BI_hecho_envio_de_mensajeria
+	ADD CONSTRAINT pk_BI_hecho_envio_de_mensajeria PRIMARY KEY (id_envio_mensajeria),
+	CONSTRAINT fk_BI_hecho_envio_tipo_paquete FOREIGN KEY (id_tipo_paquete) REFERENCES DATAZO.BI_dimension_tipo_paquete(id_tipo),
+	CONSTRAINT fk_BI_hecho_envio_de_mens_tiempo FOREIGN KEY (id_tiempo) REFERENCES DATAZO.BI_dimension_tiempo(id_tiempo)
 GO
 
-CREATE TABLE DATAZO.hecho_reclamo(id_reclamo INT NOT NULL IDENTITY(1,1), id_local INT,
+CREATE TABLE DATAZO.BI_hecho_reclamo(id_reclamo INT NOT NULL IDENTITY(1,1), id_local INT,
 					tipo_reclamo INT, id_dia INT, id_tiempo INT, id_estado INT,
 					id_rango_horario INT, id_rango_etario_op INT,
 					prom_resolucion_por_RE DECIMAL(18,2), monto_mensual_cupones DECIMAL(18,2),
 					cantidad_reclamos INT)
 
-ALTER TABLE DATAZO.hecho_reclamo
-	ADD CONSTRAINT pk_hecho_reclamo PRIMARY KEY (id_reclamo),
-	CONSTRAINT fk_hecho_reclamo_local FOREIGN KEY (id_local) REFERENCES DATAZO.dimension_local_(id_local),
-	CONSTRAINT fk_hecho_reclamo_tipo_reclamo FOREIGN KEY (tipo_reclamo) REFERENCES DATAZO.dimension_tipo_reclamo (id_tipo),
-	CONSTRAINT fk_hecho_reclamo_dia FOREIGN KEY (id_dia) REFERENCES DATAZO.dimension_dia(id_dia),
-	CONSTRAINT fk_hecho_reclamo_tiempo FOREIGN KEY (id_tiempo) REFERENCES DATAZO.dimension_tiempo(id_tiempo),
-	CONSTRAINT fk_hecho_reclamo_estado FOREIGN KEY (id_estado) REFERENCES DATAZO.dimension_estado_reclamo(id_estado),
-	CONSTRAINT fk_hecho_rango_horario FOREIGN KEY (id_rango_horario) REFERENCES DATAZO.dimension_rango_horario(id_rango_horario),
-	CONSTRAINT fk_hecho_rango_etario FOREIGN KEY (id_rango_etario_op) REFERENCES DATAZO.dimension_rango_etario(id_rango)
+ALTER TABLE DATAZO.BI_hecho_reclamo
+	ADD CONSTRAINT pk_BI_hecho_reclamo PRIMARY KEY (id_reclamo),
+	CONSTRAINT fk_BI_hecho_reclamo_local FOREIGN KEY (id_local) REFERENCES DATAZO.BI_dimension_local_(id_local),
+	CONSTRAINT fk_BI_hecho_reclamo_tipo_reclamo FOREIGN KEY (tipo_reclamo) REFERENCES DATAZO.BI_dimension_tipo_reclamo (id_tipo),
+	CONSTRAINT fk_BI_hecho_reclamo_dia FOREIGN KEY (id_dia) REFERENCES DATAZO.BI_dimension_dia(id_dia),
+	CONSTRAINT fk_BI_hecho_reclamo_tiempo FOREIGN KEY (id_tiempo) REFERENCES DATAZO.BI_dimension_tiempo(id_tiempo),
+	CONSTRAINT fk_BI_hecho_reclamo_estado FOREIGN KEY (id_estado) REFERENCES DATAZO.BI_dimension_estado_reclamo(id_estado),
+	CONSTRAINT fk_hecho_rango_horario FOREIGN KEY (id_rango_horario) REFERENCES DATAZO.BI_dimension_rango_horario(id_rango_horario),
+	CONSTRAINT fk_hecho_rango_etario FOREIGN KEY (id_rango_etario_op) REFERENCES DATAZO.BI_dimension_rango_etario(id_rango)
 GO
 
 
@@ -424,7 +424,7 @@ GO
 CREATE PROCEDURE DATAZO.migrar_dim_tiempo
 AS
 BEGIN
-	INSERT INTO DATAZO.dimension_tiempo(anio, mes)
+	INSERT INTO DATAZO.BI_dimension_tiempo(anio, mes)
 	SELECT DISTINCT * FROM (
 		SELECT DATEPART(YEAR, fecha_pedido) anio, DATEPART(MONTH, fecha_pedido) mes
 		FROM DATAZO.envio
@@ -454,7 +454,7 @@ GO
 CREATE PROCEDURE DATAZO.migrar_dim_local
 AS
 BEGIN
-	INSERT INTO DATAZO.dimension_local_ (nombre)
+	INSERT INTO DATAZO.BI_dimension_local_ (nombre)
 	SELECT  DISTINCT nombre
 	from DATAZO.local_
 	where nombre IS NOT NULL
@@ -466,7 +466,7 @@ CREATE PROCEDURE DATAZO.migrar_dim_categoria_tipo_local
 AS
 BEGIN
 	
-	INSERT INTO DATAZO.dimension_categoria_tipo_local (tipo, categoria)
+	INSERT INTO DATAZO.BI_dimension_categoria_tipo_local (tipo, categoria)
 	SELECT  DISTINCT tl.descripcion, (
 									CASE
 										WHEN c.descripcion is NULL THEN 'No definida'
@@ -545,7 +545,7 @@ GO
 CREATE PROCEDURE DATAZO.migrar_dim_rango_horario
 AS
 BEGIN
-	INSERT INTO DATAZO.dimension_rango_horario values ('00:00 - 02:00'),('02:00 - 04:00'),
+	INSERT INTO DATAZO.BI_dimension_rango_horario values ('00:00 - 02:00'),('02:00 - 04:00'),
 	('04:00 - 06:00'), ('06:00 - 08:00'), ('08:00 - 10:00'), ('10:00 - 12:00'),
 	('12:00 - 14:00'), ('14:00 - 16:00'), ('16:00 - 18:00'), ('18:00 - 20:00'),
 	('20:00 - 22:00'), ('22:00 - 00:00')
@@ -557,7 +557,7 @@ GO
 CREATE PROCEDURE DATAZO.migrar_dim_estado_reclamo
 AS
 BEGIN
-	INSERT INTO DATAZO.dimension_estado_reclamo (descripcion )
+	INSERT INTO DATAZO.BI_dimension_estado_reclamo (descripcion )
 	SELECT  DISTINCT estado
 	from DATAZO.reclamo
 	where estado  IS NOT NULL 
@@ -569,7 +569,7 @@ GO
 CREATE PROCEDURE DATAZO.migrar_dim_tipo_reclamo
 AS
 BEGIN
-	INSERT INTO DATAZO.dimension_tipo_reclamo (descripcion)
+	INSERT INTO DATAZO.BI_dimension_tipo_reclamo (descripcion)
 	SELECT  DISTINCT descripcion
 	from DATAZO.tipo_reclamo
 
@@ -579,7 +579,7 @@ GO
 CREATE PROCEDURE DATAZO.migrar_dim_rango_etario
 AS
 BEGIN
-	INSERT INTO DATAZO.dimension_rango_etario values ('<25'),('25 - 35'),
+	INSERT INTO DATAZO.BI_dimension_rango_etario values ('<25'),('25 - 35'),
 	('35 - 55'), ('>55')
 	PRINT 'dim_rango_etario migrada'
 END
@@ -591,8 +591,8 @@ GO
 CREATE PROCEDURE DATAZO.migrar_dim_tipo_movilidad
 AS
 BEGIN
-	--dimension_tipo_movilidad
-	INSERT INTO DATAZO.dimension_tipo_movilidad (descripcion )
+	--BI_dimension_tipo_movilidad
+	INSERT INTO DATAZO.BI_dimension_tipo_movilidad (descripcion )
 	SELECT  DISTINCT descripcion_movilidad
 	from DATAZO.tipo_movilidad
 	where descripcion_movilidad  IS NOT NULL 
@@ -603,8 +603,8 @@ GO
 CREATE PROCEDURE DATAZO.migrar_dim_dia
 AS 
 BEGIN 
-	--dimension_dia
-	INSERT INTO DATAZO.dimension_dia (id_dia, descripcion )
+	--BI_dimension_dia
+	INSERT INTO DATAZO.BI_dimension_dia (id_dia, descripcion )
 	SELECT (
 		CASE
 			WHEN descripcion = 'Domingo' THEN 1
@@ -624,8 +624,8 @@ GO
 CREATE PROCEDURE DATAZO.migrar_dim_tipo_paquete
 AS
 BEGIN
-	--dimension_tipo_paquete
-	INSERT INTO DATAZO.dimension_tipo_paquete (tipo)
+	--BI_dimension_tipo_paquete
+	INSERT INTO DATAZO.BI_dimension_tipo_paquete (tipo)
 	SELECT  DISTINCT tipo
 	from DATAZO.tipo_paquete
 	PRINT 'dim_tipo_paquete_migrada'
@@ -635,8 +635,8 @@ GO
 CREATE PROCEDURE DATAZO.migrar_dim_tipo_medio_pago
 AS
 BEGIN
-	--dimension_tipo_medio_pago
-	INSERT INTO DATAZO.dimension_tipo_medio_pago (descripcion )
+	--BI_dimension_tipo_medio_pago
+	INSERT INTO DATAZO.BI_dimension_tipo_medio_pago (descripcion )
 	SELECT  DISTINCT descripcion
 	from DATAZO.tipo_medio_pago
 	PRINT 'dim_tipo_medio_pago migrada'
@@ -647,7 +647,7 @@ CREATE PROCEDURE DATAZO.migrar_dim_estado_mensajeria_pedido
 AS
 BEGIN
 	--dimension_estado_pedido
-	INSERT INTO DATAZO.dimension_estado_mensajeria_pedido (descripcion )
+	INSERT INTO DATAZO.BI_dimension_estado_mensajeria_pedido (descripcion )
 	SELECT  DISTINCT descripcion
 	from DATAZO.estado 
 	PRINT 'dim_estado_pedido migrada'
@@ -659,8 +659,8 @@ GO
 CREATE PROCEDURE DATAZO.migrar_dim_provincia_localidad
 AS
 BEGIN
-	--dimension_provincia_localidad
-	INSERT INTO DATAZO.dimension_provincia_localidad (provincia , localidad )
+	--BI_dimension_provincia_localidad
+	INSERT INTO DATAZO.BI_dimension_provincia_localidad (provincia , localidad )
 	SELECT DISTINCT PROV.nombre_provincia, LOC.nombre_localidad FROM DATAZO.provincia PROV 
 	JOIN DATAZO.localidad LOC ON LOC.id_provincia = PROV.id_provincia
 	PRINT 'dim_provincia_localidad migrada'
@@ -709,11 +709,11 @@ END
 GO
 
 
-CREATE PROCEDURE DATAZO.migrar_hecho_envio
+CREATE PROCEDURE DATAZO.migrar_BI_hecho_envio
 AS
 BEGIN
 
-	INSERT INTO DATAZO.hecho_envio (mes, id_dia,
+	INSERT INTO DATAZO.BI_hecho_envio (mes, id_dia,
 	id_rango_horario_entrega, rango_etario_repartidor, id_tipo_movilidad, prov_localidad,
 	desvio, cantidad_entregados)
 
@@ -731,19 +731,19 @@ BEGIN
 	-- count(CASE WHEN dim_est.descripcion = 'Estado Mensajeria Entregado' THEN 1 ELSE NULL END) cantidad_entregados
 	count(env.id_envio) cantidad_entregados
 	from datazo.envio env
-	join datazo.dimension_tiempo tm on tm.anio = DATEPART(YEAR, env.fecha_pedido) and tm.mes = DATEPART(MONTH, env.fecha_pedido)
-	JOIN DATAZO.dimension_rango_horario rh on rh.rangoHorario = DATAZO.convertir_a_rango_horario(env.fecha_entrega)
+	join datazo.BI_dimension_tiempo tm on tm.anio = DATEPART(YEAR, env.fecha_pedido) and tm.mes = DATEPART(MONTH, env.fecha_pedido)
+	JOIN DATAZO.BI_dimension_rango_horario rh on rh.rangoHorario = DATAZO.convertir_a_rango_horario(env.fecha_entrega)
 	join datazo.tipo_movilidad t_mov on t_mov.id_tipo_movilidad = env.id_tipo_movilidad
-	join datazo.dimension_tipo_movilidad dim_t_mov on dim_t_mov.descripcion = t_mov.descripcion_movilidad 
+	join datazo.BI_dimension_tipo_movilidad dim_t_mov on dim_t_mov.descripcion = t_mov.descripcion_movilidad 
 	join datazo.repartidor rep on rep.id_repartidor = env.id_repartidor
 	join datazo.persona pers on pers.id_persona = rep.id_persona
-	join datazo.dimension_rango_etario re on re.rango_etario = datazo.convertir_a_rango_etario(datazo.calcular_edad(DATEPART(YEAR, pers.fecha_nac)))
+	join datazo.BI_dimension_rango_etario re on re.rango_etario = datazo.convertir_a_rango_etario(datazo.calcular_edad(DATEPART(YEAR, pers.fecha_nac)))
 	join datazo.direccion dir on dir.id_direccion = env.dir_origen
 	join datazo.localidad loc on loc.id_localidad = dir.localidad
 	join datazo.provincia prov on loc.id_provincia = prov.id_provincia
-	join datazo.dimension_provincia_localidad prov_loc on prov_loc.localidad = loc.nombre_localidad and prov_loc.provincia = prov.nombre_provincia
+	join datazo.BI_dimension_provincia_localidad prov_loc on prov_loc.localidad = loc.nombre_localidad and prov_loc.provincia = prov.nombre_provincia
 	join datazo.estado est on est.id_estado = env.id_estado
-	join datazo.dimension_estado_mensajeria_pedido dim_est on dim_est.descripcion = est.descripcion
+	join datazo.BI_dimension_estado_mensajeria_pedido dim_est on dim_est.descripcion = est.descripcion
 	where dim_est.descripcion = 'Estado Mensajeria Entregado'
 	group by tm.mes, DATEPART(WEEKDAY, env.fecha_pedido), rh.id_rango_horario, dim_t_mov.id_tipo_movilidad,
 						re.id_rango, prov_loc.id_provincia_localidad
@@ -751,11 +751,11 @@ BEGIN
 END
 GO
 
-CREATE PROCEDURE DATAZO.migrar_hecho_pedido_productos
+CREATE PROCEDURE DATAZO.migrar_BI_hecho_pedido_productos
 AS
 BEGIN
 
-	INSERT INTO DATAZO.hecho_pedido_productos ( 
+	INSERT INTO DATAZO.BI_hecho_pedido_productos ( 
 	id_dia,
 	id_local,
 	id_rango_horario,
@@ -798,21 +798,21 @@ BEGIN
 	avg(e.calificacion)  calificacion_local
 	from DATAZO.pedido_productos ped
 	join DATAZO.envio e on ped.id_envio = e.id_envio
-	JOIN DATAZO.dimension_rango_horario rh on rh.rangoHorario = DATAZO.convertir_a_rango_horario(e.fecha_pedido)
+	JOIN DATAZO.BI_dimension_rango_horario rh on rh.rangoHorario = DATAZO.convertir_a_rango_horario(e.fecha_pedido)
 	join datazo.local_ l on ped.id_local = l.id_local
-	join datazo.dimension_local_ local_ on local_.nombre = l.nombre
+	join datazo.BI_dimension_local_ local_ on local_.nombre = l.nombre
 	JOIN datazo.tipo_local tl on l.tipo = tl.id_tipo
-	join datazo.dimension_categoria_tipo_local ctl on tl.descripcion = ctl.tipo 
+	join datazo.BI_dimension_categoria_tipo_local ctl on tl.descripcion = ctl.tipo 
 	join datazo.direccion dir on dir.id_direccion = l.id_direccion
 	join datazo.localidad loc on loc.id_localidad = dir.localidad
 	join datazo.provincia prov on loc.id_provincia = prov.id_provincia
-	join datazo.dimension_provincia_localidad prov_loc on prov_loc.localidad = loc.nombre_localidad and prov_loc.provincia = prov.nombre_provincia
-	join datazo.dimension_tiempo tm on tm.anio = DATEPART(YEAR, e.fecha_pedido) and tm.mes = DATEPART(MONTH, e.fecha_pedido)
+	join datazo.BI_dimension_provincia_localidad prov_loc on prov_loc.localidad = loc.nombre_localidad and prov_loc.provincia = prov.nombre_provincia
+	join datazo.BI_dimension_tiempo tm on tm.anio = DATEPART(YEAR, e.fecha_pedido) and tm.mes = DATEPART(MONTH, e.fecha_pedido)
 	join datazo.usuario usr on usr.id_usuario = e.id_usuario
 	join datazo.persona pers on pers.id_persona = usr.id_persona
-	join datazo.dimension_rango_etario re on re.rango_etario = datazo.convertir_a_rango_etario(datazo.calcular_edad(DATEPART(YEAR, pers.fecha_nac)))
+	join datazo.BI_dimension_rango_etario re on re.rango_etario = datazo.convertir_a_rango_etario(datazo.calcular_edad(DATEPART(YEAR, pers.fecha_nac)))
 	join datazo.estado est on est.id_estado = e.id_estado
-	join datazo.dimension_estado_mensajeria_pedido dim_est on dim_est.descripcion = est.descripcion
+	join datazo.BI_dimension_estado_mensajeria_pedido dim_est on dim_est.descripcion = est.descripcion
 	left join datazo.cupon_por_pedido c_x_p on c_x_p.id_pedido = ped.id_pedido
 	left join datazo.cupon_descuento c on c.id_cupon = c_x_p.id_cupon
 	GROUP by rh.id_rango_horario, DATEPART(WEEKDAY, e.fecha_pedido), tm.id_tiempo, re.id_rango, dim_est.id_estado, ctl.id_categoria_tipo_local, prov_loc.id_provincia_localidad, local_.id_local
@@ -840,23 +840,23 @@ END
 GO
 
 
-CREATE PROCEDURE DATAZO.migrar_hecho_envio_de_mensajeria
+CREATE PROCEDURE DATAZO.migrar_BI_hecho_envio_de_mensajeria
 AS
 BEGIN
 
-	INSERT INTO DATAZO.hecho_envio_de_mensajeria (id_tiempo,
+	INSERT INTO DATAZO.BI_hecho_envio_de_mensajeria (id_tiempo,
 	id_tipo_paquete, prom_valor_asegurado)
 	select tm.mes,
 	dim_tp.id_tipo,
 	avg(msj.valor_asegurado)
 	from datazo.envio_de_mensajeria msj
 	join datazo.envio env on env.id_envio = msj.id_envio
-	join datazo.dimension_tiempo tm on tm.anio = DATEPART(YEAR, env.fecha_pedido) and tm.mes = DATEPART(MONTH, env.fecha_pedido)
+	join datazo.BI_dimension_tiempo tm on tm.anio = DATEPART(YEAR, env.fecha_pedido) and tm.mes = DATEPART(MONTH, env.fecha_pedido)
 	join datazo.tipo_paquete tp on tp.id_tipo = msj.tipo_paquete
-	join datazo.dimension_tipo_paquete dim_tp on dim_tp.tipo = tp.tipo 
+	join datazo.BI_dimension_tipo_paquete dim_tp on dim_tp.tipo = tp.tipo 
 	group by tm.mes, dim_tp.id_tipo
 	
-		PRINT 'hecho_envio_mensajeria migrado'
+		PRINT 'BI_hecho_envio_mensajeria migrado'
 END
 GO
 
@@ -866,10 +866,10 @@ begin
 	declare @promedio int
 	set @promedio = (select AVG(DATEDIFF(MINUTE, r.fecha, r.fecha_solucion))
 					from DATAZO.reclamo r 
-					--join DATAZO.dimension_tiempo dt on dt.anio = DATEPART(YEAR, r.fecha) AND dt.mes = DATEPART(MONTH, r.fecha) group by dt.id_tiempo, dre.id_rango
+					--join DATAZO.BI_dimension_tiempo dt on dt.anio = DATEPART(YEAR, r.fecha) AND dt.mes = DATEPART(MONTH, r.fecha) group by dt.id_tiempo, dre.id_rango
 					JOIN DATAZO.operador as o ON o.id_operador = r.id_operador
 					JOIN DATAZO.persona as per ON per.id_persona = o.id_persona
-					JOIN DATAZO.dimension_rango_etario as dre ON dre.rango_etario = DATAZO.convertir_a_rango_etario(DATAZO.calcular_edad(year(per.fecha_nac)))
+					JOIN DATAZO.BI_dimension_rango_etario as dre ON dre.rango_etario = DATAZO.convertir_a_rango_etario(DATAZO.calcular_edad(year(per.fecha_nac)))
 					where DATEPART(YEAR, r.fecha)  = @anio and DATEPART(MONTH, r.fecha) = @mes and dre.id_rango = @rangoE
 					)
 	return @promedio
@@ -882,10 +882,10 @@ begin
 	declare @monto decimal(18,2)
 	set @monto = (select SUM(cd.monto)
 					from DATAZO.reclamo r 
-					join DATAZO.dimension_tiempo dt on dt.anio = DATEPART(YEAR, r.fecha) AND dt.mes = DATEPART(MONTH, r.fecha)
+					join DATAZO.BI_dimension_tiempo dt on dt.anio = DATEPART(YEAR, r.fecha) AND dt.mes = DATEPART(MONTH, r.fecha)
 					JOIN DATAZO.usuario as u ON u.id_usuario = r.id_usuario
 					JOIN DATAZO.persona as per ON per.id_persona = u.id_persona
-					JOIN DATAZO.dimension_rango_etario as dre ON dre.rango_etario = 
+					JOIN DATAZO.BI_dimension_rango_etario as dre ON dre.rango_etario = 
 						 DATAZO.convertir_a_rango_etario(DATAZO.calcular_edad(year(per.fecha_nac)))
 					join DATAZO.cupon_por_reclamo cr on cr.nro_reclamo = r.nro_reclamo
 					join DATAZO.cupon_descuento cd on cd.id_cupon = cr.id_cupon
@@ -903,11 +903,11 @@ begin
 	declare @cantidad int
 	set @cantidad = (select count(r.nro_reclamo)
 					from DATAZO.reclamo r 
-					join DATAZO.dimension_tiempo dt on dt.anio = DATEPART(YEAR, r.fecha) AND dt.mes = DATEPART(MONTH, r.fecha)
+					join DATAZO.BI_dimension_tiempo dt on dt.anio = DATEPART(YEAR, r.fecha) AND dt.mes = DATEPART(MONTH, r.fecha)
 					JOIN DATAZO.pedido_productos as p ON p.id_pedido = r.id_pedido
 					JOIN DATAZO.local_ as l ON l.id_local = p.id_local
-					JOIN DATAZO.dimension_dia as dd ON dd.descripcion = DATENAME(WEEKDAY, r.fecha)
-					JOIN DATAZO.dimension_rango_horario as drh ON 
+					JOIN DATAZO.BI_dimension_dia as dd ON dd.descripcion = DATENAME(WEEKDAY, r.fecha)
+					JOIN DATAZO.BI_dimension_rango_horario as drh ON 
 						 drh.rangoHorario = DATAZO.convertir_a_rango_horario(r.fecha)
 					where dt.anio = @anio and dt.mes = dt.mes and l.id_local = @local and dd.id_dia = @dia and drh.id_rango_horario = @rh
 					group by dt.id_tiempo, l.id_local, dd.id_dia, drh.id_rango_horario)
@@ -916,11 +916,11 @@ begin
 end
 GO
 
-CREATE PROCEDURE DATAZO.migrar_hecho_reclamo
+CREATE PROCEDURE DATAZO.migrar_BI_hecho_reclamo
 AS
 BEGIN
 
-	INSERT INTO DATAZO.hecho_reclamo (id_local, tipo_reclamo, id_dia, id_tiempo,
+	INSERT INTO DATAZO.BI_hecho_reclamo (id_local, tipo_reclamo, id_dia, id_tiempo,
 	id_estado, id_rango_horario, id_rango_etario_op, 
 	prom_resolucion_por_RE, monto_mensual_cupones, cantidad_reclamos)
 	select
@@ -943,22 +943,22 @@ BEGIN
 	from datazo.reclamo rec
 	JOIN DATAZO.pedido_productos as p ON p.id_pedido = rec.id_pedido
 	JOIN DATAZO.local_ as l ON l.id_local = p.id_local
-	JOIN DATAZO.dimension_local_ as dl ON dl.nombre = l.nombre
+	JOIN DATAZO.BI_dimension_local_ as dl ON dl.nombre = l.nombre
 	JOIN DATAZO.tipo_reclamo as tr ON tr.id_tipo = rec.tipo_reclamo
-	JOIN DATAZO.dimension_tipo_reclamo as dtr ON dtr.descripcion = tr.descripcion
-	join datazo.dimension_tiempo dtmr on dtmr.anio = DATEPART(YEAR, rec.fecha) and dtmr.mes = DATEPART(MONTH, rec.fecha)
-	join datazo.dimension_tiempo dtms on dtms.anio = DATEPART(YEAR, rec.fecha_solucion) and dtms.mes = DATEPART(MONTH, rec.fecha_solucion)
-	JOIN DATAZO.dimension_estado_reclamo AS der ON der.descripcion = rec.estado
-	JOIN DATAZO.dimension_rango_horario drh on drh.rangoHorario = DATAZO.convertir_a_rango_horario(rec.fecha)
+	JOIN DATAZO.BI_dimension_tipo_reclamo as dtr ON dtr.descripcion = tr.descripcion
+	join datazo.BI_dimension_tiempo dtmr on dtmr.anio = DATEPART(YEAR, rec.fecha) and dtmr.mes = DATEPART(MONTH, rec.fecha)
+	join datazo.BI_dimension_tiempo dtms on dtms.anio = DATEPART(YEAR, rec.fecha_solucion) and dtms.mes = DATEPART(MONTH, rec.fecha_solucion)
+	JOIN DATAZO.BI_dimension_estado_reclamo AS der ON der.descripcion = rec.estado
+	JOIN DATAZO.BI_dimension_rango_horario drh on drh.rangoHorario = DATAZO.convertir_a_rango_horario(rec.fecha)
 	JOIN DATAZO.operador as o ON o.id_operador = rec.id_operador
 	JOIN DATAZO.persona as per ON per.id_persona = o.id_persona
-	join datazo.dimension_rango_etario re on re.rango_etario = datazo.convertir_a_rango_etario(datazo.calcular_edad(DATEPART(YEAR, per.fecha_nac)))
+	join datazo.BI_dimension_rango_etario re on re.rango_etario = datazo.convertir_a_rango_etario(datazo.calcular_edad(DATEPART(YEAR, per.fecha_nac)))
 	join DATAZO.cupon_por_reclamo cr on cr.nro_reclamo = rec.nro_reclamo
 	join DATAZO.cupon_descuento cd on cd.id_cupon = cr.id_cupon
 	group by dl.id_local, dtr.id_tipo, DATEPART(WEEKDAY, rec.fecha), dtmr.id_tiempo, der.id_estado, drh.id_rango_horario, re.id_rango
 
 
-	PRINT 'hecho_reclamo migrado'
+	PRINT 'BI_hecho_reclamo migrado'
 END
 GO
 
@@ -977,11 +977,11 @@ BEGIN TRANSACTION
 	EXECUTE DATAZO.migrar_dim_tipo_medio_pago
 	EXECUTE DATAZO.migrar_dim_estado_mensajeria_pedido
 	EXECUTE DATAZO.migrar_dim_provincia_localidad
-	EXECUTE DATAZO.migrar_hecho_pedido_productos
-	EXECUTE DATAZO.migrar_hecho_envio
-	EXECUTE DATAZO.migrar_hecho_envio_de_mensajeria
+	EXECUTE DATAZO.migrar_BI_hecho_pedido_productos
+	EXECUTE DATAZO.migrar_BI_hecho_envio
+	EXECUTE DATAZO.migrar_BI_hecho_envio_de_mensajeria
 	EXECUTE DATAZO.migrar_dim_tipo_reclamo
-	EXECUTE DATAZO.migrar_hecho_reclamo
+	EXECUTE DATAZO.migrar_BI_hecho_reclamo
 END TRY
 BEGIN CATCH
     ROLLBACK TRANSACTION;
@@ -1021,12 +1021,12 @@ AS
 			ROW_NUMBER() OVER (PARTITION BY prov_loc.localidad, cat_tipo.categoria, tiempo.mes, tiempo.anio 
 								ORDER BY sum(fact.cantidad_pedidos) DESC) row_num
 
-	FROM DATAZO.hecho_pedido_productos fact
-	JOIN datazo.dimension_dia dia on dia.id_dia = fact.id_dia
-	join datazo.dimension_rango_horario rh on rh.id_rango_horario = fact.id_rango_horario
-	join datazo.dimension_provincia_localidad prov_loc on prov_loc.id_provincia_localidad = fact.id_prov_localidad
-	join datazo.dimension_categoria_tipo_local cat_tipo on  cat_tipo.id_categoria_tipo_local = fact.id_categoria_tipo
-	join datazo.dimension_tiempo tiempo on tiempo.id_tiempo = fact.id_tiempo
+	FROM DATAZO.BI_hecho_pedido_productos fact
+	JOIN datazo.BI_dimension_dia dia on dia.id_dia = fact.id_dia
+	join datazo.BI_dimension_rango_horario rh on rh.id_rango_horario = fact.id_rango_horario
+	join datazo.BI_dimension_provincia_localidad prov_loc on prov_loc.id_provincia_localidad = fact.id_prov_localidad
+	join datazo.BI_dimension_categoria_tipo_local cat_tipo on  cat_tipo.id_categoria_tipo_local = fact.id_categoria_tipo
+	join datazo.BI_dimension_tiempo tiempo on tiempo.id_tiempo = fact.id_tiempo
 	group by dia.descripcion, rh.rangoHorario, prov_loc.localidad, cat_tipo.categoria, tiempo.mes, tiempo.anio
 	) aux
 	where row_num = 1
@@ -1040,12 +1040,12 @@ CREATE VIEW DATAZO.total_no_cobrado_por_local  (dia, franja_horaria, localidad, 
 AS
 
 	select dia.descripcion dia, rh.rangoHorario, loc.localidad, sum(ped.total_pedidos) total, local_.nombre local_
-	from datazo.hecho_pedido_productos ped
-	join datazo.dimension_estado_mensajeria_pedido est on est.id_estado = ped.id_estado
-	join datazo.dimension_dia dia on dia.id_dia = ped.id_dia
-	join datazo.dimension_rango_horario rh on rh.id_rango_horario = ped.id_rango_horario
-	join datazo.dimension_provincia_localidad loc on loc.id_provincia_localidad = ped.id_prov_localidad
-	join datazo.dimension_local_ local_ on local_.id_local = ped.id_local
+	from datazo.BI_hecho_pedido_productos ped
+	join datazo.BI_dimension_estado_mensajeria_pedido est on est.id_estado = ped.id_estado
+	join datazo.BI_dimension_dia dia on dia.id_dia = ped.id_dia
+	join datazo.BI_dimension_rango_horario rh on rh.id_rango_horario = ped.id_rango_horario
+	join datazo.BI_dimension_provincia_localidad loc on loc.id_provincia_localidad = ped.id_prov_localidad
+	join datazo.BI_dimension_local_ local_ on local_.id_local = ped.id_local
 	where est.descripcion = 'Estado Mensajeria Cancelado'
 	group by dia.descripcion, rh.rangoHorario, loc.localidad, local_.nombre
 	
@@ -1062,9 +1062,9 @@ CREATE VIEW DATAZO.promedio_mensual_envios (promedio, mes, localidad)
 AS
 
 	select FORMAT(avg(ped.total_envio_pedidos), 'N2') promedio, mes.mes, loc.localidad
-	from datazo.hecho_pedido_productos ped
-	join datazo.dimension_tiempo mes on mes.id_tiempo = ped.id_tiempo
-	join datazo.dimension_provincia_localidad loc on loc.id_provincia_localidad = ped.id_prov_localidad
+	from datazo.BI_hecho_pedido_productos ped
+	join datazo.BI_dimension_tiempo mes on mes.id_tiempo = ped.id_tiempo
+	join datazo.BI_dimension_provincia_localidad loc on loc.id_provincia_localidad = ped.id_prov_localidad
 	group by mes.mes, loc.localidad
 
 GO
@@ -1086,10 +1086,10 @@ AS
 	dia.descripcion,
 	h.rangoHorario,
 	avg(fact.desvio) desvio
-	from datazo.hecho_envio fact
-	join datazo.dimension_tipo_movilidad tm on tm.id_tipo_movilidad = fact.id_tipo_movilidad
-	join datazo.dimension_dia dia on dia.id_dia = fact.id_dia
-	join datazo.dimension_rango_horario h on h.id_rango_horario = fact.id_rango_horario_entrega
+	from datazo.BI_hecho_envio fact
+	join datazo.BI_dimension_tipo_movilidad tm on tm.id_tipo_movilidad = fact.id_tipo_movilidad
+	join datazo.BI_dimension_dia dia on dia.id_dia = fact.id_dia
+	join datazo.BI_dimension_rango_horario h on h.id_rango_horario = fact.id_rango_horario_entrega
 	group by tm.descripcion, dia.descripcion, h.rangoHorario
 
 
@@ -1103,9 +1103,9 @@ CREATE VIEW DATAZO.total_cupones_utilizados_por_mes_por_edad (mes, rango_etario,
 AS
 
 	select mes.mes, re.rango_etario, sum(ped.total_cupones) monto
-	from datazo.hecho_pedido_productos ped
-	join datazo.dimension_rango_etario re on re.id_rango = ped.id_rango_etario_usr
-	join datazo.dimension_tiempo mes on mes.id_tiempo = ped.id_tiempo
+	from datazo.BI_hecho_pedido_productos ped
+	join datazo.BI_dimension_rango_etario re on re.id_rango = ped.id_rango_etario_usr
+	join datazo.BI_dimension_tiempo mes on mes.id_tiempo = ped.id_tiempo
 	group by mes.mes, re.rango_etario
 
 
@@ -1119,9 +1119,9 @@ AS
 
 
 	select mes.mes, AVG(ped.calificacion_local) promedio, local_.nombre
-	from datazo.hecho_pedido_productos ped
-	join datazo.dimension_tiempo mes on mes.id_tiempo = ped.id_tiempo
-	join datazo.dimension_local_ local_ on local_.id_local = ped.id_local
+	from datazo.BI_hecho_pedido_productos ped
+	join datazo.BI_dimension_tiempo mes on mes.id_tiempo = ped.id_tiempo
+	join datazo.BI_dimension_local_ local_ on local_.id_local = ped.id_local
 	group by mes.mes, local_.nombre
 
 
@@ -1146,11 +1146,11 @@ AS
 	(convert(decimal(10,2), sum(fact.cantidad_entregados) * 100) / convert(decimal(10,2), SUM(DISTINCT totales_mensuales.total_mensual)))  porcentaje
 	-- sum(fact.cantidad_entregados),
 	-- SUM(DISTINCT totales_mensuales.total_mensual)
-	from datazo.hecho_envio fact
-	join datazo.dimension_rango_etario re on re.id_rango = fact.rango_etario_repartidor
-	join datazo.dimension_provincia_localidad loc on loc.id_provincia_localidad = fact.prov_localidad
+	from datazo.BI_hecho_envio fact
+	join datazo.BI_dimension_rango_etario re on re.id_rango = fact.rango_etario_repartidor
+	join datazo.BI_dimension_provincia_localidad loc on loc.id_provincia_localidad = fact.prov_localidad
 	join (
-		select sum(env.cantidad_entregados) total_mensual, env.mes from datazo.hecho_envio env
+		select sum(env.cantidad_entregados) total_mensual, env.mes from datazo.BI_hecho_envio env
 		group by env.mes
 	) totales_mensuales on totales_mensuales.mes = fact.mes
 	group by re.rango_etario, loc.localidad, fact.mes
@@ -1166,9 +1166,9 @@ tipo de paquete.*/
 CREATE VIEW DATAZO.promedio_mensual_valor_asegurado (mes, tipo_paquete , promedio)
 AS
 	SELECT t.mes, tp.tipo, em.prom_valor_asegurado
-	FROM  DATAZO.hecho_envio_de_mensajeria em 
-	JOIN DATAZO.dimension_tipo_paquete tp on tp.id_tipo = em.id_tipo_paquete
-	JOIN DATAZO.dimension_tiempo t on t.id_tiempo = em.id_tiempo
+	FROM  DATAZO.BI_hecho_envio_de_mensajeria em 
+	JOIN DATAZO.BI_dimension_tipo_paquete tp on tp.id_tipo = em.id_tipo_paquete
+	JOIN DATAZO.BI_dimension_tiempo t on t.id_tiempo = em.id_tiempo
 go
 
   
@@ -1182,11 +1182,11 @@ AS
 			rh.rangoHorario,
 			l.nombre,
 			SUM(r.cantidad_reclamos)
-	FROM  DATAZO.hecho_reclamo as r
-	JOIN DATAZO.dimension_tiempo t on t.id_tiempo = r.id_tiempo
-	JOIN DATAZO.dimension_dia d on d.id_dia = r.id_dia
-	JOIN DATAZO.dimension_rango_horario rh on rh.id_rango_horario = r.id_rango_horario
-	JOIN DATAZO.dimension_local_ as l ON l.id_local = r.id_local
+	FROM  DATAZO.BI_hecho_reclamo as r
+	JOIN DATAZO.BI_dimension_tiempo t on t.id_tiempo = r.id_tiempo
+	JOIN DATAZO.BI_dimension_dia d on d.id_dia = r.id_dia
+	JOIN DATAZO.BI_dimension_rango_horario rh on rh.id_rango_horario = r.id_rango_horario
+	JOIN DATAZO.BI_dimension_local_ as l ON l.id_local = r.id_local
 	group by t.mes, d.descripcion, rh.rangoHorario, l.nombre
 
 go
@@ -1203,9 +1203,9 @@ AS
 	SELECT tr.descripcion,
 			re.rango_etario,
 			avg(r.prom_resolucion_por_RE)
-	FROM DATAZO.hecho_reclamo r 
-	join DATAZO.dimension_tipo_reclamo tr on tr.id_tipo = r.tipo_reclamo
-	join DATAZO.dimension_rango_etario re on re.id_rango = r.id_rango_etario_op
+	FROM DATAZO.BI_hecho_reclamo r 
+	join DATAZO.BI_dimension_tipo_reclamo tr on tr.id_tipo = r.tipo_reclamo
+	join DATAZO.BI_dimension_rango_etario re on re.id_rango = r.id_rango_etario_op
 	group by tr.descripcion, re.rango_etario
 
 
@@ -1216,7 +1216,7 @@ go
 CREATE VIEW DATAZO.monto_mensual_cupones_por_reclamos (mes, monto)
 AS
 	SELECT sum(r.monto_mensual_cupones), t.mes
-	FROM DATAZO.hecho_reclamo AS r 
-	join DATAZO.dimension_tiempo t on t.id_tiempo = r.id_tiempo
+	FROM DATAZO.BI_hecho_reclamo AS r 
+	join DATAZO.BI_dimension_tiempo t on t.id_tiempo = r.id_tiempo
 	group by t.mes
 GO
