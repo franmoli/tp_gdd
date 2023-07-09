@@ -1355,36 +1355,48 @@ go
 -- /*Cantidad de reclamos mensuales recibidos por cada local en función del
 -- día de la semana y rango horario.*/
 
--- CREATE VIEW DATAZO.reclamos_mensuales_por_local (mes, dia, rango_horario, nombre_local, cant_reclamos)
--- AS
--- 	SELECT t.mes, l.nombre, d.id_dia, rh.rangoHorario, r.total_reclamos
--- 	FROM  DATAZO.hecho_reclamo as r
--- 	JOIN DATAZO.dimension_local_ as l ON l.id_local = r.id_local
--- 	JOIN DATAZO.dimension_dia d on d.id_dia = r.id_dia
--- 	JOIN DATAZO.dimension_tiempo t on t.id_tiempo = r.id_tiempo
--- 	JOIN DATAZO.dimension_rango_horario rh on rh.id_rango_horario = r.rango_horario
--- go
+CREATE VIEW DATAZO.reclamos_mensuales_por_local (mes, dia, rango_horario, nombre_local, cant_reclamos)
+AS
+	SELECT t.mes ,
+			d.descripcion,
+			rh.rangoHorario,
+			l.nombre,
+			SUM(r.cantidad_reclamos)
+	FROM  DATAZO.hecho_reclamo as r
+	JOIN DATAZO.dimension_tiempo t on t.id_tiempo = r.id_tiempo
+	JOIN DATAZO.dimension_dia d on d.id_dia = r.id_dia
+	JOIN DATAZO.dimension_rango_horario rh on rh.id_rango_horario = r.id_rango_horario
+	JOIN DATAZO.dimension_local_ as l ON l.id_local = r.id_local
+	group by t.mes, d.descripcion, rh.rangoHorario, l.nombre
+
+go
 
   
--- /*Tiempo promedio de resolución de reclamos mensual según cada tipo de
--- reclamo y rango etario de los operadores.
--- El tiempo de resolución debe calcularse en minutos y representa la
--- diferencia entre la fecha/hora en que se realizó el reclamo y la fecha/hora
--- que se resolvió.*/
+/*Tiempo promedio de resolución de reclamos mensual según cada tipo de
+reclamo y rango etario de los operadores.
+El tiempo de resolución debe calcularse en minutos y representa la
+diferencia entre la fecha/hora en que se realizó el reclamo y la fecha/hora
+que se resolvió.*/
 
--- CREATE VIEW DATAZO.tiempo_prom_resol_reclamo (tipo_reclamo, rango_etario_operado, tiempo_promedio_resolucion)
--- AS
--- 	SELECT tr.descripcion, re.rango_etario, r.prom_resolucion_por_RE
--- 	FROM DATAZO.hecho_reclamo r 
--- 	join DATAZO.dimension_tipo_reclamo tr on tr.id_tipo = r.tipo_reclamo
--- 	join DATAZO.dimension_rango_etario re on re.id_rango = p.rango_etario_operador
--- go
+CREATE VIEW DATAZO.tiempo_prom_resol_reclamo (tipo_reclamo, rango_etario_operado, tiempo_promedio_resolucion)
+AS
+	SELECT tr.descripcion,
+			re.rango_etario,
+			avg(r.prom_resolucion_por_RE)
+	FROM DATAZO.hecho_reclamo r 
+	join DATAZO.dimension_tipo_reclamo tr on tr.id_tipo = r.tipo_reclamo
+	join DATAZO.dimension_rango_etario re on re.id_rango = r.id_rango_etario_op
+	group by tr.descripcion, re.rango_etario
+
+
+go
   
--- /*Monto mensual generado en cupones a partir de reclamos.*/
+/*Monto mensual generado en cupones a partir de reclamos.*/
 
--- CREATE VIEW DATAZO.monto_mensual_cupones_por_reclamos (mes, monto)
--- AS
--- SELECT r.monto_mensual_cupones, t.mes
--- 	FROM DATAZO.hecho_reclamo AS r 
--- 	join DATAZO.dimension_tiempo t on t.id_tiempo = r.id_tiempo
--- GO
+CREATE VIEW DATAZO.monto_mensual_cupones_por_reclamos (mes, monto)
+AS
+	SELECT sum(r.monto_mensual_cupones), t.mes
+	FROM DATAZO.hecho_reclamo AS r 
+	join DATAZO.dimension_tiempo t on t.id_tiempo = r.id_tiempo
+	group by t.mes
+GO
