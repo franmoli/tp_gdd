@@ -1016,18 +1016,20 @@ mes, anio)
 AS 
 
 	select dia, franja_horaria, localidad, categoria_local, mes, anio from (
-	SELECT fact.cantidad_pedidos ,dia.descripcion dia, rh.rangoHorario franja_horaria,
+	SELECT sum(fact.cantidad_pedidos) cant_pedidos,dia.descripcion dia, rh.rangoHorario franja_horaria,
 			prov_loc.localidad localidad, cat_tipo.categoria categoria_local
 			, tiempo.mes mes, tiempo.anio anio,
 			ROW_NUMBER() OVER (PARTITION BY prov_loc.localidad, cat_tipo.categoria, tiempo.mes, tiempo.anio 
-								ORDER BY fact.cantidad_pedidos DESC) row_num
+								ORDER BY sum(fact.cantidad_pedidos) DESC) row_num
 
 	FROM DATAZO.hecho_pedido_productos fact
 	JOIN datazo.dimension_dia dia on dia.id_dia = fact.id_dia
 	join datazo.dimension_rango_horario rh on rh.id_rango_horario = fact.id_rango_horario
 	join datazo.dimension_provincia_localidad prov_loc on prov_loc.id_provincia_localidad = fact.id_prov_localidad
 	join datazo.dimension_categoria_tipo_local cat_tipo on  cat_tipo.id_categoria_tipo_local = fact.id_categoria_tipo
-	join datazo.dimension_tiempo tiempo on tiempo.id_tiempo = fact.id_tiempo) aux
+	join datazo.dimension_tiempo tiempo on tiempo.id_tiempo = fact.id_tiempo
+	group by dia.descripcion, rh.rangoHorario, prov_loc.localidad, cat_tipo.categoria, tiempo.mes, tiempo.anio
+	) aux
 	where row_num = 1
 GO
 
