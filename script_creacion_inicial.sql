@@ -406,10 +406,10 @@ ALTER TABLE DATAZO.categoria
 GO
 
 --Inserto 3 categorias distintas arbitrarias, ya que si no quedarian en NULL, como pidieron en el grupo de mails
-INSERT INTO DATAZO.categoria (id_categoria, id_tipo, descripcion)
-VALUES (1, 1, 'Restaurante Familiar'),
-(2, 2, 'Supermercado'),
-(3,2,'Despensa')
+INSERT INTO DATAZO.categoria (id_tipo, descripcion)
+VALUES ( 1, 'Restaurante Familiar'),
+( 2, 'Supermercado'),
+(2,'Despensa')
 
 	
 --Envio
@@ -898,38 +898,26 @@ create function datazo.seleccionar_categoria(@nombre varchar(255))
 returns int
 AS
 BEGIN
-	-- declare @nombre varchar(255)='Local n° 37' 
 	declare @resultado int
 
 	IF(@nombre like 'Local n°%')
 	BEGIN
+		set @resultado = 1
+	END;
+	IF(@nombre like 'Mercado Nombre %')
+	BEGIN
 		
 		set @resultado = 
 			CASE
-				when SUBSTRING(@nombre, 9, LEN(@nombre)) > 10 then 1
-				else
+				when SUBSTRING(@nombre, 15, LEN(@nombre)) > 150 then 2
+				else 3
 			end;
 
-
-		-- select @resultado
 	END;
-
-
-	-- select *, SUBSTRING(nombre, 9, LEN(nombre)) test from datazo.local_ order by 3
-		
-
 
 
 	return @resultado
 end
-go
-
-drop function datazo.seleccionar_categoria
-
-select * from datazo.local_
-
-select datazo.seleccionar_categoria('Local n° 37')
-
 go
 
 
@@ -939,22 +927,26 @@ go
 CREATE PROCEDURE DATAZO.migrar_locales
 AS
 BEGIN
-	INSERT INTO DATAZO.local_(id_direccion, nombre, descripcion, tipo)
-	SELECT DISTINCT DIR.id_direccion, MASTR.LOCAL_NOMBRE, MASTR.LOCAL_DESCRIPCION, TP.id_tipo
+	INSERT INTO DATAZO.local_(id_direccion, nombre, descripcion, tipo, categoria)
+	SELECT DISTINCT DIR.id_direccion, MASTR.LOCAL_NOMBRE, MASTR.LOCAL_DESCRIPCION, TP.id_tipo, datazo.seleccionar_categoria(MASTR.LOCAL_NOMBRE)
 	FROM gd_esquema.Maestra MASTR
 	JOIN DATAZO.tipo_local TP ON TP.descripcion = MASTR.LOCAL_TIPO
 	JOIN DATAZO.provincia PROV ON PROV.nombre_provincia = MASTR.LOCAL_PROVINCIA
 	JOIN DATAZO.localidad LOCALI ON LOCALI.nombre_localidad = MASTR.LOCAL_LOCALIDAD AND PROV.id_provincia = LOCALI.id_provincia
 	JOIN DATAZO.direccion DIR ON DIR.direccion = MASTR.LOCAL_DIRECCION AND DIR.localidad = LOCALI.id_localidad
 	WHERE MASTR.LOCAL_NOMBRE IS NOT NULL
+
+	drop function datazo.seleccionar_categoria
 	PRINT 'locales migrados'
 END
 GO
 
 
+go
+
+
+
 --insert de pedidos de productos
-
-
 CREATE PROCEDURE DATAZO.migrar_pedidos_de_productos
 AS
 BEGIN
