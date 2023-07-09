@@ -887,6 +887,45 @@ END
 GO
 
 
+create function datazo.seleccionar_categoria(@nombre varchar(255))
+returns int
+AS
+BEGIN
+	-- declare @nombre varchar(255)='Local n° 37' 
+	declare @resultado int
+
+	IF(@nombre like 'Local n°%')
+	BEGIN
+		
+		set @resultado = 
+			CASE
+				when SUBSTRING(@nombre, 9, LEN(@nombre)) > 10 then 1
+				else
+			end;
+
+
+		-- select @resultado
+	END;
+
+
+	-- select *, SUBSTRING(nombre, 9, LEN(nombre)) test from datazo.local_ order by 3
+		
+
+
+
+	return @resultado
+end
+go
+
+drop function datazo.seleccionar_categoria
+
+select * from datazo.local_
+
+select datazo.seleccionar_categoria('Local n° 37')
+
+go
+
+
 
 /*LOCALES*/
 
