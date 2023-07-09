@@ -359,10 +359,11 @@ GO
 --Create de hechos
 
 CREATE TABLE DATAZO.hecho_envio(id_envio INT NOT NULL IDENTITY (1,1), id_tiempo INT,
-					rango_etario_repartidor INT, id_medioPago INT,
+					rango_etario_repartidor INT,
+					-- id_medioPago INT,
 					id_rango_horario_entrega INT, prov_localidad INT,
 					id_dia INT, cantidad_entregados INT,
-					desvio SMALLDATETIME,
+					desvio DECIMAL(18,2),
 					id_tipo_movilidad INT
 					)
 
@@ -371,7 +372,7 @@ ALTER TABLE DATAZO.hecho_envio
 	CONSTRAINT fk_hecho_envio_tiempo FOREIGN KEY (id_tiempo) REFERENCES DATAZO.dimension_tiempo(id_tiempo),
 	CONSTRAINT fk_hecho_envio_rango_etario FOREIGN KEY (rango_etario_repartidor) REFERENCES DATAZO.dimension_rango_etario(id_rango),
 	CONSTRAINT fk_hecho_envio_estado FOREIGN KEY (id_estado) REFERENCES DATAZO.dimension_estado_mensajeria_pedido(id_estado),
-	CONSTRAINT fk_hecho_envio_medioPago FOREIGN KEY (id_medioPago) REFERENCES DATAZO.dimension_tipo_medio_pago (id_tipo_medio_pago),
+	-- CONSTRAINT fk_hecho_envio_medioPago FOREIGN KEY (id_medioPago) REFERENCES DATAZO.dimension_tipo_medio_pago (id_tipo_medio_pago),
 	CONSTRAINT fk_hecho_envio_rango_horario_entrega FOREIGN KEY (id_rango_horario_entrega) REFERENCES DATAZO.dimension_rango_horario(id_rango_horario),
 	CONSTRAINT fk_hecho_envio_prov_localidad FOREIGN KEY (prov_localidad) REFERENCES DATAZO.dimension_provincia_localidad (id_provincia_localidad),
 	CONSTRAINT fk_hecho_envio_dia FOREIGN KEY (id_dia) REFERENCES DATAZO.dimension_dia(id_dia),
@@ -737,25 +738,26 @@ BEGIN
 
 
 
-	INSERT INTO DATAZO.hecho_envio (id_tiempo, id_dia, id_medioPago,
+	INSERT INTO DATAZO.hecho_envio (id_tiempo, id_dia,
 	id_rango_horario_entrega, rango_etario_repartidor, id_tipo_movilidad, prov_localidad,
-	cantidad_entregados, desvio)
+	desvio, cantidad_entregados)
 
 	-- agrupar por tipo de movilidad, dia de la semana, franja horaria, rango etario, localidad, estado, mes
 	select 
 	tm.id_tiempo aniomes,
 	DATEPART(WEEKDAY, env.fecha_pedido) dia,
 	rh.id_rango_horario franja_horaria,
-	dim_t_mov.id_tipo_movilidad tipo_movilidad_repartidor,
 	re.id_rango rango_etario, 
+	dim_t_mov.id_tipo_movilidad tipo_movilidad_repartidor,
 	prov_loc.id_provincia_localidad localidad,
 	-- desvio promedio en tiempo de entrega, calculado con la formula del enunciado
 	avg(datazo.calcular_desvio(env.fecha_pedido, env.fecha_entrega, env.tiempo_estimado_entrega)) desvio_promedio_entrega,
-	-- este es el porcentaje de cuantos pedidos entrego tal rango etario de repartidores
-	count(CASE WHEN dim_est.descripcion = 'Estado Mensajeria Entregado' THEN 1 ELSE NULL END) cantidad_entregados
+	-- la cantidad de pedidos que se entregaron en este rango horario, etario localidad etc
+	-- count(CASE WHEN dim_est.descripcion = 'Estado Mensajeria Entregado' THEN 1 ELSE NULL END) cantidad_entregados
+	count(env.id_envio) cantidad_entregados
 	from datazo.envio env
 	join datazo.dimension_tiempo tm on tm.anio = DATEPART(YEAR, env.fecha_pedido) and tm.mes = DATEPART(MONTH, env.fecha_pedido)
-	JOIN DATAZO.dimension_rango_horario rh on rh.rangoHorario = DATAZO.convertir_a_rango_horario(env.fecha_pedido)
+	JOIN DATAZO.dimension_rango_horario rh on rh.rangoHorario = DATAZO.convertir_a_rango_horario(env.fecha_entrega)
 	join datazo.tipo_movilidad t_mov on t_mov.id_tipo_movilidad = env.id_tipo_movilidad
 	join datazo.dimension_tipo_movilidad dim_t_mov on dim_t_mov.descripcion = t_mov.descripcion_movilidad 
 	join datazo.repartidor rep on rep.id_repartidor = env.id_repartidor
@@ -767,6 +769,7 @@ BEGIN
 	join datazo.dimension_provincia_localidad prov_loc on prov_loc.localidad = loc.nombre_localidad and prov_loc.provincia = prov.nombre_provincia
 	join datazo.estado est on est.id_estado = env.id_estado
 	join datazo.dimension_estado_mensajeria_pedido dim_est on dim_est.descripcion = est.descripcion
+	where dim_est.descripcion = 'Estado Mensajeria Entregado'
 	group by tm.id_tiempo, DATEPART(WEEKDAY, env.fecha_pedido), rh.id_rango_horario, dim_t_mov.id_tipo_movilidad,
 						re.id_rango, prov_loc.id_provincia_localidad
 
@@ -1050,7 +1053,7 @@ BEGIN TRANSACTION
 	EXECUTE DATAZO.migrar_dim_estado_mensajeria_pedido
 	EXECUTE DATAZO.migrar_dim_provincia_localidad
 	EXECUTE DATAZO.migrar_hecho_pedido_productos
--- 	EXECUTE DATAZO.migrar_hecho_envio
+	EXECUTE DATAZO.migrar_hecho_envio
 -- 	EXECUTE DATAZO.migrar_hecho_envio_de_mensajeria
 -- 	EXECUTE DATAZO.migrar_dim_tipo_reclamo
 -- 	EXECUTE DATAZO.migrar_hecho_reclamo
