@@ -971,15 +971,17 @@ INSERT INTO DATAZO.hecho_reclamo (id_local, tipo_reclamo, id_dia, id_tiempo,
 	id_estado, id_rango_horario, id_rango_etario_op, 
 	prom_resolucion_por_RE, monto_mensual_cupones, cantidad_reclamos)
 	SELECT dl.id_local, dtr.id_tipo, dd.id_dia, dt.id_tiempo, der.id_estado, drh.id_rango_horario, dre.id_rango, 
-		   DATAZO.prom_resolucion_por_RE(dt.anio, dt.mes, dre.id_rango), DATAZO.monto_mensual_cupones_reclamos(dt.anio, dt.mes, dre.id_rango),
-		   DATAZO.cantidad_reclamos(dt.anio, dt.mes, l.id_local, dd.id_dia, drh.id_rango_horario)
+		   AVG(DATEDIFF(MINUTE, r.fecha, r.fecha_solucion)),  SUM(cd.monto),
+		   count(r.nro_reclamo)
 	FROM DATAZO.reclamo as r
 	JOIN DATAZO.pedido_productos as p ON p.id_pedido = r.id_pedido
+	join DATAZO.cupon_por_reclamo cr on cr.nro_reclamo = r.nro_reclamo
+	join DATAZO.cupon_descuento cd on cd.id_cupon = cr.id_cupon
 	JOIN DATAZO.local_ as l ON l.id_local = p.id_local
 	JOIN DATAZO.dimension_local_ as dl ON dl.nombre = l.nombre
 	JOIN DATAZO.tipo_reclamo as tr ON tr.id_tipo = r.tipo_reclamo
 	JOIN DATAZO.dimension_tipo_reclamo as dtr ON dtr.descripcion = tr.descripcion
-	JOIN DATAZO.dimension_dia as dd ON dd.descripcion = DATENAME(WEEKDAY, r.fecha)
+	JOIN DATAZO.dimension_dia as dd ON dd.id_dia = DATEPART(WEEKDAY, r.fecha)
 	JOIN DATAZO.dimension_tiempo as dt ON dt.anio = DATEPART(YEAR, r.fecha) AND
 	dt.mes = DATEPART(MONTH, r.fecha)
 	JOIN DATAZO.dimension_estado_reclamo AS der ON der.descripcion = r.estado
@@ -989,7 +991,7 @@ INSERT INTO DATAZO.hecho_reclamo (id_local, tipo_reclamo, id_dia, id_tiempo,
 	JOIN DATAZO.persona as per ON per.id_persona = o.id_persona
 	JOIN DATAZO.dimension_rango_etario as dre ON dre.rango_etario = 
 		DATAZO.convertir_a_rango_etario(DATAZO.calcular_edad(year(per.fecha_nac)))
-	
+	group by dl.id_local, dtr.id_tipo, dd.id_dia, dt.id_tiempo, der.id_estado, drh.id_rango_horario, dre.id_rango
 
 	PRINT 'hecho_reclamo migrado'
 END
