@@ -277,9 +277,12 @@ IF EXISTS(SELECT [name] FROM sys.procedures WHERE [name] = 'migrar_cupones_descu
 GO
 
 -- SCHEMA
--- IF EXISTS (SELECT * FROM sys.schemas WHERE [name] = 'DATAZO')
--- 	DROP SCHEMA DATAZO
--- GO
+IF EXISTS (SELECT * FROM sys.schemas WHERE [name] = 'DATAZO')
+	DROP SCHEMA DATAZO
+GO
+
+
+-- drop procedure datazo.migrar_hecho_usuario
 
 CREATE SCHEMA DATAZO
 GO

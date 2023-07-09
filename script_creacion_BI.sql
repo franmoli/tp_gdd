@@ -667,34 +667,7 @@ BEGIN
 END
 GO
 
-CREATE FUNCTION DATAZO.calcular_procentaje_de_envios(@mes int,
-	@rango_etario_repartidor varchar(10), @provincia varchar(255), @localidad varchar(255))
-	RETURNS float
-	AS
-	BEGIN
-		DECLARE @envios_parciales INT
-		DECLARE @porcentaje_envios FLOAT
 
-			SELECT @envios_parciales = COUNT(*) FROM DATAZO.envio
-			JOIN DATAZO.repartidor ON envio.id_repartidor = repartidor.id_repartidor
-			JOIN DATAZO.persona ON repartidor.id_persona = persona.id_persona AND
-			DATAZO.convertir_a_rango_etario(
-				DATAZO.calcular_edad(YEAR(persona.fecha_nac)))
-			 = @rango_etario_repartidor
-			JOIN direccion ON envio.dir_destino = direccion.id_direccion
-			JOIN localidad ON localidad.id_localidad = direccion.localidad AND
-				localidad.nombre_localidad = @localidad
-			JOIN provincia ON localidad.id_provincia = provincia.id_provincia AND
-				provincia.nombre_provincia = @provincia
-			WHERE MONTH(envio.fecha_entrega) = @mes
-
-			SELECT @porcentaje_envios = @envios_parciales / COUNT(*) 
-			FROM DATAZO.envio
-			WHERE MONTH(envio.fecha_entrega) = @mes
-
-		RETURN @porcentaje_envios
-	END
-	GO
 	
 CREATE FUNCTION DATAZO.calcular_desvio ( @fecha_pedido DATETIME, @fecha_entrega DATETIME, @tiempo_estimado INT)
 RETURNS FLOAT
@@ -823,21 +796,7 @@ GO
 
 
 
-CREATE FUNCTION DATAZO.calcular_promedio_VA(@anio INT, @mes INT, @tipo_paquete VARCHAR(50))
-RETURNS DECIMAL(18,2)
-AS
-BEGIN
-	DECLARE @promedio_VA DECIMAL(18,2)
-	set @promedio_VA =(
-	SELECT AVG(em.valor_asegurado) FROM envio
-	join DATAZO.envio_de_mensajeria em on em.id_envio = envio.id_envio
-	JOIN DATAZO.tipo_paquete as tp ON tp.tipo = @tipo_paquete
-	WHERE DATEPART(YEAR, envio.fecha_entrega) = @anio AND
-		DATEPART(MONTH, envio.fecha_entrega) = @mes)
-	RETURN @promedio_VA
 
-END
-GO
 
 
 CREATE PROCEDURE DATAZO.migrar_BI_hecho_envio_de_mensajeria
@@ -860,61 +819,6 @@ BEGIN
 END
 GO
 
-create function DATAZO.prom_resolucion_por_RE(@anio int, @mes int, @rangoE int)
-returns int
-begin
-	declare @promedio int
-	set @promedio = (select AVG(DATEDIFF(MINUTE, r.fecha, r.fecha_solucion))
-					from DATAZO.reclamo r 
-					--join DATAZO.BI_dimension_tiempo dt on dt.anio = DATEPART(YEAR, r.fecha) AND dt.mes = DATEPART(MONTH, r.fecha) group by dt.id_tiempo, dre.id_rango
-					JOIN DATAZO.operador as o ON o.id_operador = r.id_operador
-					JOIN DATAZO.persona as per ON per.id_persona = o.id_persona
-					JOIN DATAZO.BI_dimension_rango_etario as dre ON dre.rango_etario = DATAZO.convertir_a_rango_etario(DATAZO.calcular_edad(year(per.fecha_nac)))
-					where DATEPART(YEAR, r.fecha)  = @anio and DATEPART(MONTH, r.fecha) = @mes and dre.id_rango = @rangoE
-					)
-	return @promedio
-end
-GO
-
-create function DATAZO.monto_mensual_cupones_reclamos(@anio int, @mes int, @rangoE int)
-returns decimal(18,2)
-begin
-	declare @monto decimal(18,2)
-	set @monto = (select SUM(cd.monto)
-					from DATAZO.reclamo r 
-					join DATAZO.BI_dimension_tiempo dt on dt.anio = DATEPART(YEAR, r.fecha) AND dt.mes = DATEPART(MONTH, r.fecha)
-					JOIN DATAZO.usuario as u ON u.id_usuario = r.id_usuario
-					JOIN DATAZO.persona as per ON per.id_persona = u.id_persona
-					JOIN DATAZO.BI_dimension_rango_etario as dre ON dre.rango_etario = 
-						 DATAZO.convertir_a_rango_etario(DATAZO.calcular_edad(year(per.fecha_nac)))
-					join DATAZO.cupon_por_reclamo cr on cr.nro_reclamo = r.nro_reclamo
-					join DATAZO.cupon_descuento cd on cd.id_cupon = cr.id_cupon
-					where dt.anio = @anio and dt.mes = dt.mes and dre.id_rango = @rangoE
-					group by dt.id_tiempo, dre.rango_etario)
-			
-	return @monto				
-end
-GO
-
-
-create function DATAZO.cantidad_reclamos(@anio int, @mes int, @local int, @dia int,@rh int)
-returns int
-begin
-	declare @cantidad int
-	set @cantidad = (select count(r.nro_reclamo)
-					from DATAZO.reclamo r 
-					join DATAZO.BI_dimension_tiempo dt on dt.anio = DATEPART(YEAR, r.fecha) AND dt.mes = DATEPART(MONTH, r.fecha)
-					JOIN DATAZO.pedido_productos as p ON p.id_pedido = r.id_pedido
-					JOIN DATAZO.local_ as l ON l.id_local = p.id_local
-					JOIN DATAZO.BI_dimension_dia as dd ON dd.descripcion = DATENAME(WEEKDAY, r.fecha)
-					JOIN DATAZO.BI_dimension_rango_horario as drh ON 
-						 drh.rangoHorario = DATAZO.convertir_a_rango_horario(r.fecha)
-					where dt.anio = @anio and dt.mes = dt.mes and l.id_local = @local and dd.id_dia = @dia and drh.id_rango_horario = @rh
-					group by dt.id_tiempo, l.id_local, dd.id_dia, drh.id_rango_horario)
-			
-	return @cantidad				
-end
-GO
 
 CREATE PROCEDURE DATAZO.migrar_BI_hecho_reclamo
 AS
@@ -988,10 +892,24 @@ BEGIN CATCH
 	THROW 50001, 'Error al migrar las tablas, verifique que las nuevas tablas se encuentren vac�as o bien ejecute un DROP de todas las nuevas tablas y vuelva a intentarlo.',1;
 END CATCH
 
---    IF (EXISTS (SELECT 1 FROM DATAZO.envio)
---    AND EXISTS (SELECT 1 FROM DATAZO.usuario)
---    )
-	IF(1 = 1)
+   IF (EXISTS (SELECT 1 FROM DATAZO.BI_hecho_envio_de_mensajeria)
+   AND EXISTS (SELECT 1 FROM DATAZO.BI_hecho_reclamo)
+   AND EXISTS (SELECT 1 FROM DATAZO.BI_hecho_pedido_productos)
+   AND EXISTS (SELECT 1 FROM DATAZO.BI_hecho_envio)
+   AND EXISTS (SELECT 1 FROM DATAZO.BI_dimension_tiempo)
+   AND EXISTS (SELECT 1 FROM DATAZO.BI_dimension_local_)
+   AND EXISTS (SELECT 1 FROM DATAZO.BI_dimension_categoria_tipo_local)
+   AND EXISTS (SELECT 1 FROM DATAZO.BI_dimension_rango_horario)
+   AND EXISTS (SELECT 1 FROM DATAZO.BI_dimension_estado_reclamo)
+   AND EXISTS (SELECT 1 FROM DATAZO.BI_dimension_tipo_reclamo)
+   AND EXISTS (SELECT 1 FROM DATAZO.BI_dimension_rango_etario)
+   AND EXISTS (SELECT 1 FROM DATAZO.BI_dimension_tipo_movilidad)
+   AND EXISTS (SELECT 1 FROM DATAZO.BI_dimension_dia)
+   AND EXISTS (SELECT 1 FROM DATAZO.BI_dimension_tipo_paquete)
+   AND EXISTS (SELECT 1 FROM DATAZO.BI_dimension_tipo_medio_pago)
+   AND EXISTS (SELECT 1 FROM DATAZO.BI_dimension_provincia_localidad)
+   AND EXISTS (SELECT 1 FROM DATAZO.BI_dimension_estado_mensajeria_pedido))
+	-- IF(1 = 1)
    
    BEGIN
 	PRINT 'Tablas migradas correctamente.';
