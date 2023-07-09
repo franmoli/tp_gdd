@@ -1324,10 +1324,9 @@ AS
 	join datazo.dimension_rango_etario re on re.id_rango = fact.rango_etario_repartidor
 	join datazo.dimension_provincia_localidad loc on loc.id_provincia_localidad = fact.prov_localidad
 	join (
-		select sum(env.cantidad_entregados) total_mensual, env.mes, loc2.localidad from datazo.hecho_envio env
-		join datazo.dimension_provincia_localidad loc2 on loc2.id_provincia_localidad = env.prov_localidad
-		group by env.mes, loc2.localidad
-	) totales_mensuales on totales_mensuales.mes = fact.mes and totales_mensuales.localidad = loc.localidad
+		select sum(env.cantidad_entregados) total_mensual, env.mes from datazo.hecho_envio env
+		group by env.mes
+	) totales_mensuales on totales_mensuales.mes = fact.mes
 	group by re.rango_etario, loc.localidad, fact.mes
 
 -- select convert(decimal(10,2),1)/convert(decimal(10,2),10)
