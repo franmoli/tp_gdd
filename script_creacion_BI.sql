@@ -392,8 +392,7 @@ GO
 
 CREATE TABLE DATAZO.hecho_envio_de_mensajeria(id_envio_mensajeria INT NOT NULL IDENTITY(1,1), 
 									id_tiempo INT, id_tipo_paquete INT, 
-									prom_valor_asegurado decimal(18,2), 
-									precio_seguro decimal(18,2))
+									prom_valor_asegurado decimal(18,2))
 
 ALTER TABLE DATAZO.hecho_envio_de_mensajeria
 	ADD CONSTRAINT pk_hecho_envio_de_mensajeria PRIMARY KEY (id_envio_mensajeria),
