@@ -359,9 +359,9 @@ GO
 --Create de hechos
 
 CREATE TABLE DATAZO.hecho_envio(id_envio INT NOT NULL IDENTITY (1,1), id_tiempo INT,
-					rango_etario_repartidor INT, id_estado INT, id_medioPago INT,
+					rango_etario_repartidor INT, id_medioPago INT,
 					id_rango_horario_entrega INT, prov_localidad INT,
-					id_dia INT, porcentaje_de_envios DECIMAL(18,2),
+					id_dia INT, cantidad_entregados INT,
 					desvio SMALLDATETIME,
 					id_tipo_movilidad INT
 					)
@@ -704,19 +704,13 @@ CREATE FUNCTION DATAZO.calcular_procentaje_de_envios(@mes int,
 	END
 	GO
 	
-CREATE FUNCTION DATAZO.calcular_desvio (@tipo_movilidad VARCHAR(255), @dia INT,
-@rango_horario VARCHAR(255))
+CREATE FUNCTION DATAZO.calcular_desvio ( @fecha_pedido DATETIME, @fecha_entrega DATETIME, @tiempo_estimado INT)
 RETURNS FLOAT
 AS
 BEGIN
 	DECLARE @desvio FLOAT
 
-	SELECT @desvio = AVG(DATEDIFF(MINUTE, e.fecha_pedido, e.fecha_entrega) -
-	e.tiempo_estimado_entrega) FROM DATAZO.envio as e
-	JOIN DATAZO.repartidor as r ON e.id_repartidor = r.id_repartidor
-	JOIN DATAZO.tipo_movilidad ON r.tipo_movilidad = tipo_movilidad.id_tipo_movilidad
-	WHERE DATAZO.convertir_a_rango_horario(e.fecha_entrega) = @rango_horario AND
-	DATEPART(WEEKDAY, e.fecha_entrega) = @dia
+	SET @desvio = DATEDIFF(MINUTE, @fecha_pedido, @fecha_entrega) - @tiempo_estimado
 
 	RETURN @desvio
 END
@@ -743,30 +737,44 @@ BEGIN
 
 
 
-	INSERT INTO DATAZO.hecho_envio (id_tiempo, id_dia, id_estado, id_medioPago,
+	INSERT INTO DATAZO.hecho_envio (id_tiempo, id_dia, id_medioPago,
 	id_rango_horario_entrega, rango_etario_repartidor, id_tipo_movilidad, prov_localidad,
-	porcentaje_de_envios, desvio)
+	cantidad_entregados, desvio)
 
-	-- agrupar por tipo de movilidad, dia de la semana, franja horaria, rango etario, localidad, estado
+	-- agrupar por tipo de movilidad, dia de la semana, franja horaria, rango etario, localidad, estado, mes
 	select 
 	tm.id_tiempo aniomes,
 	DATEPART(WEEKDAY, env.fecha_pedido) dia,
 	rh.id_rango_horario franja_horaria,
-	1 tipo_movilidad_repartidor,
-	1 rango_etario, 
-	1 localidad,
-	1 estado,
+	dim_t_mov.id_tipo_movilidad tipo_movilidad_repartidor,
+	re.id_rango rango_etario, 
+	prov_loc.id_provincia_localidad localidad,
 	-- desvio promedio en tiempo de entrega, calculado con la formula del enunciado
-	1 desvio_promedio_entrega,
+	avg(datazo.calcular_desvio(env.fecha_pedido, env.fecha_entrega, env.tiempo_estimado_entrega)) desvio_promedio_entrega,
 	-- este es el porcentaje de cuantos pedidos entrego tal rango etario de repartidores
-	1 porcentaje_de_pedidos_entregados
+	count(CASE WHEN dim_est.descripcion = 'Estado Mensajeria Entregado' THEN 1 ELSE NULL END) cantidad_entregados
 	from datazo.envio env
 	join datazo.dimension_tiempo tm on tm.anio = DATEPART(YEAR, env.fecha_pedido) and tm.mes = DATEPART(MONTH, env.fecha_pedido)
 	JOIN DATAZO.dimension_rango_horario rh on rh.rangoHorario = DATAZO.convertir_a_rango_horario(env.fecha_pedido)
-	join datazo.dimension_tipo_movilidad t_mov on t_mov.descripcion = 
+	join datazo.tipo_movilidad t_mov on t_mov.id_tipo_movilidad = env.id_tipo_movilidad
+	join datazo.dimension_tipo_movilidad dim_t_mov on dim_t_mov.descripcion = t_mov.descripcion_movilidad 
+	join datazo.repartidor rep on rep.id_repartidor = env.id_repartidor
+	join datazo.persona pers on pers.id_persona = rep.id_persona
+	join datazo.dimension_rango_etario re on re.rango_etario = datazo.convertir_a_rango_etario(datazo.calcular_edad(DATEPART(YEAR, pers.fecha_nac)))
+	join datazo.direccion dir on dir.id_direccion = env.dir_origen
+	join datazo.localidad loc on loc.id_localidad = dir.localidad
+	join datazo.provincia prov on loc.id_provincia = prov.id_provincia
+	join datazo.dimension_provincia_localidad prov_loc on prov_loc.localidad = loc.nombre_localidad and prov_loc.provincia = prov.nombre_provincia
+	join datazo.estado est on est.id_estado = env.id_estado
+	join datazo.dimension_estado_mensajeria_pedido dim_est on dim_est.descripcion = est.descripcion
+	group by tm.id_tiempo, DATEPART(WEEKDAY, env.fecha_pedido), rh.id_rango_horario, dim_t_mov.id_tipo_movilidad,
+						re.id_rango, prov_loc.id_provincia_localidad
 
-	select * from datazo.envio where envio.id_estado = 2
 
+	-- select * from datazo.envio
+
+
+-- (98404
 
 		-- SELECT DISTINCT dt.id_tiempo, dd.id_dia, de.id_estado, dtmp.id_tipo_medio_pago,
 		-- drh.id_rango_horario, dre.id_rango, dtm.id_tipo_movilidad,
